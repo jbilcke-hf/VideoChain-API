@@ -8,6 +8,8 @@ import { generateVideo } from './services/generateVideo.mts'
 import { downloadVideo } from './services/downloadVideo.mts'
 import { upscaleVideo } from './services/upscaleVideo.mts'
 import { generateSeed } from './services/generateSeed.mts'
+import { addAudioToVideo } from './services/addAudioToVideo.mts'
+
 import { MakeShot } from './types.mts'
 
 const app = express()
@@ -42,13 +44,14 @@ app.post('/shot', async (req, res) => {
   const audioPrompt = `${query.audioPrompt || ''}`
 
   // optional seed
-  const seedStr = Number(`${query.seed || ''}`)
+  const defaultSeed = generateSeed()
+  const seedStr = Number(`${query.seed || defaultSeed}`)
   const maybeSeed = Number(seedStr)
-  const seed = isNaN(maybeSeed) || ! isFinite(maybeSeed) ? generateSeed() : maybeSeed
+  const seed = isNaN(maybeSeed) || ! isFinite(maybeSeed) ? defaultSeed : maybeSeed
     
 
   // should we upscale or not?
-  const upscale = `${query.upscale || 'false'}` === 'true'
+  const upscale = `${query.upscale || 'true'}` === 'true'
 
   // duration of the prompt, in seconds
   const defaultDuration = 3
@@ -104,8 +107,10 @@ app.post('/shot', async (req, res) => {
 
   // TODO call AudioLDM
   if (audioPrompt) {
-    // const baseAudio = await callAudioLDM(audioPrompt)
+    // const audioFileName = await callAudioLDM(audioPrompt)
     console.log('calling audio prompt')
+
+    // await addAudioToVideo(videoFileName, audioFileName)
   }
 
   console.log('returning result to user..')
