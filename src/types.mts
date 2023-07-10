@@ -24,3 +24,21 @@ export interface Database {
   startAtShotId: string
   sequences: Sequence[]
 }
+
+
+export interface MakeShot {
+  token: string
+  shotPrompt: string
+  // inputVideo?: string
+
+  audioPrompt?: string
+  seed?: number
+  upscale?: boolean
+
+  duration?: number
+  steps?: number
+
+  fps?: number // 8, 12, 24, 30, 60
+
+  resolution?: number // 256, 512, 576, 720, 1080
+}

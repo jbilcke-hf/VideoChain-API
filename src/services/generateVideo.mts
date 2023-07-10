@@ -1,19 +1,24 @@
 import { client } from '@gradio/client'
 
-import { getRandomInt } from "./generateSeed.mts"
+import { generateSeed } from "./generateSeed.mts"
 
-const videoSpaceApiUrl = process.env.VS_VIDEO_SPACE_API_URL
+const instances: string[] = [
+  process.env.VS_VIDEO_GENERATION_SPACE_API_URL
+]
 
-export const callZeroscope = async (prompt: string, options?: {
+export const generateVideo = async (prompt: string, options?: {
   seed: number;
   nbFrames: number;
   nbSteps: number;
 }) => {
-  const seed = options?.seed || getRandomInt()
+  const seed = options?.seed || generateSeed()
   const nbFrames = options?.nbFrames || 24 // we can go up to 48 frames, but then upscaling quill require too much memory!
   const nbSteps = options?.nbSteps || 35
 
-  const api = await client(videoSpaceApiUrl)
+  const instance = instances.shift()
+  instances.push(instance)
+
+  const api = await client(instance)
 
   const rawResponse = await api.predict('/run', [		
     prompt, // string  in 'Prompt' Textbox component		
@@ -24,5 +29,5 @@ export const callZeroscope = async (prompt: string, options?: {
   
   const { name } = rawResponse?.data?.[0]?.[0] as { name: string, orig_name: string }
 
-  return `${videoSpaceApiUrl}/file=${name}`
+  return `${instance}/file=${name}`
 }

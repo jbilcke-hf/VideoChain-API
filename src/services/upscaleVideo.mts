@@ -5,19 +5,23 @@ import tmpDir from 'temp-dir'
 import puppeteer from 'puppeteer'
 import { downloadVideo } from './downloadVideo.mts'
 
+const instances: string[] = [
+  process.env.VS_VIDEO_UPSCALE_SPACE_API_URL
+]
+
 // TODO we should use an inference endpoint instead (or a space which bakes generation + upscale at the same time)
 export async function upscaleVideo(fileName: string, prompt: string) {
-  
+  const instance = instances.shift()
+  instances.push(instance)
+
   const browser = await puppeteer.launch({
     // headless: true,
     protocolTimeout: 800000,
   })
 
-  const spaceUrl = process.env.VS_UPSCALE_SPACE_API_URL
-
   const page = await browser.newPage()
 
-  await page.goto(spaceUrl, {
+  await page.goto(instance, {
     waitUntil: 'networkidle2',
   })
 

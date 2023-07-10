@@ -9,7 +9,7 @@ import tmpDir from "temp-dir"
 import { downloadVideo } from './downloadVideo.mts'
 
 const instances: string[] = [
-  process.env.VS_INTERPOLATION_SPACE_URL
+  process.env.VS_VIDEO_INTERPOLATION_SPACE_API_URL
 ]
 
 export const interpolateVideo = async (fileName: string) => {
@@ -19,13 +19,13 @@ export const interpolateVideo = async (fileName: string) => {
   const instance = instances.shift()
   instances.push(instance)
 
-  const app = await client(instance)
+  const api = await client(instance)
 
   const video = await fs.readFile(inputFilePath)
 
   const blob = new Blob([video], { type: 'video/mp4' })
   // const blob = blobFrom(filePath)
-  const result = await app.predict(1, [
+  const result = await api.predict(1, [
     blob, 	// blob in 'parameter_5' Video component		
     1, // number (numeric value between 1 and 4) in 'Interpolation Steps' Slider component		
     24, // string  in 'FPS output' Radio component

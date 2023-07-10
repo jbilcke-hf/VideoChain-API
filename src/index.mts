@@ -2,15 +2,29 @@ import { promises as fs } from 'fs'
 
 import express from 'express'
 
-import { callZeroscope } from './services/callZeroscope.mts'
+import { generateVideo } from './services/generateVideo.mts'
 import { downloadVideo } from './services/downloadVideo.mts'
 import { upscaleVideo } from './services/upscaleVideo.mts'
+import { generateSeed } from './services/generateSeed.mts'
+import { MakeShot } from './types.mts'
 
 const app = express()
 const port = 7860
 
+app.use(express.json())
+
+
 app.post('/shot', async (req, res) => {
-  const shotPrompt = `${req.query.shotPrompt || ''}`
+  const query = req.body as MakeShot
+
+  const token = `${query.token || ''}`
+  if (token !== process.env.VS_SECRET_ACCESS_TOKEN) {
+    res.write(JSON.stringify({ error: true, message: 'access denied' }))
+    res.end()
+    return
+  }
+
+  const shotPrompt = `${query.shotPrompt || ''}`
   if (shotPrompt.length) {
     res.write(JSON.stringify({ error: true, message: 'prompt too short' }))
     res.end()
@@ -18,28 +32,60 @@ app.post('/shot', async (req, res) => {
   }
 
   // optional video URL
-  const inputVideo = `${req.query.inputVideo || ''}`
+  // const inputVideo = `${req.query.inputVideo || ''}`
 
   // optional audio prompt
-  const audioPrompt = `${req.query.audioPrompt || ''}`
+  const audioPrompt = `${query.audioPrompt || ''}`
+
+    // optional seed
+    const seedStr = Number(`${query.seed || ''}`)
+    const maybeSeed = Number(seedStr)
+    const seed = isNaN(maybeSeed) || ! isFinite(maybeSeed) ? generateSeed() : maybeSeed
+    
 
   // should we upscale or not?
-  const upscale = `${req.query.audioPrompt || 'false'}` === 'true'
+  const upscale = `${query.upscale || 'false'}` === 'true'
 
   // duration of the prompt, in seconds
-  const durationStr = Number(`${req.query.audioPrompt || '3'}`)
+  const durationStr = Number(`${query.duration || ''}`)
   const maybeDuration = Number(durationStr)
-  const duration = Math.min(3, Math.max(1, isNaN(maybeDuration) || isFinite(maybeDuration) ? 3 : maybeDuration))
+  const duration = Math.min(3, Math.max(1, isNaN(maybeDuration) || !isFinite(maybeDuration) ? 3 : maybeDuration))
+  
+  const stepsStr = Number(`${query.steps || ''}`)
+  const maybeSteps = Number(stepsStr)
+  const nbSteps = Math.min(60, Math.max(1, isNaN(maybeSteps) || !isFinite(maybeSteps) ? 35 : maybeSteps))
   
   // const frames per second
-  const fps = `${req.query.audioPrompt || 'false'}` === 'true'
-
-  console.log('calling zeroscope..')
-  const generatedVideoUrl = await callZeroscope(shotPrompt)
+  const fpsStr = Number(`${query.fps || ''}`)
+  const maybeFps = Number(fpsStr)
+  const fps = Math.min(60, Math.max(8, isNaN(maybeFps) || !isFinite(maybeFps) ? 24 : maybeFps))
+  
+  const resolutionStr = Number(`${query.resolution || ''}`)
+  const maybeResolution = Number(resolutionStr)
+  const resolution = Math.min(1080, Math.max(256, isNaN(maybeResolution) || !isFinite(maybeResolution) ? 576 : maybeResolution))
+  
 
   const shotFileName = `${Date.now()}.mp4`
 
-  
+  console.log('generating video with the following params:', {
+    shotPrompt,
+    audioPrompt,
+    resolution,
+    duration,
+    nbSteps,
+    fps,
+    seed,
+    upscale,
+    shotFileName
+  })
+  console.log('generating base video ..')
+  const generatedVideoUrl = await generateVideo(shotPrompt, {
+    seed,
+    nbFrames: 24, // if we try more eg 48 frames, this will crash the upscaler (not enough memory)
+    nbSteps
+  })
+
+
   console.log('downloading video..')
   const videoFileName = await downloadVideo(generatedVideoUrl, shotFileName)
 
