@@ -1,0 +1,9 @@
+node_modules
+*.log
+*.bin
+.DS_Store
+.venv
+models/
+sandbox/
+audio.pipe
+video.pipe
