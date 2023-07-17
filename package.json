@@ -1,15 +1,15 @@
 {
-  "name": "video-service",
+  "name": "videochain-api",
   "version": "1.0.0",
-  "description": "Micro-service used to generate video sequences",
+  "description": "A service which wraps and chains video and audio spaces together",
   "main": "src/index.mts",
   "scripts": {
     "start": "node --loader ts-node/esm src/index.mts",
     "test": "node --loader ts-node/esm src/test.mts",
     "test2": "node --loader ts-node/esm src/test2.mts",
     "docker": "npm run docker:build && npm run docker:run",
-    "docker:build": "docker build -t  ai-webtv .",
-    "docker:run": "docker run -it -p 7860:7860 video-service"
+    "docker:build": "docker build -t videochain-api .",
+    "docker:run": "docker run -it -p 7860:7860 videochain-api"
   },
   "author": "Julian Bilcke <julian.bilcke@huggingface.co>",
   "license": "Apache License",
