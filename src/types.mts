@@ -26,14 +26,30 @@ export interface Database {
 }
 
 
-export interface MakeShot {
+export interface ShotQuery {
   token: string
   shotPrompt: string
   // inputVideo?: string
 
-  audioPrompt?: string
+  // describe the background audio (crowd, birds, wind, sea etc..)
+  backgroundAudioPrompt?: string
+
+  // describe the foreground audio (cars revving, footsteps, objects breaking, explosion etc)
+  foregroundAudioPrompt?: string
+
+  // describe the main actor visible in the shot (optional)
+  actorPrompt?: string
+
+  // describe the main actor voice (man, woman, old, young, amused, annoyed.. etc)
+  actorVoicePrompt?: string
+
+  // describe the main actor dialogue line
+  actorDialoguePrompt?: string
+
   seed?: number
   upscale?: boolean
+
+  noise?: boolean // add movie noise
 
   duration?: number
   steps?: number
@@ -41,4 +57,9 @@ export interface MakeShot {
   fps?: number // 8, 12, 24, 30, 60
 
   resolution?: number // 256, 512, 576, 720, 1080
+}
+
+export interface Job {
+  startedAt: string
+  query: ShotQuery
 }

@@ -1,12 +1,13 @@
 import puppeteer from "puppeteer"
+
 import { downloadVideo } from "./downloadVideo.mts"
 
 const instances: string[] = [
-  process.env.VS_AUDIO_GENERATION_SPACE_API_URL
+  process.env.VS_VOICE_GENERATION_SPACE_API_URL
 ]
 
 // TODO we should use an inference endpoint instead
-export async function generateAudio(prompt: string, audioFileName: string) {
+export async function generateVoice(prompt: string, voiceFileName: string) {
   const instance = instances.shift()
   instances.push(instance)
 
@@ -25,9 +26,9 @@ export async function generateAudio(prompt: string, audioFileName: string) {
 
   await new Promise(r => setTimeout(r, 3000))
 
-  const firstTextboxInput = await page.$('input[data-testid="textbox"]')
+  const firstTextarea = await page.$('textarea[data-testid="textbox"]')
 
-  await firstTextboxInput.type(prompt)
+  await firstTextarea.type(prompt)
 
   // console.log("looking for the button to submit")
   const submitButton = await page.$("button.lg")
@@ -35,22 +36,21 @@ export async function generateAudio(prompt: string, audioFileName: string) {
   // console.log("clicking on the button")
   await submitButton.click()
 
-  await page.waitForSelector("a[download]", {
+  await page.waitForSelector("audio", {
     timeout: 800000, // need to be large enough in case someone else attemps to use our space
   })
 
-  const audioRemoteUrl = await page.$$eval("a[download]", el => el.map(x => x.getAttribute("href"))[0])
+  const voiceRemoteUrl = await page.$$eval("audio", el => el.map(x => x.getAttribute("src"))[0])
 
 
   console.log({
-    audioRemoteUrl,
+    voiceRemoteUrl,
   })
 
 
-  // console.log("downloading file from space..")
-  console.log(`- downloading ${audioFileName} from ${audioRemoteUrl}`)
+  console.log(`- downloading ${voiceFileName} from ${voiceRemoteUrl}`)
 
-  await downloadVideo(audioRemoteUrl, audioFileName)
+  await downloadVideo(voiceRemoteUrl, voiceFileName)
 
-  return audioFileName
+  return voiceFileName
 }

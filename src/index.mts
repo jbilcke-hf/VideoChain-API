@@ -1,63 +1,62 @@
-import { promises as fs } from 'fs'
-import path from 'node:path'
+import { promises as fs } from "fs"
 
-import tmpDir from 'temp-dir'
-import express from 'express'
+import express from "express"
 
-import { generateVideo } from './services/generateVideo.mts'
-import { downloadVideo } from './services/downloadVideo.mts'
-import { upscaleVideo } from './services/upscaleVideo.mts'
-import { generateSeed } from './services/generateSeed.mts'
-import { addAudioToVideo } from './services/addAudioToVideo.mts'
-
-import { MakeShot } from './types.mts'
+import { generateSeed } from "./services/generateSeed.mts"
+import { Job, ShotQuery } from "./types.mts"
+import { generateShot } from "./services/generateShot.mts"
 
 const app = express()
 const port = 7860
 
 app.use(express.json())
 
+const queue: Job[] = []
 
-app.post('/shot', async (req, res) => {
-  const query = req.body as MakeShot
+app.post("/shot", async (req, res) => {
+  const query = req.body as ShotQuery
 
-  console.log('received query:', query)
-  const token = `${query.token || ''}`
+  const token = `${query.token || ""}`
   if (token !== process.env.VS_SECRET_ACCESS_TOKEN) {
     console.log("couldn't find access token in the query")
-    res.write(JSON.stringify({ error: true, message: 'access denied' }))
+    res.write(JSON.stringify({ error: true, message: "access denied" }))
     res.end()
     return
   }
 
-  const shotPrompt = `${query.shotPrompt || ''}`
+  const shotPrompt = `${query.shotPrompt || ""}`
   if (shotPrompt.length < 5) {
-    res.write(JSON.stringify({ error: true, message: 'prompt too short (must be at least 5 in length)' }))
+    res.write(JSON.stringify({ error: true, message: "prompt too short (must be at least 5 in length)" }))
     res.end()
     return
   }
 
   // optional video URL
-  // const inputVideo = `${req.query.inputVideo || ''}`
+  // const inputVideo = `${req.query.inputVideo || ""}`
 
-  // optional audio prompt
-  const audioPrompt = `${query.audioPrompt || ''}`
+  // optional background audio prompt
+  const backgroundAudioPrompt = `${query.backgroundAudioPrompt || ""}`
+
+  // optional foreground audio prompt
+  const foregroundAudioPrompt = `${query.foregroundAudioPrompt || ""}`
 
   // optional seed
   const defaultSeed = generateSeed()
   const seedStr = Number(`${query.seed || defaultSeed}`)
   const maybeSeed = Number(seedStr)
   const seed = isNaN(maybeSeed) || ! isFinite(maybeSeed) ? defaultSeed : maybeSeed
-    
+  
+  // in production we want those ON by default
+  const upscale = `${query.upscale || "true"}` === "true"
+  const interpolate = `${query.upscale || "true"}` === "true"
+  const noise = `${query.noise || "true"}` === "true"
 
-  // should we upscale or not?
-  const upscale = `${query.upscale || 'true'}` === 'true'
 
-  // duration of the prompt, in seconds
   const defaultDuration = 3
+  const maxDuration = 5
   const durationStr = Number(`${query.duration || defaultDuration}`)
   const maybeDuration = Number(durationStr)
-  const duration = Math.min(3, Math.max(1, isNaN(maybeDuration) || !isFinite(maybeDuration) ? defaultDuration : maybeDuration))
+  const duration = Math.min(maxDuration, Math.max(1, isNaN(maybeDuration) || !isFinite(maybeDuration) ? defaultDuration : maybeDuration))
   
   const defaultSteps = 35
   const stepsStr = Number(`${query.steps || defaultSteps}`)
@@ -68,58 +67,45 @@ app.post('/shot', async (req, res) => {
   const defaultFps = 24
   const fpsStr = Number(`${query.fps || defaultFps}`)
   const maybeFps = Number(fpsStr)
-  const fps = Math.min(60, Math.max(8, isNaN(maybeFps) || !isFinite(maybeFps) ? defaultFps : maybeFps))
+  const nbFrames = Math.min(60, Math.max(8, isNaN(maybeFps) || !isFinite(maybeFps) ? defaultFps : maybeFps))
   
   const defaultResolution = 576
   const resolutionStr = Number(`${query.resolution || defaultResolution}`)
   const maybeResolution = Number(resolutionStr)
   const resolution = Math.min(1080, Math.max(256, isNaN(maybeResolution) || !isFinite(maybeResolution) ? defaultResolution : maybeResolution))
   
+  const actorPrompt = `${query.actorPrompt || ""}`
 
-  const shotFileName = `${Date.now()}.mp4`
+  const actorVoicePrompt = `${query.actorVoicePrompt || ""}`
 
-  console.log('generating video with the following params:', {
+  const actorDialoguePrompt = `${query.actorDialoguePrompt || ""}`
+
+
+  const { filePath } = await generateShot({
+    seed,
+    actorPrompt,
     shotPrompt,
-    audioPrompt,
-    resolution,
+    backgroundAudioPrompt,
+    foregroundAudioPrompt,
+    actorDialoguePrompt,
+    actorVoicePrompt,
     duration,
+    nbFrames,
+    resolution,
     nbSteps,
-    fps,
-    seed,
     upscale,
-    shotFileName
-  })
-  console.log('generating base video ..')
-  const generatedVideoUrl = await generateVideo(shotPrompt, {
-    seed,
-    nbFrames: 24, // if we try more eg 48 frames, this will crash the upscaler (not enough memory)
-    nbSteps
+    interpolate,
+    noise,
   })
 
+  console.log(`generated video in ${filePath}`)
 
-  console.log('downloading video..')
-  const videoFileName = await downloadVideo(generatedVideoUrl, shotFileName)
-
-  if (upscale) {
-    console.log('upscaling video..')
-    await upscaleVideo(videoFileName, shotPrompt)
-  }
-
-  // TODO call AudioLDM
-  if (audioPrompt) {
-    // const audioFileName = await callAudioLDM(audioPrompt)
-    console.log('calling audio prompt')
-
-    // await addAudioToVideo(videoFileName, audioFileName)
-  }
-
-  console.log('returning result to user..')
-
-  const filePath = path.resolve(tmpDir, videoFileName)
+  console.log("returning result to user..")
 
   const buffer = await fs.readFile(filePath)
-  res.setHeader('Content-Type', 'media/mp4')
-  res.setHeader('Content-Length', buffer.length)
+
+  res.setHeader("Content-Type", "media/mp4")
+  res.setHeader("Content-Length", buffer.length)
   res.end(buffer)
 })
 
