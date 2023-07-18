@@ -1,112 +1,123 @@
-import { promises as fs } from "fs"
+import { createReadStream, promises as fs } from "fs"
 
 import express from "express"
 
-import { generateSeed } from "./services/generateSeed.mts"
-import { Job, ShotQuery } from "./types.mts"
-import { generateShot } from "./services/generateShot.mts"
+import { VideoTask, VideoSequenceRequest } from "./types.mts"
+import { requestToTask } from "./services/requestToTask.mts"
+import { savePendingTask } from "./database/savePendingTask.mts"
+import { getTask } from "./database/getTask.mts"
+import { main } from "./main.mts"
+
+main()
 
 const app = express()
 const port = 7860
 
 app.use(express.json())
 
-const queue: Job[] = []
-
-app.post("/shot", async (req, res) => {
-  const query = req.body as ShotQuery
-
-  const token = `${query.token || ""}`
+app.post("/", async (req, res) => {
+  const request = req.body as VideoSequenceRequest
+  
+  const token = `${request.token || ""}`
   if (token !== process.env.VS_SECRET_ACCESS_TOKEN) {
     console.log("couldn't find access token in the query")
-    res.write(JSON.stringify({ error: true, message: "access denied" }))
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
     res.end()
     return
   }
 
-  const shotPrompt = `${query.shotPrompt || ""}`
-  if (shotPrompt.length < 5) {
-    res.write(JSON.stringify({ error: true, message: "prompt too short (must be at least 5 in length)" }))
+  let task: VideoTask = null
+
+  console.log(`creating task from request..`)
+  try {
+    task = await requestToTask(request)
+  } catch (err) {
+    console.error(`failed to create task: ${task}`)
+    res.status(400)
+    res.write(JSON.stringify({ error: "query seems to be malformed" }))
     res.end()
     return
   }
 
-  // optional video URL
-  // const inputVideo = `${req.query.inputVideo || ""}`
+  console.log(`saving task ${task.id}`)
+  try {
+    await savePendingTask(task)
+    res.status(200)
+    res.write(JSON.stringify(task))
+    res.end()
+  } catch (err) {
+    console.error(err)
+    res.status(500)
+    res.write(JSON.stringify({ error: "couldn't save the task" }))
+    res.end()
+  }
+})
 
-  // optional background audio prompt
-  const backgroundAudioPrompt = `${query.backgroundAudioPrompt || ""}`
+app.get("/:id", async (req, res) => {
+  try {
+    const task = await getTask(req.params.id)
+    delete task.finalFilePath
+    delete task.tmpFilePath
+    res.status(200)
+    res.write(JSON.stringify(task))
+    res.end()
+  } catch (err) {
+    console.error(err)
+    res.status(404)
+    res.write(JSON.stringify({ error: "couldn't find this task" }))
+    res.end()
+  }
+})
 
-  // optional foreground audio prompt
-  const foregroundAudioPrompt = `${query.foregroundAudioPrompt || ""}`
+app.get("/video/:id\.mp4", async (req, res) => {
+  if (!req.params.id) {
+    res.status(400)
+    res.write(JSON.stringify({ error: "please provide a valid video id" }))
+    res.end()
+    return
+  }
 
-  // optional seed
-  const defaultSeed = generateSeed()
-  const seedStr = Number(`${query.seed || defaultSeed}`)
-  const maybeSeed = Number(seedStr)
-  const seed = isNaN(maybeSeed) || ! isFinite(maybeSeed) ? defaultSeed : maybeSeed
+  let task: VideoTask = null
+
+  try {
+    task = await getTask(req.params.id)
+    console.log("returning result to user..")
+
+    const filePath = task.finalFilePath || task.tmpFilePath || ''
+    if (!filePath) {
+      res.status(400)
+      res.write(JSON.stringify({ error: "video exists, but cannot be previewed yet" }))
+      res.end()
+      return
+    }
+  } catch (err) {
+    res.status(404)
+    res.write(JSON.stringify({ error: "this video doesn't exist" }))
+    res.end()
+    return
+  }
+
+  // file path exists, let's try to read it
+  try {
+    // do we need this?
+    // res.status(200)
+    // res.setHeader("Content-Type", "media/mp4")
+    console.log(`creating a video read stream from ${filePath}`)
+    const stream = createReadStream(filePath)
   
-  // in production we want those ON by default
-  const upscale = `${query.upscale || "true"}` === "true"
-  const interpolate = `${query.upscale || "true"}` === "true"
-  const noise = `${query.noise || "true"}` === "true"
-
-
-  const defaultDuration = 3
-  const maxDuration = 5
-  const durationStr = Number(`${query.duration || defaultDuration}`)
-  const maybeDuration = Number(durationStr)
-  const duration = Math.min(maxDuration, Math.max(1, isNaN(maybeDuration) || !isFinite(maybeDuration) ? defaultDuration : maybeDuration))
-  
-  const defaultSteps = 35
-  const stepsStr = Number(`${query.steps || defaultSteps}`)
-  const maybeSteps = Number(stepsStr)
-  const nbSteps = Math.min(60, Math.max(1, isNaN(maybeSteps) || !isFinite(maybeSteps) ? defaultSteps : maybeSteps))
-  
-  // const frames per second
-  const defaultFps = 24
-  const fpsStr = Number(`${query.fps || defaultFps}`)
-  const maybeFps = Number(fpsStr)
-  const nbFrames = Math.min(60, Math.max(8, isNaN(maybeFps) || !isFinite(maybeFps) ? defaultFps : maybeFps))
-  
-  const defaultResolution = 576
-  const resolutionStr = Number(`${query.resolution || defaultResolution}`)
-  const maybeResolution = Number(resolutionStr)
-  const resolution = Math.min(1080, Math.max(256, isNaN(maybeResolution) || !isFinite(maybeResolution) ? defaultResolution : maybeResolution))
-  
-  const actorPrompt = `${query.actorPrompt || ""}`
-
-  const actorVoicePrompt = `${query.actorVoicePrompt || ""}`
-
-  const actorDialoguePrompt = `${query.actorDialoguePrompt || ""}`
-
-
-  const { filePath } = await generateShot({
-    seed,
-    actorPrompt,
-    shotPrompt,
-    backgroundAudioPrompt,
-    foregroundAudioPrompt,
-    actorDialoguePrompt,
-    actorVoicePrompt,
-    duration,
-    nbFrames,
-    resolution,
-    nbSteps,
-    upscale,
-    interpolate,
-    noise,
-  })
-
-  console.log(`generated video in ${filePath}`)
-
-  console.log("returning result to user..")
-
-  const buffer = await fs.readFile(filePath)
-
-  res.setHeader("Content-Type", "media/mp4")
-  res.setHeader("Content-Length", buffer.length)
-  res.end(buffer)
+    stream.on('close', () => {
+      console.log(`finished streaming the video`)
+      res.end()
+    })
+    
+    stream.pipe(res)
+  } catch (err) {
+    console.error(`failed to read the video file at ${filePath}: ${err}`)
+    res.status(500)
+    res.write(JSON.stringify({ error: "failed to read the video file" }))
+    res.end()
+  }
 })
 
 app.listen(port, () => { console.log(`Open http://localhost:${port}`) })

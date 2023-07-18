@@ -1,4 +1,4 @@
-import { generateAudio } from "./services/generateAudio.mts"
+import { generateAudio } from "../services/generateAudio.mts"
 
 
 console.log('generating background audio..')
