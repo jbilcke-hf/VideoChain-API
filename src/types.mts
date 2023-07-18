@@ -124,8 +124,6 @@ export interface VideoShotMeta {
   actorDialoguePrompt: string
 
   seed: number
-  upscale: boolean
-
   noise: boolean // add movie noise
 
   durationMs: number // in milliseconds
@@ -133,7 +131,7 @@ export interface VideoShotMeta {
 
   fps: number // 8, 12, 24, 30, 60
 
-  resolution: number // 256, 512, 576, 720, 1080
+  resolution: string // {width}x{height} (256, 512, 576, 720, 1080)
 
   introTransition: VideoTransition
   introDurationMs: number // in milliseconds
@@ -151,6 +149,10 @@ export interface VideoShotMeta {
 
 
 export interface VideoShotData {
+
+  // used to check compatibility
+  version: number
+
   hasGeneratedVideo: boolean
   hasUpscaledVideo: boolean
   hasGeneratedBackgroundAudio: boolean
@@ -194,7 +196,6 @@ export interface VideoSequenceMeta {
   actorDialoguePrompt: string
 
   seed: number
-  upscale: boolean
 
   noise: boolean // add movie noise
 
@@ -210,6 +211,10 @@ export interface VideoSequenceMeta {
 
 
 export interface VideoSequenceData {
+
+  // used to check compatibility
+  version: number
+
   nbCompletedShots: number
   nbTotalShots: number
   progressPercent: number

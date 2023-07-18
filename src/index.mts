@@ -3,7 +3,7 @@ import { createReadStream, promises as fs } from "fs"
 import express from "express"
 
 import { VideoTask, VideoSequenceRequest } from "./types.mts"
-import { requestToTask } from "./services/requestToTask.mts"
+import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
 import { savePendingTask } from "./database/savePendingTask.mts"
 import { getTask } from "./database/getTask.mts"
 import { main } from "./main.mts"
@@ -31,7 +31,7 @@ app.post("/", async (req, res) => {
 
   console.log(`creating task from request..`)
   try {
-    task = await requestToTask(request)
+    task = await parseVideoRequest(request)
   } catch (err) {
     console.error(`failed to create task: ${task}`)
     res.status(400)
@@ -79,21 +79,21 @@ app.get("/video/:id\.mp4", async (req, res) => {
   }
 
   let task: VideoTask = null
-
   try {
     task = await getTask(req.params.id)
     console.log("returning result to user..")
-
-    const filePath = task.finalFilePath || task.tmpFilePath || ''
-    if (!filePath) {
-      res.status(400)
-      res.write(JSON.stringify({ error: "video exists, but cannot be previewed yet" }))
-      res.end()
-      return
-    }
   } catch (err) {
     res.status(404)
     res.write(JSON.stringify({ error: "this video doesn't exist" }))
+    res.end()
+    return
+  }
+
+
+  const filePath = task.finalFilePath || task.tmpFilePath || ''
+  if (!filePath) {
+    res.status(400)
+    res.write(JSON.stringify({ error: "video exists, but cannot be previewed yet" }))
     res.end()
     return
   }

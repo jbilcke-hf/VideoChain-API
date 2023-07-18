@@ -3,7 +3,7 @@ node_modules
 *.bin
 .DS_Store
 .venv
-models/
-sandbox/
-audio.pipe
-video.pipe
+./database/completed/*.json
+./database/pending/*.json
+*.mp4
+sandbox
