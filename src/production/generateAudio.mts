@@ -8,7 +8,7 @@ import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
 import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
 const instances: string[] = [
-  process.env.VS_AUDIO_GENERATION_SPACE_API_URL
+  process.env.VC_AUDIO_GENERATION_SPACE_API_URL
 ]
 
 // TODO we should use an inference endpoint instead

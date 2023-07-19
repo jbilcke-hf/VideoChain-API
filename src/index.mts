@@ -23,7 +23,7 @@ app.post("/", async (req, res) => {
   const request = req.body as VideoSequenceRequest
   
   const token = `${request.token || ""}`
-  if (token !== process.env.VS_SECRET_ACCESS_TOKEN) {
+  if (token !== process.env.VC_SECRET_ACCESS_TOKEN) {
     console.log("couldn't find access token in the query")
     res.status(401)
     res.write(JSON.stringify({ error: "invalid token" }))

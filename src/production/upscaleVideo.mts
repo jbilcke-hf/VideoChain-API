@@ -9,7 +9,7 @@ import { pendingFilesDirFilePath } from '../config.mts'
 import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
 const instances: string[] = [
-  process.env.VS_VIDEO_UPSCALE_SPACE_API_URL
+  process.env.VC_VIDEO_UPSCALE_SPACE_API_URL
 ]
 
 // TODO we should use an inference endpoint instead (or a space which bakes generation + upscale at the same time)

@@ -3,7 +3,7 @@ import puppeteer from "puppeteer"
 import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
 
 const instances: string[] = [
-  process.env.VS_VOICE_GENERATION_SPACE_API_URL
+  process.env.VC_VOICE_GENERATION_SPACE_API_URL
 ]
 
 // TODO we should use an inference endpoint instead

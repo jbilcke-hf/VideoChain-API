@@ -1,6 +1,6 @@
 import path from "node:path"
 
-export const storagePath = `${process.env.VS_STORAGE_PATH || './sandbox'}`
+export const storagePath = `${process.env.VC_STORAGE_PATH || './sandbox'}`
 
 export const tasksDirPath = path.join(storagePath, "tasks")
 export const pendingTasksDirFilePath = path.join(tasksDirPath, "pending")

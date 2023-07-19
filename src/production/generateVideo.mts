@@ -4,7 +4,7 @@ import { client } from "@gradio/client"
 import { generateSeed } from "../utils/generateSeed.mts"
 
 const instances: string[] = [
-  process.env.VS_VIDEO_GENERATION_SPACE_API_URL
+  process.env.VC_VIDEO_GENERATION_SPACE_API_URL
 ]
 
 export const generateVideo = async (prompt: string, options?: {

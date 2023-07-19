@@ -8,7 +8,7 @@ const response = await fetch(`${server}/`, {
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
-    token: process.env.VS_SECRET_ACCESS_TOKEN,
+    token: process.env.VC_SECRET_ACCESS_TOKEN,
     sequence: {
       id: videoId,
     },

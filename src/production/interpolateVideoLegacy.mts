@@ -8,7 +8,7 @@ import tmpDir from "temp-dir"
 import { downloadFileToTmp } from '../utils/downloadFileToTmp.mts'
 
 const instances: string[] = [
-  process.env.VS_VIDEO_INTERPOLATION_SPACE_API_URL
+  process.env.VC_VIDEO_INTERPOLATION_SPACE_API_URL
 ]
 
 export const interpolateVideo = async (fileName: string, steps: number, fps: number) => {

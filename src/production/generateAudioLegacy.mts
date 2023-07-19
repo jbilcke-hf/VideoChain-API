@@ -3,7 +3,7 @@ import { client } from '@gradio/client'
 import { generateSeed } from "../utils/generateSeed.mts"
 
 const instances: string[] = [
-  process.env.VS_AUDIO_GENERATION_SPACE_API_URL
+  process.env.VC_AUDIO_GENERATION_SPACE_API_URL
 ]
 
 export const generateAudio = async (prompt: string, options?: {

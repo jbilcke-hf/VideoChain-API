@@ -4,7 +4,7 @@ import tmpDir from "temp-dir"
 
 import { HfInference } from "@huggingface/inference"
 
-const hf = new HfInference(process.env.VS_HF_API_TOKEN)
+const hf = new HfInference(process.env.VC_HF_API_TOKEN)
 
 export const generateActor = async (prompt: string, fileName: string, seed: number) => {
   const positivePrompt = [

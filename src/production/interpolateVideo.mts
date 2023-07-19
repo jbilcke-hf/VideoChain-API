@@ -9,7 +9,7 @@ import { pendingFilesDirFilePath } from "../config.mts"
 import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
 const instances: string[] = [
-  process.env.VS_VIDEO_INTERPOLATION_SPACE_API_URL
+  process.env.VC_VIDEO_INTERPOLATION_SPACE_API_URL
 ]
 
 // TODO we should use an inference endpoint instead
