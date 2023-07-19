@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs"
 import path from "path"
 
 import { VideoTask } from "../types.mts"
-import { completedTasksDirFilePath, pendingTasksDirFilePath } from "./constants.mts"
+import { completedTasksDirFilePath, pendingTasksDirFilePath } from "../config.mts"
 
 export const saveCompletedTask = async (task: VideoTask) => {
   const fileName = `${task.id}.json`

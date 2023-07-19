@@ -55,8 +55,7 @@ export const parseVideoRequest = async (request: VideoSequenceRequest): Promise<
     completedAt: null,
     completed: false,
     error: '',
-    tmpFilePath: '',
-    finalFilePath: '',
+    filePath: '',
 
     // ------- the VideoShot -----
 

@@ -77,8 +77,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: V
     completedAt: '',
     completed: false,
     error: '',
-    tmpFilePath: '',
-    finalFilePath: '',
+    filePath: '',
   }
 
   return shot

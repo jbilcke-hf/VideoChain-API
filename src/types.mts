@@ -167,8 +167,7 @@ export interface VideoShotData {
   completedAt: string
   completed: boolean
   error: string
-  tmpFilePath: string
-  finalFilePath: string
+  filePath: string
 }
 
 export type VideoShot = VideoShotMeta & VideoShotData
@@ -221,8 +220,7 @@ export interface VideoSequenceData {
   completedAt: string
   completed: boolean
   error: string
-  tmpFilePath: string
-  finalFilePath: string
+  filePath: string
 }
 
 export type VideoSequence = VideoSequenceMeta & VideoSequenceData
