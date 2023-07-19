@@ -5,7 +5,7 @@ import { Blob } from "buffer"
 import { client } from "@gradio/client"
 import tmpDir from "temp-dir"
 
-import { downloadVideo } from './downloadVideo.mts'
+import { downloadFileToTmp } from '../utils/downloadFileToTmp.mts'
 
 const instances: string[] = [
   process.env.VS_VIDEO_INTERPOLATION_SPACE_API_URL
@@ -35,5 +35,5 @@ export const interpolateVideo = async (fileName: string, steps: number, fps: num
   const { orig_name, data: remoteFilePath } = data
   const remoteUrl = `${instance}/file=${remoteFilePath}`
   console.log("remoteUrl:", remoteUrl)
-  await downloadVideo(remoteUrl, fileName)
+  await downloadFileToTmp(remoteUrl, fileName)
 }

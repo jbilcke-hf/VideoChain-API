@@ -6,9 +6,9 @@ export const tasksDirPath = path.join(storagePath, "tasks")
 export const pendingTasksDirFilePath = path.join(tasksDirPath, "pending")
 export const completedTasksDirFilePath =  path.join(tasksDirPath, "completed")
 
-export const videosDirPath = path.join(storagePath, "videos")
-export const pendingVideosDirFilePath = path.join(videosDirPath, "pending")
-export const completedVideosDirFilePath =  path.join(videosDirPath, "completed")
+export const filesDirPath = path.join(storagePath, "files")
+export const pendingFilesDirFilePath = path.join(filesDirPath, "pending")
+export const completedFilesDirFilePath =  path.join(filesDirPath, "completed")
 
 export const shotFormatVersion = 1
 export const sequenceFormatVersion = 1

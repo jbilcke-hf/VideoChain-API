@@ -3,18 +3,21 @@ import { v4 as uuidv4 } from "uuid"
 // convert a request (which might be invalid)
 
 import { VideoSequenceRequest, VideoTask } from "../types.mts"
-import { generateSeed } from "../services/generateSeed.mts"
 import { getValidNumber } from "./getValidNumber.mts"
 import { getValidResolution } from "./getValidResolution.mts"
 import { parseShotRequest } from "./parseShotRequest.mts"
-import { sequenceFormatVersion } from "../database/constants.mts"
+import { generateSeed } from "./generateSeed.mts"
+import { sequenceFormatVersion } from "../config.mts"
 
 
 export const parseVideoRequest = async (request: VideoSequenceRequest): Promise<VideoTask> => {
+  // we don't want people to input their own ID or we might have trouble,
+  // such as people attempting to use a non-UUID, a file path (to hack us), etc
+  const id = uuidv4()
 
   const task: VideoTask = {
     // ------------ VideoSequenceMeta -------------
-    id: uuidv4(),
+    id,
 
     // describe the whole movie
     videoPrompt: `${request.sequence.videoPrompt || ''}`,
@@ -38,7 +41,7 @@ export const parseVideoRequest = async (request: VideoSequenceRequest): Promise<
 
     noise: request.sequence.noise === true,
 
-    steps: getValidNumber(request.sequence.steps, 1, 60, 35),
+    steps: getValidNumber(request.sequence.steps, 10, 50, 35),
 
     fps: getValidNumber(request.sequence.fps, 8, 60, 24),
 
@@ -49,13 +52,15 @@ export const parseVideoRequest = async (request: VideoSequenceRequest): Promise<
 
     // ---------- VideoSequenceData ---------
     version: sequenceFormatVersion,
+    fileName: `${id}.mp4`,
+    hasAssembledVideo: false,
     nbCompletedShots: 0,
     nbTotalShots: 0,
     progressPercent: 0,
     completedAt: null,
     completed: false,
     error: '',
-    filePath: '',
+
 
     // ------- the VideoShot -----
 

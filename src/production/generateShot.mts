@@ -3,12 +3,12 @@ import path from "node:path"
 import { v4 as uuidv4 } from "uuid"
 import tmpDir from "temp-dir"
 
-import { downloadVideo } from "./downloadVideo.mts"
+import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
 import { generateAudio } from "./generateAudio.mts"
 import { generateVideo } from "./generateVideo.mts"
 import { upscaleVideo } from "./upscaleVideo.mts"
 import { generateVoice } from "./generateVoice.mts"
-import { generateSeed } from "./generateSeed.mts"
+import { generateSeed } from "../utils/generateSeed.mts"
 import { mergeAudio } from "./mergeAudio.mts"
 import { addAudioToVideo } from "./addAudioToVideo.mts"
 import { interpolateVideo } from "./interpolateVideo.mts"
@@ -106,7 +106,7 @@ export const generateShot = async ({
 
   console.log("downloading video..")
 
-  const videoFileName = await downloadVideo(generatedVideoUrl, shotFileName)
+  const videoFileName = await downloadFileToTmp(generatedVideoUrl, shotFileName)
 
   if (upscale) {
     console.log("upscaling video..")
@@ -135,7 +135,7 @@ export const generateShot = async ({
     const interpolationSteps = 3
     const interpolatedFramesPerSecond = 24
     await interpolateVideo(
-      videoFileName,
+      task,
       interpolationSteps,
       interpolatedFramesPerSecond
     )
@@ -194,7 +194,7 @@ export const generateShot = async ({
       audioFileName = foregroundAudioFileName
     }
 
-    await addAudioToVideo(videoFileName, audioFileName)
+    await addAudioToVideo(task, audioFileName)
   }
 
   console.log("returning result to user..")

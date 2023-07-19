@@ -3,14 +3,17 @@ import { v4 as uuidv4 } from "uuid"
 // convert a request (which might be invalid)
 
 import { VideoSequence, VideoShot, VideoShotMeta } from "../types.mts"
-import { generateSeed } from "../services/generateSeed.mts"
+import { generateSeed } from "./generateSeed.mts"
 import { getValidNumber } from "./getValidNumber.mts"
-import { shotFormatVersion } from "../database/constants.mts"
+import { shotFormatVersion } from "../config.mts"
 
 export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: VideoShotMeta): Promise<VideoShot> => {
+  // we don't want people to input their own ID or we might have trouble,
+  // such as people attempting to use a non-UUID, a file path (to hack us), etc
+  const id = uuidv4()
 
   const shot: VideoShot = {
-    id: maybeShotMeta.id || uuidv4(),
+    id,
 
     shotPrompt: `${maybeShotMeta.shotPrompt || ""}`,
 
@@ -39,7 +42,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: V
     durationMs: getValidNumber(maybeShotMeta.durationMs, 0, 6000, 3000),
     
     // a video sequence CAN HAVE inconsistent iteration steps
-    steps: getValidNumber(maybeShotMeta.steps || sequence.steps, 1, 60, 35),
+    steps: getValidNumber(maybeShotMeta.steps || sequence.steps, 10, 50, 35),
 
     // a video sequence MUST HAVE consistent frames per second
     fps: getValidNumber(sequence.fps, 8, 60, 24),
@@ -54,6 +57,8 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: V
     // for internal use
 
     version: shotFormatVersion,
+    fileName: `${id}.mp4`,
+    hasGeneratedPreview: false,
     hasGeneratedVideo: false,
     hasUpscaledVideo: false,
     hasGeneratedBackgroundAudio: false,
@@ -77,7 +82,6 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: V
     completedAt: '',
     completed: false,
     error: '',
-    filePath: '',
   }
 
   return shot

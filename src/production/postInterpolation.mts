@@ -1,11 +1,11 @@
 import path from "node:path"
-import fs from "node:fs"
 
 import { v4 as uuidv4 } from "uuid"
 import tmpDir from "temp-dir"
 import ffmpeg from "fluent-ffmpeg"
+import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
-export const postInterpolation = async (fileName: string, duration: number, nbFrames: number): Promise<string> => {
+export const postInterpolation = async (fileName: string, durationMs: number, nbFrames: number): Promise<string> => {
   return new Promise((resolve,reject) => {
 
     const tmpFileName = `${uuidv4()}.mp4`
@@ -13,15 +13,20 @@ export const postInterpolation = async (fileName: string, duration: number, nbFr
     const filePath = path.join(tmpDir, fileName)
     const tmpFilePath = path.join(tmpDir, tmpFileName)
 
-
     ffmpeg.ffprobe(filePath, function(err, metadata) {
       if (err) { reject(err); return; }
       
+      const durationInSec = durationMs / 1000
 
-      const currentVideoDuration = metadata.format.duration
-
+      const currentVideoDurationInSec = metadata.format.duration
+      
+      console.log(`target duration in sec: ${currentVideoDurationInSec}s`)
+    
+      console.log(`target duration in sec: ${durationInSec}s (${durationMs}ms)`)
+    
       // compute a ratio ex. 0.3 = 30% of the total length
-      const durationRatio = currentVideoDuration / duration
+      const durationRatio = currentVideoDurationInSec / durationInSec
+      console.log(`durationRatio: ${durationRatio} (${Math.round(durationRatio % 100)}%)`)
 
     ffmpeg(filePath)
 
@@ -40,12 +45,7 @@ export const postInterpolation = async (fileName: string, duration: number, nbFr
 
       .save(tmpFilePath)
       .on("end", async () => {
-        await fs.promises.copyFile(tmpFilePath, filePath)
-        try {
-          await fs.promises.unlink(tmpFilePath)
-        } catch (err) {
-          console.log("failed to cleanup (no big deal..)")
-        }
+        await moveFileFromTmpToPending(tmpFileName, fileName)
 
         resolve(fileName)
       })

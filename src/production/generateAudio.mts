@@ -1,5 +1,11 @@
+import path from "node:path"
+
+import { v4 as uuidv4 } from "uuid"
+import tmpDir from "temp-dir"
 import puppeteer from "puppeteer"
-import { downloadVideo } from "./downloadVideo.mts"
+
+import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
+import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
 const instances: string[] = [
   process.env.VS_AUDIO_GENERATION_SPACE_API_URL
@@ -42,15 +48,11 @@ export async function generateAudio(prompt: string, audioFileName: string) {
   const audioRemoteUrl = await page.$$eval("a[download]", el => el.map(x => x.getAttribute("href"))[0])
 
 
-  console.log({
-    audioRemoteUrl,
-  })
+  // it is always a good idea to download to a tmp dir before saving to the pending dir
+  // because there is always a risk that the download will fail
+  
+  const tmpFileName = `${uuidv4()}.mp4`
 
-
-  // console.log("downloading file from space..")
-  console.log(`- downloading ${audioFileName} from ${audioRemoteUrl}`)
-
-  await downloadVideo(audioRemoteUrl, audioFileName)
-
-  return audioFileName
+  await downloadFileToTmp(audioRemoteUrl, tmpFileName)
+  await moveFileFromTmpToPending(tmpFileName, audioFileName)
 }

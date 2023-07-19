@@ -1,12 +1,15 @@
-import { createReadStream, promises as fs } from "fs"
+import { createReadStream, existsSync } from "node:fs"
+import path from "node:path"
 
 import express from "express"
 
 import { VideoTask, VideoSequenceRequest } from "./types.mts"
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
-import { savePendingTask } from "./database/savePendingTask.mts"
-import { getTask } from "./database/getTask.mts"
+import { savePendingTask } from "./scheduler/savePendingTask.mts"
+import { getTask } from "./scheduler/getTask.mts"
 import { main } from "./main.mts"
+import { completedFilesDirFilePath } from "./config.mts"
+import { deleteTask } from "./scheduler/deleteTask.mts"
 
 main()
 
@@ -57,8 +60,6 @@ app.post("/", async (req, res) => {
 app.get("/:id", async (req, res) => {
   try {
     const task = await getTask(req.params.id)
-    delete task.finalFilePath
-    delete task.tmpFilePath
     res.status(200)
     res.write(JSON.stringify(task))
     res.end()
@@ -66,6 +67,30 @@ app.get("/:id", async (req, res) => {
     console.error(err)
     res.status(404)
     res.write(JSON.stringify({ error: "couldn't find this task" }))
+    res.end()
+  }
+})
+
+app.delete("/:id", async (req, res) => {
+  let task: VideoTask = null
+  try {
+    task = await getTask(req.params.id)
+  } catch (err) {
+    console.error(err)
+    res.status(404)
+    res.write(JSON.stringify({ error: "couldn't find this task" }))
+    res.end()
+  }
+
+  try {
+    await deleteTask(task)
+    res.status(200)
+    res.write(JSON.stringify({ success: true }))
+    res.end()
+  } catch (err) {
+    console.error(err)
+    res.status(500)
+    res.write(JSON.stringify({ success: false, error: "failed to delete the task" }))
     res.end()
   }
 })
@@ -89,8 +114,11 @@ app.get("/video/:id\.mp4", async (req, res) => {
     return
   }
 
+  const completedFilePath = path.join(completedFilesDirFilePath, task.fileName)
 
-  const filePath = task.finalFilePath || task.tmpFilePath || ''
+  // note: we DON'T want to use the pending file path, as there may be operations on it
+  // (ie. a process might be busy writing stuff to it)
+  const filePath = existsSync(completedFilePath) ? completedFilePath : ""
   if (!filePath) {
     res.status(400)
     res.write(JSON.stringify({ error: "video exists, but cannot be previewed yet" }))

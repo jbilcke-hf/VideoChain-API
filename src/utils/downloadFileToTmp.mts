@@ -1,17 +1,18 @@
-import path from 'node:path'
-import fs from 'node:fs'
-import { pendingVideosDirFilePath } from '../config.mts'
+import path from "node:path"
+import fs from "node:fs"
 
-export const downloadVideo = async (remoteUrl: string, fileName: string): Promise<string> => {
+import tmpDir from "temp-dir"
 
-  const filePath = path.resolve(pendingVideosDirFilePath, fileName)
+export const downloadFileToTmp = async (remoteUrl: string, fileName: string) => {
+
+  const filePath = path.resolve(tmpDir, fileName)
 
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 15 * 60 * 60 * 1000) // 15 minutes
 
   // TODO finish the timeout?
 
-  // download the video
+  // download the file
   const response = await fetch(remoteUrl, {
     signal: controller.signal
   })
@@ -23,6 +24,4 @@ export const downloadVideo = async (remoteUrl: string, fileName: string): Promis
     filePath,
     Buffer.from(arrayBuffer)
   )
-
-  return fileName
 }

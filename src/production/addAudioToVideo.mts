@@ -5,6 +5,8 @@ import tmpDir from "temp-dir"
 import { v4 as uuidv4 } from "uuid"
 
 import ffmpeg from "fluent-ffmpeg"
+import { pendingFilesDirFilePath } from "../config.mts"
+import { moveFile } from "../utils/moveFile.mts"
 
 export const addAudioToVideo = async (
   videoFileName: string,
@@ -17,14 +19,12 @@ export const addAudioToVideo = async (
   * 2.0: amplify the audio to 200% of original volume (double volume - might cause clipping)
   */
   volume: number = 1.0
-): Promise<string> => {
-  
-  const tempOutputFilePath = `${uuidv4()}.mp4`
-  const videoFilePath = path.resolve(tmpDir, videoFileName)
+) => {
+  const tempOutputFilePath = path.join(tmpDir, `${uuidv4()}.mp4`)
   const audioFilePath = path.resolve(tmpDir, audioFileName)
 
   await new Promise((resolve, reject) => {
-    ffmpeg(videoFilePath)
+    ffmpeg(videoFileName)
       .input(audioFilePath)
       .audioFilters({ filter: 'volume', options: volume }) // add audio filter for volume
       .outputOptions("-c:v copy")  // use video copy codec
@@ -39,7 +39,5 @@ export const addAudioToVideo = async (
   })
 
   // Now we want to replace the original video file with the new file that has been created
-  await fs.rename(tempOutputFilePath, videoFilePath)
-
-  return videoFileName
+  await moveFile(tempOutputFilePath, videoFileName)
 };

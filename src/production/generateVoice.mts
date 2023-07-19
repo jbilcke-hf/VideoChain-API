@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer"
 
-import { downloadVideo } from "./downloadVideo.mts"
+import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
 
 const instances: string[] = [
   process.env.VS_VOICE_GENERATION_SPACE_API_URL
@@ -50,7 +50,7 @@ export async function generateVoice(prompt: string, voiceFileName: string) {
 
   console.log(`- downloading ${voiceFileName} from ${voiceRemoteUrl}`)
 
-  await downloadVideo(voiceRemoteUrl, voiceFileName)
+  await downloadFileToTmp(voiceRemoteUrl, voiceFileName)
 
   return voiceFileName
 }

@@ -1,9 +1,12 @@
-import path from 'node:path'
-import fs from 'node:fs'
+import path from "node:path"
 
-import tmpDir from 'temp-dir'
-import puppeteer from 'puppeteer'
-import { downloadVideo } from './downloadVideo.mts'
+import { v4 as uuidv4 } from "uuid"
+import tmpDir from "temp-dir"
+import puppeteer from "puppeteer"
+
+import { downloadFileToTmp } from '../utils/downloadFileToTmp.mts'
+import { pendingFilesDirFilePath } from '../config.mts'
+import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
 const instances: string[] = [
   process.env.VS_VIDEO_UPSCALE_SPACE_API_URL
@@ -28,7 +31,7 @@ export async function upscaleVideo(fileName: string, prompt: string) {
   const promptField = await page.$('textarea')
   await promptField.type(prompt)
 
-  const inputFilePath = path.join(tmpDir, fileName)
+  const inputFilePath = path.join(pendingFilesDirFilePath, fileName)
   // console.log(`local file to upscale: ${inputFilePath}`)
   
   await new Promise(r => setTimeout(r, 3000))
@@ -59,24 +62,11 @@ export async function upscaleVideo(fileName: string, prompt: string) {
 
   const upscaledFileUrl = await page.$$eval('a[download="xl_result.mp4"]', el => el.map(x => x.getAttribute("href"))[0])
 
-  // console.log('downloading upscaled image from:', upscaledFileUrl)
+  // it is always a good idea to download to a tmp dir before saving to the pending dir
+  // because there is always a risk that the download will fail
+  
+  const tmpFileName = `${uuidv4()}.mp4`
 
-  const tmpFileName = `${fileName}_xl`
-
-  // console.log('downloading file from space..')
-  console.log(`- downloading ${fileName} from ${upscaledFileUrl}`)
-
-  await downloadVideo(upscaledFileUrl, tmpFileName)
-
-  const tmpFilePath = path.join(tmpDir, tmpFileName)
-  const filePath = path.join(tmpDir, fileName)
-
-  await fs.promises.copyFile(tmpFilePath, filePath)
-  try {
-    await fs.promises.unlink(tmpFilePath)
-  } catch (err) {
-    console.log('failed to cleanup (no big deal..)')
-  }
-
-  return fileName
+  await downloadFileToTmp(upscaledFileUrl, tmpFileName)
+  await moveFileFromTmpToPending(tmpFileName, fileName)
 }

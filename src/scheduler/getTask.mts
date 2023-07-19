@@ -1,6 +1,6 @@
 import path from "node:path"
 
-import { completedTasksDirFilePath, pendingTasksDirFilePath } from "./constants.mts"
+import { completedTasksDirFilePath, pendingTasksDirFilePath } from "../config.mts"
 import { readTask } from "./readTask.mts"
 
 export const getTask = async (id: string) => {

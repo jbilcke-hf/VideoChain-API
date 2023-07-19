@@ -1,17 +1,20 @@
 import path from "node:path"
 
-import puppeteer from "puppeteer"
+import { v4 as uuidv4 } from "uuid"
 import tmpDir from "temp-dir"
-import { downloadVideo } from "./downloadVideo.mts"
+import puppeteer from "puppeteer"
+
+import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
+import { pendingFilesDirFilePath } from "../config.mts"
+import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
 const instances: string[] = [
   process.env.VS_VIDEO_INTERPOLATION_SPACE_API_URL
 ]
 
-
 // TODO we should use an inference endpoint instead
 export async function interpolateVideo(fileName: string, steps: number, fps: number) {
-  const inputFilePath = path.join(tmpDir, fileName)
+  const inputFilePath = path.join(pendingFilesDirFilePath, fileName)
 
   console.log(`interpolating ${fileName}`)
   console.log(`warning: interpolateVideo parameter "${steps}" is ignored!`)
@@ -47,7 +50,11 @@ export async function interpolateVideo(fileName: string, steps: number, fps: num
 
   const interpolatedFileUrl = await page.$$eval('a[download="interpolated_result.mp4"]', el => el.map(x => x.getAttribute("href"))[0])
 
-  await downloadVideo(interpolatedFileUrl, fileName)
+  // it is always a good idea to download to a tmp dir before saving to the pending dir
+  // because there is always a risk that the download will fail
 
-  return fileName
+  const tmpFileName = `${uuidv4()}.mp4`
+
+  await downloadFileToTmp(interpolatedFileUrl, tmpFileName)
+  await moveFileFromTmpToPending(tmpFileName, fileName)
 }

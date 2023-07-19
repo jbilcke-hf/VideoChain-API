@@ -102,9 +102,6 @@ export type VideoTransition =
 
 
 export interface VideoShotMeta {
-  // must be unique
-  id: string
-
   shotPrompt: string
   // inputVideo?: string
 
@@ -135,24 +132,20 @@ export interface VideoShotMeta {
 
   introTransition: VideoTransition
   introDurationMs: number // in milliseconds
-
-  // for internal use
-  hasGeneratedVideo: boolean
-  hasUpscaledVideo: boolean
-  hasGeneratedBackgroundAudio: boolean
-  hasGeneratedForegroundAudio: boolean
-  hasGeneratedActor: boolean
-  hasInterpolatedVideo: boolean
-  hasAddedAudio: boolean
-  hasPostProcessedVideo: boolean
 }
 
 
 export interface VideoShotData {
+  // must be unique
+  id: string
+
+  fileName: string
 
   // used to check compatibility
   version: number
 
+  // for internal use
+  hasGeneratedPreview: boolean
   hasGeneratedVideo: boolean
   hasUpscaledVideo: boolean
   hasGeneratedBackgroundAudio: boolean
@@ -167,14 +160,11 @@ export interface VideoShotData {
   completedAt: string
   completed: boolean
   error: string
-  filePath: string
 }
 
 export type VideoShot = VideoShotMeta & VideoShotData
 
 export interface VideoSequenceMeta {
-  // must be unique
-  id: string
 
   // describe the whole movie
   videoPrompt: string
@@ -198,7 +188,7 @@ export interface VideoSequenceMeta {
 
   noise: boolean // add movie noise
 
-  steps: number
+  steps: number // between 10 and 50
 
   fps: number // 8, 12, 24, 30, 60
 
@@ -210,17 +200,21 @@ export interface VideoSequenceMeta {
 
 
 export interface VideoSequenceData {
+  // must be unique
+  id: string
+  
+  fileName: string
 
   // used to check compatibility
   version: number
 
+  hasAssembledVideo: boolean
   nbCompletedShots: number
   nbTotalShots: number
   progressPercent: number
   completedAt: string
   completed: boolean
   error: string
-  filePath: string
 }
 
 export type VideoSequence = VideoSequenceMeta & VideoSequenceData
