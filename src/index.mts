@@ -10,6 +10,7 @@ import { getTask } from "./scheduler/getTask.mts"
 import { main } from "./main.mts"
 import { completedFilesDirFilePath } from "./config.mts"
 import { deleteTask } from "./scheduler/deleteTask.mts"
+import { getPendingTasks } from "./scheduler/getPendingTasks.mts"
 
 main()
 
@@ -53,6 +54,21 @@ app.post("/", async (req, res) => {
     console.error(err)
     res.status(500)
     res.write(JSON.stringify({ error: "couldn't save the task" }))
+    res.end()
+  }
+})
+
+// get all pending tasks
+app.get("/", async (req, res) => {
+  try {
+    const tasks = await getPendingTasks()
+    res.status(200)
+    res.write(JSON.stringify(tasks, null, 2))
+    res.end()
+  } catch (err) {
+    console.error(err)
+    res.status(500)
+    res.write(JSON.stringify({ error: "couldn't get the tasks" }))
     res.end()
   }
 })
