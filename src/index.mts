@@ -11,6 +11,7 @@ import { main } from "./main.mts"
 import { completedFilesDirFilePath } from "./config.mts"
 import { deleteTask } from "./scheduler/deleteTask.mts"
 import { getPendingTasks } from "./scheduler/getPendingTasks.mts"
+import { hasValidAuthorization } from "./utils/hasValidAuthorization.mts"
 
 main()
 
@@ -22,14 +23,14 @@ app.use(express.json())
 app.post("/", async (req, res) => {
   const request = req.body as VideoSequenceRequest
   
-  const token = `${request.token || ""}`
-  if (token !== process.env.VC_SECRET_ACCESS_TOKEN) {
-    console.log("couldn't find access token in the query")
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
     res.status(401)
     res.write(JSON.stringify({ error: "invalid token" }))
     res.end()
     return
   }
+
 
   let task: VideoTask = null
 
@@ -60,6 +61,15 @@ app.post("/", async (req, res) => {
 
 // get all pending tasks
 app.get("/", async (req, res) => {
+    
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+
   try {
     const tasks = await getPendingTasks()
     res.status(200)
@@ -74,6 +84,15 @@ app.get("/", async (req, res) => {
 })
 
 app.get("/:id", async (req, res) => {
+    
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+
   try {
     const task = await getTask(req.params.id)
     res.status(200)
@@ -88,6 +107,16 @@ app.get("/:id", async (req, res) => {
 })
 
 app.delete("/:id", async (req, res) => {
+    
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+
+
   let task: VideoTask = null
   try {
     task = await getTask(req.params.id)
@@ -112,6 +141,16 @@ app.delete("/:id", async (req, res) => {
 })
 
 app.get("/video/:id\.mp4", async (req, res) => {
+    
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+
+  
   if (!req.params.id) {
     res.status(400)
     res.write(JSON.stringify({ error: "please provide a valid video id" }))
