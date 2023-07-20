@@ -219,10 +219,10 @@ export interface VideoSequenceData {
 
 export type VideoSequence = VideoSequenceMeta & VideoSequenceData
 
-export type VideoSequenceRequest = {
-  token: string
-  sequence: VideoSequenceMeta
-  shots: VideoShotMeta[]
+export type VideoTaskRequest = {
+  prompt: string
+  sequence: Partial<VideoSequenceMeta>
+  shots: Array<Partial<VideoShotMeta>>
 }
 
 export type VideoTask = VideoSequence & {

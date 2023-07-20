@@ -3,7 +3,7 @@ import path from "node:path"
 
 import express from "express"
 
-import { VideoTask, VideoSequenceRequest } from "./types.mts"
+import { VideoTask, VideoTaskRequest } from "./types.mts"
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
 import { savePendingTask } from "./scheduler/savePendingTask.mts"
 import { getTask } from "./scheduler/getTask.mts"
@@ -21,8 +21,8 @@ const port = 7860
 app.use(express.json())
 
 app.post("/", async (req, res) => {
-  const request = req.body as VideoSequenceRequest
-  
+  const request = req.body as VideoTaskRequest
+
   if (!hasValidAuthorization(req.headers)) {
     console.log("Invalid authorization")
     res.status(401)
@@ -30,8 +30,7 @@ app.post("/", async (req, res) => {
     res.end()
     return
   }
-
-
+  
   let task: VideoTask = null
 
   console.log(`creating task from request..`)
@@ -150,7 +149,7 @@ app.get("/video/:id\.mp4", async (req, res) => {
     return
   }
 
-  
+
   if (!req.params.id) {
     res.status(400)
     res.write(JSON.stringify({ error: "please provide a valid video id" }))

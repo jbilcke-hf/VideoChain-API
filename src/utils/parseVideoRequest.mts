@@ -1,19 +1,32 @@
 import { v4 as uuidv4 } from "uuid"
+import { HfInference } from "@huggingface/inference"
 
 // convert a request (which might be invalid)
 
-import { VideoSequenceRequest, VideoTask } from "../types.mts"
+import { VideoTaskRequest, VideoTask, VideoShotMeta } from "../types.mts"
 import { getValidNumber } from "./getValidNumber.mts"
 import { getValidResolution } from "./getValidResolution.mts"
 import { parseShotRequest } from "./parseShotRequest.mts"
 import { generateSeed } from "./generateSeed.mts"
 import { sequenceFormatVersion } from "../config.mts"
 
+// const hfi = new HfInference(process.env._VC_HF_API_TOKEN)
+// const hf = hfi.endpoint(process.env.VC_INFERENCE_ENDPOINT_URL)
 
-export const parseVideoRequest = async (request: VideoSequenceRequest): Promise<VideoTask> => {
+export const parseVideoRequest = async (request: VideoTaskRequest): Promise<VideoTask> => {
   // we don't want people to input their own ID or we might have trouble,
   // such as people attempting to use a non-UUID, a file path (to hack us), etc
   const id = uuidv4()
+
+  if (typeof request.prompt === "string" && request.prompt.length > 0) {
+      // TODO: use llama2 to populate this!
+    request.sequence = {
+      videoPrompt: request.prompt,
+    }
+    request.shots = [{
+      shotPrompt: request.prompt,
+    }]
+  }
 
   const task: VideoTask = {
     // ------------ VideoSequenceMeta -------------
