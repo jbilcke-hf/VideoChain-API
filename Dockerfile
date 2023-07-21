@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update
 
-RUN apt --yes install ffmpeg
+RUN apt --yes install ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libgbm1 libasound2 libpangocairo-1.0-0 libxss1 libgtk-3-0
 
 # Set up a new user named "user" with user ID 1000
 RUN useradd -o -u 1000 user
