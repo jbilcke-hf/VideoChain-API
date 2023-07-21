@@ -197,34 +197,6 @@ export const processTask = async (task: VideoTask) => {
       }
     }
 
-
-    let foregroundAudioFileName = `${task.ownerId}_${task.id}_${shot.id}_${uuidv4()}.m4a`
-
-    if (!shot.hasGeneratedForegroundAudio && shot.foregroundAudioPrompt) {
-      console.log("generating foreground audio..")
-   
-      try {
-        await generateAudio(shot.foregroundAudioPrompt, foregroundAudioFileName)
-
-        shot.hasGeneratedForegroundAudio = true
-        shot.nbCompletedSteps++
-        nbCompletedSteps++
-        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
-
-        await addAudioToVideo(shot.fileName, foregroundAudioFileName)
-
-        await updatePendingTask(task)
-
-      } catch (err) {
-        console.error(`failed to generate foreground audio for ${shot.id} (${err})`)
-        // something is wrong, let's put the whole thing back into the queue
-        task.error = `failed to generate foreground audio ${shot.id} (will try again later)`
-        await updatePendingTask(task)
-        break
-      }
-    }
-
       
     if (!shot.hasPostProcessedVideo) {
       console.log("post-processing video..")
@@ -254,6 +226,45 @@ export const processTask = async (task: VideoTask) => {
         task.error = `failed to post-process shot ${shot.id} (will try again later)`
         await updatePendingTask(task)
         break
+      }
+    }
+
+
+    let foregroundAudioFileName = `${task.ownerId}_${task.id}_${shot.id}_${uuidv4()}.m4a`
+
+    if (!shot.hasGeneratedForegroundAudio) {
+      if (shot.foregroundAudioPrompt) {
+        console.log("generating foreground audio..")
+    
+        try {
+          await generateAudio(shot.foregroundAudioPrompt, foregroundAudioFileName)
+
+          shot.hasGeneratedForegroundAudio = true
+          shot.nbCompletedSteps++
+          nbCompletedSteps++
+          shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+          task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+
+          await addAudioToVideo(shot.fileName, foregroundAudioFileName)
+
+          await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+
+          await updatePendingTask(task)
+
+        } catch (err) {
+          console.error(`failed to generate foreground audio for ${shot.id} (${err})`)
+          // something is wrong, let's put the whole thing back into the queue
+          task.error = `failed to generate foreground audio ${shot.id} (will try again later)`
+          await updatePendingTask(task)
+          break
+        }
+      } else {
+        shot.hasGeneratedForegroundAudio = true
+        shot.nbCompletedSteps++
+        nbCompletedSteps++
+        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+        await updatePendingTask(task)
       }
     }
 

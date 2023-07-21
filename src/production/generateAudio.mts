@@ -16,10 +16,8 @@ export async function generateAudio(prompt: string, audioFileName: string) {
   const instance = instances.shift()
   instances.push(instance)
 
-  console.log("instance:", instance)
-  
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     protocolTimeout: 800000,
   })
 
