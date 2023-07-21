@@ -42,7 +42,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
     durationMs: getValidNumber(maybeShotMeta.durationMs, 0, 6000, 3000),
     
     // a video sequence CAN HAVE inconsistent iteration steps
-    steps: getValidNumber(maybeShotMeta.steps || sequence.steps, 10, 50, 35),
+    steps: getValidNumber(maybeShotMeta.steps || sequence.steps, 10, 50, 45),
 
     // a video sequence MUST HAVE consistent frames per second
     fps: getValidNumber(sequence.fps, 8, 60, 24),

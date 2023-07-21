@@ -68,7 +68,7 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
 
     noise: request.sequence.noise === true,
 
-    steps: getValidNumber(request.sequence.steps, 10, 50, 35),
+    steps: getValidNumber(request.sequence.steps, 10, 50, 45),
 
     fps: getValidNumber(request.sequence.fps, 8, 60, 24),
 

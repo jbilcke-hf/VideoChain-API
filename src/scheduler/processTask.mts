@@ -100,6 +100,8 @@ export const processTask = async (task: VideoTask) => {
 
         await updatePendingTask(task)
 
+        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+
       } catch (err) {
         console.error(`failed to generate shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
