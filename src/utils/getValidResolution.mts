@@ -3,8 +3,10 @@ import { getValidNumber } from "./getValidNumber.mts"
 export const getValidResolution = (something: any) => {
   const strValue = `${something || ''}`
   const chunks = strValue.split('x')
-  if (chunks.length < 2) {
-    throw new Error('Invalid resolution (should be written like "1280x720" etc)')
+  console.log("chunks:", chunks)
+  
+  if (chunks.length !== 2) {
+    return `1280x720`
   }
 
   const [widthStr, heightStr] = chunks

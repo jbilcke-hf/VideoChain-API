@@ -34,10 +34,11 @@ app.post("/", async (req, res) => {
   let task: VideoTask = null
 
   console.log(`creating task from request..`)
+  console.log(`request: `, JSON.stringify(request))
   try {
     task = await parseVideoRequest(request)
   } catch (err) {
-    console.error(`failed to create task: ${task}`)
+    console.error(`failed to create task: ${task} (${err})`)
     res.status(400)
     res.write(JSON.stringify({ error: "query seems to be malformed" }))
     res.end()

@@ -20,13 +20,13 @@ export const postInterpolation = async (fileName: string, durationMs: number, nb
 
       const currentVideoDurationInSec = metadata.format.duration
       
-      console.log(`target duration in sec: ${currentVideoDurationInSec}s`)
+      console.log(`currentVideoDurationInSec in sec: ${currentVideoDurationInSec}s`)
     
       console.log(`target duration in sec: ${durationInSec}s (${durationMs}ms)`)
     
       // compute a ratio ex. 0.3 = 30% of the total length
       const durationRatio = currentVideoDurationInSec / durationInSec
-      console.log(`durationRatio: ${durationRatio} (${Math.round(durationRatio % 100)}%)`)
+      console.log(`durationRatio: ${durationRatio}`)
 
     ffmpeg(filePath)
 

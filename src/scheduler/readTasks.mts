@@ -10,16 +10,20 @@ export const readTasks = async (taskDirFilePath: string): Promise<VideoTask[]> =
   let tasksFiles: string[] = []
   try {
     const filesInDir = await fs.readdir(taskDirFilePath)
+    console.log("filesInDir:", filesInDir)
 
     // we only keep valid files (in UUID.json format)
     tasksFiles = filesInDir.filter(fileName => fileName.match(/[a-z0-9\-]\.json/i))
+
+    console.log("tasksfiles:", tasksFiles)
   } catch (err) {
     console.log(`failed to read tasks: ${err}`)
   }
 
   const tasks: VideoTask[] = []
 
-  for (const taskFileName in tasksFiles) {
+  for (const taskFileName of tasksFiles) {
+    console.log("taskFileName:", taskFileName)
     const taskFilePath = path.join(taskDirFilePath, taskFileName)
     try {
       const task = await readTask(taskFilePath)

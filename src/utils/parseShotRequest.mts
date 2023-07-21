@@ -7,7 +7,7 @@ import { generateSeed } from "./generateSeed.mts"
 import { getValidNumber } from "./getValidNumber.mts"
 import { shotFormatVersion } from "../config.mts"
 
-export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: VideoShotMeta): Promise<VideoShot> => {
+export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: Partial<VideoShotMeta>): Promise<VideoShot> => {
   // we don't want people to input their own ID or we might have trouble,
   // such as people attempting to use a non-UUID, a file path (to hack us), etc
   const id = uuidv4()

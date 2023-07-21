@@ -57,7 +57,7 @@ export const processTask = async (task: VideoTask) => {
         // await copyVideoFromTmpToPending(shot.fileName)
 
         // copy from /tmp to /data/completed
-        await copyVideoFromTmpToCompleted(shot.fileName)
+        await copyVideoFromTmpToCompleted(shot.fileName, task.fileName)
 
         shot.hasGeneratedPreview = true
         shot.nbCompletedSteps++
@@ -201,16 +201,17 @@ export const processTask = async (task: VideoTask) => {
 
   console.log(`end of the loop:`)
   console.log(`nb completed shots: ${task.nbCompletedShots}`)
+  console.log(`len of the shot array: ${task.shots.length}`)
   
-  if (task.nbCompletedShots === task.nbTotalShots) {
+  if (task.nbCompletedShots === task.shots.length) {
     console.log(`we have completed the whole video sequence!`)
     console.log(`assembling the video..`)
 
-    if (task.nbTotalShots === 1) {
+    if (task.shots.length === 1) {
       console.log(`we only have one shot, so this gonna be easy`)
       task.hasAssembledVideo = true
 
-      // the shot become the final movie
+      // the single shot (so, the first) becomes the final movie
       await moveVideoFromPendingToCompleted(task.shots[0].fileName, task.fileName)
 
       await updatePendingTask(task)

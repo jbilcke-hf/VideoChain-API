@@ -19,6 +19,7 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
   const id = uuidv4()
 
   if (typeof request.prompt === "string" && request.prompt.length > 0) {
+    console.log("we have a valid prompt:", request.prompt)
       // TODO: use llama2 to populate this!
     request.sequence = {
       videoPrompt: request.prompt,
@@ -28,6 +29,7 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
     }]
   }
 
+  console.log("continuing..")
   const task: VideoTask = {
     // ------------ VideoSequenceMeta -------------
     id,
@@ -68,7 +70,6 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
     fileName: `${id}.mp4`,
     hasAssembledVideo: false,
     nbCompletedShots: 0,
-    nbTotalShots: 0,
     progressPercent: 0,
     completedAt: null,
     completed: false,
@@ -80,9 +81,12 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
     shots: [],
   }
 
+  console.log("we are still good..")
   const maybeShots = Array.isArray(request.shots) ? request.shots : []
 
+  console.log("let's try..")
   for (const maybeShot of maybeShots) {
+    console.log("trying shot", maybeShot)
     try {
       const shot = await parseShotRequest(task, maybeShot)
       task.shots.push(shot)

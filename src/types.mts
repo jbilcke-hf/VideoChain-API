@@ -210,7 +210,6 @@ export interface VideoSequenceData {
 
   hasAssembledVideo: boolean
   nbCompletedShots: number
-  nbTotalShots: number
   progressPercent: number
   completedAt: string
   completed: boolean
