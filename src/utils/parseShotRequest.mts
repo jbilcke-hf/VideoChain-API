@@ -37,6 +37,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
 
     // a video sequence SHOULD HAVE a consistent grain
     noise: sequence.noise,
+    noiseAmount: sequence.noiseAmount,
 
     // a video sequence CAN HAVE inconsistent scene duration, like in any real movie
     durationMs: getValidNumber(maybeShotMeta.durationMs, 0, 6000, 3000),

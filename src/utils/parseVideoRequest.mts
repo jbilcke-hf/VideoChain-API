@@ -67,6 +67,7 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
     seed: getValidNumber(request.sequence.seed, 0, 4294967295, generateSeed()),
 
     noise: request.sequence.noise === true,
+    noiseAmount: request.sequence.noise === true ? 2 : 0,
 
     steps: getValidNumber(request.sequence.steps, 10, 50, 45),
 

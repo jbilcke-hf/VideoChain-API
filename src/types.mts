@@ -122,6 +122,7 @@ export interface VideoShotMeta {
 
   seed: number
   noise: boolean // add movie noise
+  noiseAmount: number // noise strength (default is 2, and 10 is very visible)
 
   durationMs: number // in milliseconds
   steps: number
@@ -187,6 +188,7 @@ export interface VideoSequenceMeta {
   seed: number
 
   noise: boolean // add movie noise
+  noiseAmount: number // noise strength (default is 2, and 10 is very visible)
 
   steps: number // between 10 and 50
 

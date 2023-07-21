@@ -5,7 +5,7 @@ import tmpDir from "temp-dir"
 import ffmpeg from "fluent-ffmpeg"
 import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
-export const postInterpolation = async (fileName: string, durationMs: number, nbFrames: number): Promise<string> => {
+export const postInterpolation = async (fileName: string, durationMs: number, nbFrames: number, noiseAmount: number): Promise<string> => {
   return new Promise((resolve,reject) => {
 
     const tmpFileName = `${uuidv4()}.mp4`
@@ -37,7 +37,7 @@ export const postInterpolation = async (fileName: string, durationMs: number, nb
         `setpts=${durationRatio}*PTS`, // we make the video faster
         //'scale=-1:576:lanczos',
         // 'unsharp=5:5:0.2:5:5:0.2', // not recommended, this make the video more "pixely"
-        'noise=c0s=10:c0f=t+u' // add a movie grain noise
+        `noise=c0s=${noiseAmount}:c0f=t+u` // add a movie grain noise
       ])
       .outputOptions([
         `-r ${nbFrames}`,
