@@ -23,7 +23,19 @@ export const processTask = async (task: VideoTask) => {
     return
   }
 
+  // always count 1 more step, for the final assembly
+
+  let nbTotalSteps = 1
+
   for (const shot of task.shots) {
+    nbTotalSteps += shot.nbTotalSteps
+  }
+
+  let nbCompletedSteps = 0
+
+  for (const shot of task.shots) {
+    nbCompletedSteps += shot.nbCompletedSteps
+
     // skip shots completed previously
     if (shot.completed) {
       continue
@@ -62,6 +74,9 @@ export const processTask = async (task: VideoTask) => {
 
         shot.hasGeneratedPreview = true
         shot.nbCompletedSteps++
+        nbCompletedSteps++
+        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
         await updatePendingTask(task)
 
@@ -97,6 +112,9 @@ export const processTask = async (task: VideoTask) => {
 
         shot.hasGeneratedVideo = true
         shot.nbCompletedSteps++
+        nbCompletedSteps++
+        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
         await updatePendingTask(task)
 
@@ -119,6 +137,9 @@ export const processTask = async (task: VideoTask) => {
 
         shot.hasUpscaledVideo = true
         shot.nbCompletedSteps++
+        nbCompletedSteps++
+        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
         await updatePendingTask(task)
 
@@ -157,6 +178,9 @@ export const processTask = async (task: VideoTask) => {
 
         shot.hasInterpolatedVideo = true
         shot.nbCompletedSteps++
+        nbCompletedSteps++
+        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
         await updatePendingTask(task)
 
@@ -187,6 +211,9 @@ export const processTask = async (task: VideoTask) => {
     
         shot.hasPostProcessedVideo = true
         shot.nbCompletedSteps++
+        nbCompletedSteps++
+        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
         await updatePendingTask(task)
 
@@ -203,6 +230,8 @@ export const processTask = async (task: VideoTask) => {
 
     shot.completed = true
     shot.completedAt = new Date().toISOString()
+    shot.progressPercent = 100
+
     task.nbCompletedShots++
 
     await updatePendingTask(task)
@@ -246,6 +275,8 @@ export const processTask = async (task: VideoTask) => {
       }
     }
 
+    nbCompletedSteps++
+    task.progressPercent = 100
     task.completed = true
     task.completedAt = new Date().toISOString()
     await updatePendingTask(task)
