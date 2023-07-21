@@ -18,7 +18,7 @@ export async function generateAudio(prompt: string, audioFileName: string) {
 
   const browser = await puppeteer.launch({
     headless: true,
-    protocolTimeout: 800000,
+    protocolTimeout: 120000,
   })
 
   const page = await browser.newPage()
@@ -40,7 +40,7 @@ export async function generateAudio(prompt: string, audioFileName: string) {
   await submitButton.click()
 
   await page.waitForSelector("a[download]", {
-    timeout: 800000, // need to be large enough in case someone else attemps to use our space
+    timeout: 120000, // no need to wait for too long, generation is quick
   })
 
   const audioRemoteUrl = await page.$$eval("a[download]", el => el.map(x => x.getAttribute("href"))[0])
