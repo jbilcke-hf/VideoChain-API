@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid"
+
 import { saveCompletedTask } from "./saveCompletedTask.mts"
 import { savePendingTask } from "./savePendingTask.mts"
 import { updatePendingTask } from "./updatePendingTask.mts"
@@ -12,6 +14,9 @@ import { postInterpolation } from "../production/postInterpolation.mts"
 import { moveVideoFromPendingToCompleted } from "../utils/moveVideoFromPendingToCompleted.mts"
 import { assembleShots } from "../production/assembleShots.mts"
 import { copyVideoFromPendingToCompleted } from "../utils/copyVideoFromPendingToCompleted.mts"
+import { generateAudio } from "../production/generateAudio.mts"
+import { mergeAudio } from "../production/mergeAudio.mts"
+import { addAudioToVideo } from "../production/addAudioToVideo.mts"
 
 export const processTask = async (task: VideoTask) => {
   console.log(`processing video task ${task.id}`)
@@ -192,6 +197,34 @@ export const processTask = async (task: VideoTask) => {
       }
     }
 
+
+    let foregroundAudioFileName = `${task.ownerId}_${task.id}_${shot.id}_${uuidv4()}.m4a`
+
+    if (!shot.hasGeneratedForegroundAudio && shot.foregroundAudioPrompt) {
+      console.log("generating foreground audio..")
+   
+      try {
+        await generateAudio(shot.foregroundAudioPrompt, foregroundAudioFileName)
+
+        shot.hasGeneratedForegroundAudio = true
+        shot.nbCompletedSteps++
+        nbCompletedSteps++
+        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+
+        await addAudioToVideo(shot.fileName, foregroundAudioFileName)
+
+        await updatePendingTask(task)
+
+      } catch (err) {
+        console.error(`failed to generate foreground audio for ${shot.id} (${err})`)
+        // something is wrong, let's put the whole thing back into the queue
+        task.error = `failed to generate foreground audio ${shot.id} (will try again later)`
+        await updatePendingTask(task)
+        break
+      }
+    }
+
       
     if (!shot.hasPostProcessedVideo) {
       console.log("post-processing video..")
@@ -204,7 +237,7 @@ export const processTask = async (task: VideoTask) => {
     console.log('performing final scaling (1280x720 @ 24 FPS)')
 
       try {
-        await postInterpolation(shot.fileName, shot.durationMs, shot.fps)
+        await postInterpolation(shot.fileName, shot.durationMs, shot.fps, shot.noiseAmount)
     
         shot.hasPostProcessedVideo = true
         shot.nbCompletedSteps++

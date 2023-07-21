@@ -21,7 +21,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
     backgroundAudioPrompt: `${maybeShotMeta.backgroundAudioPrompt || ""}`,
 
     // describe the foreground audio (cars revving, footsteps, objects breaking, explosion etc)
-    foregroundAudioPrompt: `${maybeShotMeta.foregroundAudioPrompt || ""}`,
+    foregroundAudioPrompt: `${maybeShotMeta.foregroundAudioPrompt || maybeShotMeta.shotPrompt || ""}`,
 
     // describe the main actor visible in the shot (optional)
     actorPrompt: `${maybeShotMeta.actorPrompt || ""}`,
@@ -70,15 +70,14 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
     hasPostProcessedVideo: false,
     nbCompletedSteps: 0,
 
-    // 0. in queue
-    // 1. generate with Zeroscope
-    // 2. upscale with Zeroscope XL
-    // 3. interpolate with FILE
-    // 4. generate audio background
-    // 5. generate audio foreground
-    // 6. add audio to video
-    // 7. post-processing
-    nbTotalSteps: 7,
+    // - generate with Zeroscope
+    // - upscale with Zeroscope XL
+    // - interpolate with FILE
+    // - generate audio background
+    // - generate audio foreground
+    // - add audio to video
+    // - post-processing
+    nbTotalSteps: 5,
     progressPercent: 0,
     completedAt: '',
     completed: false,
