@@ -11,6 +11,7 @@ import { interpolateVideo } from "../production/interpolateVideo.mts"
 import { postInterpolation } from "../production/postInterpolation.mts"
 import { moveVideoFromPendingToCompleted } from "../utils/moveVideoFromPendingToCompleted.mts"
 import { assembleShots } from "../production/assembleShots.mts"
+import { copyVideoFromPendingToCompleted } from "../utils/copyVideoFromPendingToCompleted.mts"
 
 export const processTask = async (task: VideoTask) => {
   console.log(`processing video task ${task.id}`)
@@ -118,6 +119,8 @@ export const processTask = async (task: VideoTask) => {
         shot.nbCompletedSteps++
 
         await updatePendingTask(task)
+
+        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
       } catch (err) {
         console.error(`failed to upscale shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
@@ -155,6 +158,8 @@ export const processTask = async (task: VideoTask) => {
 
         await updatePendingTask(task)
 
+        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+
       } catch (err) {
         console.error(`failed to interpolate shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
@@ -182,6 +187,8 @@ export const processTask = async (task: VideoTask) => {
         shot.nbCompletedSteps++
 
         await updatePendingTask(task)
+
+        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
 
       } catch (err) {
         console.error(`failed to post-process shot ${shot.id} (${err})`)

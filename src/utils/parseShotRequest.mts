@@ -57,7 +57,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
     // for internal use
 
     version: shotFormatVersion,
-    fileName: `${id}.mp4`,
+    fileName: `${sequence.ownerId}_${sequence.id}_${id}.mp4`,
     hasGeneratedPreview: false,
     hasGeneratedVideo: false,
     hasUpscaledVideo: false,

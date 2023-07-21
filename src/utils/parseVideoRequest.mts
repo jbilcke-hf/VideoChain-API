@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid"
+import { v4 as uuidv4, validate as uuidValidate } from "uuid"
 import { HfInference } from "@huggingface/inference"
 
 // convert a request (which might be invalid)
@@ -29,10 +29,22 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
     }]
   }
 
-  console.log("continuing..")
+  // more or less check that we have a UUID
+  // (I think we can also have an exact match over length === 34)
+  if (uuidValidate(request.ownerId)) {
+    console.log("we have a valid owner:", request.ownerId)
+      // TODO: use llama2 to populate this!
+    request.ownerId
+  } else {
+    request.ownerId = uuidv4()
+  }
+
+  // console.log("continuing..")
   const task: VideoTask = {
     // ------------ VideoSequenceMeta -------------
     id,
+
+    ownerId: request.ownerId,
 
     // describe the whole movie
     videoPrompt: `${request.sequence.videoPrompt || ''}`,
@@ -67,7 +79,7 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
 
     // ---------- VideoSequenceData ---------
     version: sequenceFormatVersion,
-    fileName: `${id}.mp4`,
+    fileName: `${request.ownerId}_${id}.mp4`,
     hasAssembledVideo: false,
     nbCompletedShots: 0,
     progressPercent: 0,
@@ -81,12 +93,12 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
     shots: [],
   }
 
-  console.log("we are still good..")
+  // console.log("we are still good..")
   const maybeShots = Array.isArray(request.shots) ? request.shots : []
 
-  console.log("let's try..")
+  // console.log("let's try..")
   for (const maybeShot of maybeShots) {
-    console.log("trying shot", maybeShot)
+    // console.log("trying shot", maybeShot)
     try {
       const shot = await parseShotRequest(task, maybeShot)
       task.shots.push(shot)

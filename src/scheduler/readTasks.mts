@@ -5,7 +5,7 @@ import { VideoTask } from "../types.mts"
 import { readTask } from "./readTask.mts"
 
 
-export const readTasks = async (taskDirFilePath: string): Promise<VideoTask[]> => {
+export const readTasks = async (taskDirFilePath: string, ownerId?: string): Promise<VideoTask[]> => {
 
   let tasksFiles: string[] = []
   try {
@@ -13,7 +13,9 @@ export const readTasks = async (taskDirFilePath: string): Promise<VideoTask[]> =
     // console.log("filesInDir:", filesInDir)
 
     // we only keep valid files (in UUID.json format)
-    tasksFiles = filesInDir.filter(fileName => fileName.match(/[a-z0-9\-]\.json/i))
+    tasksFiles = filesInDir.filter(fileName =>
+      fileName.match(/[a-z0-9\-_]\.json/i) && (ownerId ? fileName.includes(ownerId): true)
+    )
 
     // console.log("tasksfiles:", tasksFiles)
   } catch (err) {

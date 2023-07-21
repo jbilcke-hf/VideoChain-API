@@ -2,8 +2,6 @@ import { initFolders } from "./initFolders.mts"
 import { getPendingTasks } from "./scheduler/getPendingTasks.mts"
 import { processTask } from "./scheduler/processTask.mts"
 
-initFolders()
-
 export const main = async () => {
 
   const tasks = await getPendingTasks()

@@ -6,7 +6,7 @@ import { pendingTasksDirFilePath } from "../config.mts"
 
 export const updatePendingTask = async (task: VideoTask) => {
   try {
-    const fileName = `${task.id}.json`
+    const fileName = `${task.ownerId}_${task.id}.json`
     const filePath = path.join(pendingTasksDirFilePath, fileName)
     await fs.writeFile(filePath, JSON.stringify(task, null, 2), "utf8")
   } catch (err) {

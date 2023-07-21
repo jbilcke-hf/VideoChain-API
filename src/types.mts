@@ -202,6 +202,8 @@ export interface VideoSequenceMeta {
 export interface VideoSequenceData {
   // must be unique
   id: string
+
+  ownerId: string
   
   fileName: string
 
@@ -218,11 +220,12 @@ export interface VideoSequenceData {
 
 export type VideoSequence = VideoSequenceMeta & VideoSequenceData
 
-export type VideoTaskRequest = {
+export type VideoTaskRequest = Partial<{
   prompt: string
+  ownerId: string // to uniquely identify where the video come from
   sequence: Partial<VideoSequenceMeta>
   shots: Array<Partial<VideoShotMeta>>
-}
+}>
 
 export type VideoTask = VideoSequence & {
   shots: VideoShot[]

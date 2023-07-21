@@ -10,7 +10,7 @@ import { deleteFileIfExists } from "../utils/deleteFileIfExists.mts"
 
 
 export const deleteTask = async (task: VideoTask) => {
-  const taskFileName = `${task.id}.json`
+  const taskFileName = `${task.ownerId}_${task.id}.json`
   const videoFileName = task.fileName
   
   // .mp4 files
