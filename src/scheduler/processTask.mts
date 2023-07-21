@@ -66,11 +66,9 @@ export const processTask = async (task: VideoTask) => {
         // download to /tmp
         await downloadFileToTmp(generatedPreviewVideoUrl, shot.fileName)
 
-        // NO NEED to copy from /tmp to /data/pending
-        // await copyVideoFromTmpToPending(shot.fileName)
+        await copyVideoFromTmpToPending(shot.fileName)
 
-        // copy from /tmp to /data/completed
-        await copyVideoFromTmpToCompleted(shot.fileName, task.fileName)
+        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
 
         shot.hasGeneratedPreview = true
         shot.nbCompletedSteps++
@@ -116,10 +114,9 @@ export const processTask = async (task: VideoTask) => {
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
         task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await updatePendingTask(task)
-
         await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
 
+        await updatePendingTask(task)
       } catch (err) {
         console.error(`failed to generate shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
@@ -141,9 +138,9 @@ export const processTask = async (task: VideoTask) => {
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
         task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await updatePendingTask(task)
-
         await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+
+        await updatePendingTask(task)
       } catch (err) {
         console.error(`failed to upscale shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
@@ -182,9 +179,9 @@ export const processTask = async (task: VideoTask) => {
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
         task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await updatePendingTask(task)
-
         await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+
+        await updatePendingTask(task)
 
       } catch (err) {
         console.error(`failed to interpolate shot ${shot.id} (${err})`)
@@ -215,10 +212,9 @@ export const processTask = async (task: VideoTask) => {
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
         task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await updatePendingTask(task)
-
         await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
 
+        await updatePendingTask(task)
       } catch (err) {
         console.error(`failed to post-process shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
