@@ -1,44 +1,49 @@
 import { v4 as uuidv4 } from "uuid"
 
-import { saveCompletedTask } from "./saveCompletedTask.mts"
-import { savePendingTask } from "./savePendingTask.mts"
-import { updatePendingTask } from "./updatePendingTask.mts"
-import { VideoShot, VideoTask } from "../types.mts"
-import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
+import { Video } from "../types.mts"
+
 import { generateVideo } from "../production/generateVideo.mts"
-import { copyVideoFromTmpToPending } from "../utils/copyVideoFromTmpToPending.mts"
-import { copyVideoFromTmpToCompleted } from "../utils/copyVideoFromTmpToCompleted.mts"
 import { upscaleVideo } from "../production/upscaleVideo.mts"
 import { interpolateVideo } from "../production/interpolateVideo.mts"
 import { postInterpolation } from "../production/postInterpolation.mts"
-import { moveVideoFromPendingToCompleted } from "../utils/moveVideoFromPendingToCompleted.mts"
 import { assembleShots } from "../production/assembleShots.mts"
-import { copyVideoFromPendingToCompleted } from "../utils/copyVideoFromPendingToCompleted.mts"
 import { generateAudio } from "../production/generateAudio.mts"
-import { mergeAudio } from "../production/mergeAudio.mts"
 import { addAudioToVideo } from "../production/addAudioToVideo.mts"
 
-export const processTask = async (task: VideoTask) => {
-  console.log(`processing video task ${task.id}`)
+import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
+import { copyVideoFromTmpToPending } from "../utils/copyVideoFromTmpToPending.mts"
+import { copyVideoFromPendingToCompleted } from "../utils/copyVideoFromPendingToCompleted.mts"
 
-  // something isn't right, the task is already completed
-  if (task.completed) {
-    console.log(`video task ${task.id} is already completed`)
-    await saveCompletedTask(task)
-    return
-  }
+import { saveAndCheckIfNeedToStop } from "./saveAndCheckIfNeedToStop.mts"
+import { enrichVideoSpecsUsingLLM } from "../llm/enrichVideoSpecsUsingLLM.mts"
 
-  // always count 1 more step, for the final assembly
+export const processVideo = async (video: Video) => {
 
-  let nbTotalSteps = 1
+  // just a an additional precaution, for consistency and robustness
+  if (["pause", "completed", "abort", "delete"].includes(video.status)) { return }
 
-  for (const shot of task.shots) {
+  console.log(`processing video video ${video.id}`)
+
+  // always count 2 more steps: 1 for the LLM, 1 for the final assembly
+
+  let nbTotalSteps = 2
+
+  for (const shot of video.shots) {
     nbTotalSteps += shot.nbTotalSteps
   }
 
   let nbCompletedSteps = 0
 
-  for (const shot of task.shots) {
+  if (!video.hasGeneratedSpecs) {
+    await enrichVideoSpecsUsingLLM(video)
+
+    nbCompletedSteps++
+    video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+
+    if (await saveAndCheckIfNeedToStop(video)) { return }
+  }
+
+  for (const shot of video.shots) {
     nbCompletedSteps += shot.nbCompletedSteps
 
     // skip shots completed previously
@@ -55,6 +60,8 @@ export const processTask = async (task: VideoTask) => {
     // so for now, we fix it to 24 frames
     // const nbFramesForBaseModel = Math.min(3, Math.max(1, Math.round(duration))) * 8
     const nbFramesForBaseModel = 24
+
+    if (await saveAndCheckIfNeedToStop(video)) { return }
 
     if (!shot.hasGeneratedPreview) {
       console.log("generating a preview of the final result..")
@@ -73,21 +80,20 @@ export const processTask = async (task: VideoTask) => {
 
         await copyVideoFromTmpToPending(shot.fileName)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
 
         shot.hasGeneratedPreview = true
         shot.nbCompletedSteps++
         nbCompletedSteps++
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+        video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await updatePendingTask(task)
-
+        if (await saveAndCheckIfNeedToStop(video)) { return }
       } catch (err) {
         console.error(`failed to generate preview for shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
-        task.error = `failed to generate preview for shot ${shot.id} (will try again later)`
-        await updatePendingTask(task)
+        video.error = `failed to generate preview for shot ${shot.id} (will try again later)`
+        if (await saveAndCheckIfNeedToStop(video)) { return }
         break
       }
 
@@ -117,16 +123,17 @@ export const processTask = async (task: VideoTask) => {
         shot.nbCompletedSteps++
         nbCompletedSteps++
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+        video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
 
-        await updatePendingTask(task)
+        if (await saveAndCheckIfNeedToStop(video)) { return }
       } catch (err) {
         console.error(`failed to generate shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
-        task.error = `failed to generate shot ${shot.id} (will try again later)`
-        await updatePendingTask(task)
+        video.error = `failed to generate shot ${shot.id} (will try again later)`
+        if (await saveAndCheckIfNeedToStop(video)) { return }
+
         break
       }
 
@@ -141,16 +148,18 @@ export const processTask = async (task: VideoTask) => {
         shot.nbCompletedSteps++
         nbCompletedSteps++
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+        video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
 
-        await updatePendingTask(task)
+        if (await saveAndCheckIfNeedToStop(video)) { return }
+
       } catch (err) {
         console.error(`failed to upscale shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
-        task.error = `failed to upscale shot ${shot.id} (will try again later)`
-        await updatePendingTask(task)
+        video.error = `failed to upscale shot ${shot.id} (will try again later)`
+        if (await saveAndCheckIfNeedToStop(video)) { return }
+
         break
       }
     }
@@ -182,17 +191,17 @@ export const processTask = async (task: VideoTask) => {
         shot.nbCompletedSteps++
         nbCompletedSteps++
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+        video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
 
-        await updatePendingTask(task)
+        if (await saveAndCheckIfNeedToStop(video)) { return }
 
       } catch (err) {
         console.error(`failed to interpolate shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
-        task.error = `failed to interpolate shot ${shot.id} (will try again later)`
-        await updatePendingTask(task)
+        video.error = `failed to interpolate shot ${shot.id} (will try again later)`
+        if (await saveAndCheckIfNeedToStop(video)) { return }
         break
       }
     }
@@ -215,22 +224,22 @@ export const processTask = async (task: VideoTask) => {
         shot.nbCompletedSteps++
         nbCompletedSteps++
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+        video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
 
-        await updatePendingTask(task)
+        if (await saveAndCheckIfNeedToStop(video)) { return }
       } catch (err) {
         console.error(`failed to post-process shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
-        task.error = `failed to post-process shot ${shot.id} (will try again later)`
-        await updatePendingTask(task)
+        video.error = `failed to post-process shot ${shot.id} (will try again later)`
+        if (await saveAndCheckIfNeedToStop(video)) { return }
         break
       }
     }
 
 
-    let foregroundAudioFileName = `${task.ownerId}_${task.id}_${shot.id}_${uuidv4()}.m4a`
+    let foregroundAudioFileName = `${video.ownerId}_${video.id}_${shot.id}_${uuidv4()}.m4a`
 
     if (!shot.hasGeneratedForegroundAudio) {
       if (shot.foregroundAudioPrompt) {
@@ -243,19 +252,19 @@ export const processTask = async (task: VideoTask) => {
           shot.nbCompletedSteps++
           nbCompletedSteps++
           shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-          task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+          video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
           await addAudioToVideo(shot.fileName, foregroundAudioFileName)
 
-          await copyVideoFromPendingToCompleted(shot.fileName, task.fileName)
+          await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
 
-          await updatePendingTask(task)
+          if (await saveAndCheckIfNeedToStop(video)) { return }
 
         } catch (err) {
           console.error(`failed to generate foreground audio for ${shot.id} (${err})`)
           // something is wrong, let's put the whole thing back into the queue
-          task.error = `failed to generate foreground audio ${shot.id} (will try again later)`
-          await updatePendingTask(task)
+          video.error = `failed to generate foreground audio ${shot.id} (will try again later)`
+          if (await saveAndCheckIfNeedToStop(video)) { return }
           break
         }
       } else {
@@ -263,8 +272,8 @@ export const processTask = async (task: VideoTask) => {
         shot.nbCompletedSteps++
         nbCompletedSteps++
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-        task.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
-        await updatePendingTask(task)
+        video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+        if (await saveAndCheckIfNeedToStop(video)) { return }
       }
     }
 
@@ -272,56 +281,54 @@ export const processTask = async (task: VideoTask) => {
     shot.completedAt = new Date().toISOString()
     shot.progressPercent = 100
 
-    task.nbCompletedShots++
+    video.nbCompletedShots++
 
-    await updatePendingTask(task)
+    if (await saveAndCheckIfNeedToStop(video)) { return }
   }
 
   console.log(`end of the loop:`)
-  console.log(`nb completed shots: ${task.nbCompletedShots}`)
-  console.log(`len of the shot array: ${task.shots.length}`)
+  console.log(`nb completed shots: ${video.nbCompletedShots}`)
+  console.log(`len of the shot array: ${video.shots.length}`)
   
-  if (task.nbCompletedShots === task.shots.length) {
-    console.log(`we have completed the whole video sequence!`)
-    console.log(`assembling the video..`)
+  // now time to check the end game
 
-    if (task.shots.length === 1) {
+  if (video.nbCompletedShots === video.shots.length) {
+    console.log(`we have generated each individual shot!`)
+    console.log(`assembling the fonal..`)
+
+    if (!video.hasAssembledVideo) {
+
+    if (video.shots.length === 1) {
       console.log(`we only have one shot, so this gonna be easy`)
-      task.hasAssembledVideo = true
+      video.hasAssembledVideo = true
 
       // the single shot (so, the first) becomes the final movie
-      await moveVideoFromPendingToCompleted(task.shots[0].fileName, task.fileName)
+      await copyVideoFromPendingToCompleted(video.shots[0].fileName, video.fileName)
 
-      await updatePendingTask(task)
-    }
+      if (await saveAndCheckIfNeedToStop(video)) { return }
+    } else {
+        console.log(`assembling ${video.shots.length} shots together, might take a while`)
+        try {
+          await assembleShots(video.shots, video.fileName)
+          console.log(`finished assembling the ${video.shots.length} shots together!`)
 
-    if (!task.hasAssembledVideo) {
-      console.log(`assembling the ${task.shots.length} shots together (might take a while)`)
-      try {
-        await assembleShots(task.shots, task.fileName)
-        console.log(`finished assembling the ${task.shots.length} shots together!`)
+          await copyVideoFromPendingToCompleted(video.fileName)
 
-        await moveVideoFromPendingToCompleted(task.fileName)
+          video.hasAssembledVideo = true
 
-        task.hasAssembledVideo = true
-
-        await updatePendingTask(task)
-      } catch (err) {
-        console.error(`failed to assemble the shots together (${err})`)
-        // something is wrong, let's put the whole thing back into the queue
-        task.error = `failed to assemble the shots together (will try again later)`
-        await updatePendingTask(task)
-        return
+          if (await saveAndCheckIfNeedToStop(video)) { return }
+        } catch (err) {
+          console.error(`failed to assemble the shots together (${err})`)
+          // something is wrong, let's put the whole thing back into the queue
+          video.error = `failed to assemble the shots together (will try again later)`
+          if (await saveAndCheckIfNeedToStop(video)) { return }
+          return
+        }
       }
     }
 
     nbCompletedSteps++
-    task.progressPercent = 100
-    task.completed = true
-    task.completedAt = new Date().toISOString()
-    await updatePendingTask(task)
-
-    console.log(`moving task to completed tasks..`)
-    await saveCompletedTask(task)
+    video.completed = true
+    if (await saveAndCheckIfNeedToStop(video)) { return }
   }
 }

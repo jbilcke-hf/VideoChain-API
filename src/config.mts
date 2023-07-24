@@ -2,9 +2,9 @@ import path from "node:path"
 
 export const storagePath = `${process.env.VC_STORAGE_PATH || './sandbox'}`
 
-export const tasksDirPath = path.join(storagePath, "tasks")
-export const pendingTasksDirFilePath = path.join(tasksDirPath, "pending")
-export const completedTasksDirFilePath =  path.join(tasksDirPath, "completed")
+export const metadataDirPath = path.join(storagePath, "metadata")
+export const pendingMetadataDirFilePath = path.join(metadataDirPath, "pending")
+export const completedMetadataDirFilePath =  path.join(metadataDirPath, "completed")
 
 export const filesDirPath = path.join(storagePath, "files")
 export const pendingFilesDirFilePath = path.join(filesDirPath, "pending")

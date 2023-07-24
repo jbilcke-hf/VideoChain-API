@@ -135,7 +135,7 @@ export const generateShot = async ({
     const interpolationSteps = 3
     const interpolatedFramesPerSecond = 24
     await interpolateVideo(
-      task,
+      video,
       interpolationSteps,
       interpolatedFramesPerSecond
     )
@@ -194,7 +194,7 @@ export const generateShot = async ({
       audioFileName = foregroundAudioFileName
     }
 
-    await addAudioToVideo(task, audioFileName)
+    await addAudioToVideo(video, audioFileName)
   }
 
   console.log("returning result to user..")

@@ -14,8 +14,19 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
 
   const shot: VideoShot = {
     id,
+    sequenceId: sequence.id,
+    ownerId: sequence.ownerId,
 
     shotPrompt: `${maybeShotMeta.shotPrompt || ""}`,
+
+    // background, weather, lights, time of the day, etc
+    environmentPrompt: `${maybeShotMeta.environmentPrompt || ""}`,
+
+    // camera parameters, angle, type of shot etc
+    photographyPrompt: `${maybeShotMeta.photographyPrompt || ""}`,
+
+    // dynamic elements of the scene, movement etc
+    actionPrompt: `${maybeShotMeta.actionPrompt || ""}`,
 
     // describe the background audio (crowd, birds, wind, sea etc..)
     backgroundAudioPrompt: `${maybeShotMeta.backgroundAudioPrompt || ""}`,
@@ -79,6 +90,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
     // - post-processing
     nbTotalSteps: 5,
     progressPercent: 0,
+    createdAt: new Date().toISOString(),
     completedAt: '',
     completed: false,
     error: '',

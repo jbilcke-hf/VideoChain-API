@@ -4,17 +4,21 @@ import path from "node:path"
 import { validate as uuidValidate } from "uuid"
 import express from "express"
 
-import { VideoTask, VideoTaskRequest } from "./types.mts"
+import { Video, VideoStatus, VideoAPIRequest } from "./types.mts"
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
-import { savePendingTask } from "./scheduler/savePendingTask.mts"
-import { getTask } from "./scheduler/getTask.mts"
+import { savePendingVideo } from "./scheduler/savePendingVideo.mts"
+import { getVideo } from "./scheduler/getVideo.mts"
 import { main } from "./main.mts"
 import { completedFilesDirFilePath } from "./config.mts"
-import { deleteTask } from "./scheduler/deleteTask.mts"
-import { getPendingTasks } from "./scheduler/getPendingTasks.mts"
+import { markVideoAsToDelete } from "./scheduler/markVideoAsToDelete.mts"
+import { markVideoAsToAbort } from "./scheduler/markVideoAsToAbort.mts"
+import { markVideoAsToPause } from "./scheduler/markVideoAsToPause.mts"
+import { markVideoAsPending } from "./scheduler/markVideoAsPending.mts"
+import { getPendingVideos } from "./scheduler/getPendingVideos.mts"
 import { hasValidAuthorization } from "./utils/hasValidAuthorization.mts"
-import { getAllTasksForOwner } from "./scheduler/getAllTasksForOwner.mts"
+import { getAllVideosForOwner } from "./scheduler/getAllVideosForOwner.mts"
 import { initFolders } from "./initFolders.mts"
+import { sortVideosByYoungestFirst } from "./utils/sortVideosByYoungestFirst.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -26,8 +30,8 @@ const port = 7860
 
 app.use(express.json())
 
-app.post("/", async (req, res) => {
-  const request = req.body as VideoTaskRequest
+app.post("/:ownerId", async (req, res) => {
+  const request = req.body as VideoAPIRequest
 
   if (!hasValidAuthorization(req.headers)) {
     console.log("Invalid authorization")
@@ -37,44 +41,6 @@ app.post("/", async (req, res) => {
     return
   }
   
-  let task: VideoTask = null
-
-  console.log(`creating task from request..`)
-  console.log(`request: `, JSON.stringify(request))
-  try {
-    task = await parseVideoRequest(request)
-  } catch (err) {
-    console.error(`failed to create task: ${task} (${err})`)
-    res.status(400)
-    res.write(JSON.stringify({ error: "query seems to be malformed" }))
-    res.end()
-    return
-  }
-
-  console.log(`saving task ${task.id}`)
-  try {
-    await savePendingTask(task)
-    res.status(200)
-    res.write(JSON.stringify(task))
-    res.end()
-  } catch (err) {
-    console.error(err)
-    res.status(500)
-    res.write(JSON.stringify({ error: "couldn't save the task" }))
-    res.end()
-  }
-})
-
-// only get the tasks for a specific owner
-app.get("/owner/:ownerId", async (req, res) => {
-  if (!hasValidAuthorization(req.headers)) {
-    console.log("Invalid authorization")
-    res.status(401)
-    res.write(JSON.stringify({ error: "invalid token" }))
-    res.end()
-    return
-  }
-
   const ownerId = req.params.ownerId
 
   if (!uuidValidate(ownerId)) {
@@ -85,20 +51,35 @@ app.get("/owner/:ownerId", async (req, res) => {
     return
   }
 
+  let video: Video = null
+
+  console.log(`creating video from request..`)
+  console.log(`request: `, JSON.stringify(request))
   try {
-    const tasks = await getAllTasksForOwner(ownerId)
+    video = await parseVideoRequest(ownerId, request)
+  } catch (err) {
+    console.error(`failed to create video: ${video} (${err})`)
+    res.status(400)
+    res.write(JSON.stringify({ error: "query seems to be malformed" }))
+    res.end()
+    return
+  }
+
+  console.log(`saving video ${video.id}`)
+  try {
+    await savePendingVideo(video)
     res.status(200)
-    res.write(JSON.stringify(tasks, null, 2))
+    res.write(JSON.stringify(video))
     res.end()
   } catch (err) {
     console.error(err)
     res.status(500)
-    res.write(JSON.stringify({ error: `couldn't get the tasks for owner ${ownerId}` }))
+    res.write(JSON.stringify({ error: "couldn't save the video" }))
     res.end()
   }
 })
 
-app.get("/download/:id\.mp4", async (req, res) => {
+app.get("/:ownerId/:videoId\.mp4", async (req, res) => {
     
   /*
   for simplicity, let's skip auth when fetching videos
@@ -113,7 +94,7 @@ app.get("/download/:id\.mp4", async (req, res) => {
   }
   */
 
-  const [ownerId, videoId] = `${req.params.id}`.split("_")
+  const ownerId = req.params.ownerId
 
   if (!uuidValidate(ownerId)) {
     console.error("invalid owner id")
@@ -123,6 +104,7 @@ app.get("/download/:id\.mp4", async (req, res) => {
     return
   }
 
+  const videoId = req.params.videoId
 
   if (!uuidValidate(videoId)) {
     console.error("invalid video id")
@@ -132,9 +114,9 @@ app.get("/download/:id\.mp4", async (req, res) => {
     return
   }
 
-  let task: VideoTask = null
+  let video: Video = null
   try {
-    task = await getTask(ownerId, videoId)
+    video = await getVideo(ownerId, videoId)
     console.log(`returning video ${videoId} to owner ${ownerId}`)
   } catch (err) {
     res.status(404)
@@ -143,7 +125,7 @@ app.get("/download/:id\.mp4", async (req, res) => {
     return
   }
 
-  const completedFilePath = path.join(completedFilesDirFilePath, task.fileName)
+  const completedFilePath = path.join(completedFilesDirFilePath, video.fileName)
 
   // note: we DON'T want to use the pending file path, as there may be operations on it
   // (ie. a process might be busy writing stuff to it)
@@ -177,30 +159,8 @@ app.get("/download/:id\.mp4", async (req, res) => {
   }
 })
 
-// get all pending tasks
-app.get("/", async (req, res) => {
-  if (!hasValidAuthorization(req.headers)) {
-    console.log("Invalid authorization")
-    res.status(401)
-    res.write(JSON.stringify({ error: "invalid token" }))
-    res.end()
-    return
-  }
-
-  try {
-    const tasks = await getPendingTasks()
-    res.status(200)
-    res.write(JSON.stringify(tasks, null, 2))
-    res.end()
-  } catch (err) {
-    console.error(err)
-    res.status(500)
-    res.write(JSON.stringify({ error: "couldn't get the tasks" }))
-    res.end()
-  }
-})
-
-app.get("/:id", async (req, res) => {
+// get metadata (json)
+app.get("/:ownerId/:videoId", async (req, res) => {
     
   if (!hasValidAuthorization(req.headers)) {
     console.log("Invalid authorization")
@@ -210,7 +170,7 @@ app.get("/:id", async (req, res) => {
     return
   }
 
-  const [ownerId, videoId] = `${req.params.id}`.split("_")
+  const ownerId = req.params.ownerId
 
   if (!uuidValidate(ownerId)) {
     console.error("invalid owner id")
@@ -220,6 +180,7 @@ app.get("/:id", async (req, res) => {
     return
   }
 
+  const videoId = req.params.videoId
 
   if (!uuidValidate(videoId)) {
     console.error("invalid video id")
@@ -230,18 +191,201 @@ app.get("/:id", async (req, res) => {
   }
 
   try {
-    const task = await getTask(ownerId, videoId)
+    const video = await getVideo(ownerId, videoId)
     res.status(200)
-    res.write(JSON.stringify(task))
+    res.write(JSON.stringify(video))
     res.end()
   } catch (err) {
     console.error(err)
     res.status(404)
-    res.write(JSON.stringify({ error: "couldn't find this task" }))
+    res.write(JSON.stringify({ error: "couldn't find this video" }))
     res.end()
   }
 })
 
+// only get the videos for a specific owner
+app.get("/:ownerId", async (req, res) => {
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+
+  const ownerId = req.params.ownerId
+
+  if (!uuidValidate(ownerId)) {
+    console.error(`invalid owner d ${ownerId}`)
+    res.status(400)
+    res.write(JSON.stringify({ error: `invalid owner id ${ownerId}` }))
+    res.end()
+    return
+  }
+
+  try {
+    const videos = await getAllVideosForOwner(ownerId)
+    sortVideosByYoungestFirst(videos)
+    res.status(200)
+    res.write(JSON.stringify(videos, null, 2))
+    res.end()
+  } catch (err) {
+    console.error(err)
+    res.status(500)
+    res.write(JSON.stringify({ error: `couldn't get the videos for owner ${ownerId}` }))
+    res.end()
+  }
+})
+
+// get all pending videos - this is for admin usage only
+app.get("/", async (req, res) => {
+  if (!hasValidAuthorization(req.headers)) {
+    // this is what users will see in the space - but no need to show something scary
+    console.log("Invalid authorization")
+    res.status(200)
+    res.write(`<html><head></head><body>
+This space is the REST API used by VideoChain UI:<br/>
+<a href="https://jbilcke-hf-videochain-ui.hf.space" target="_blank">https://jbilcke-hf-videochain-ui.hf.space</a>
+    </body></html>`)
+    res.end()
+    // res.status(401)
+    // res.write(JSON.stringify({ error: "invalid token" }))
+    // res.end()
+    return
+  }
+
+  try {
+    const videos = await getPendingVideos()
+    res.status(200)
+    res.write(JSON.stringify(videos, null, 2))
+    res.end()
+  } catch (err) {
+    console.error(err)
+    res.status(500)
+    res.write(JSON.stringify({ error: "couldn't get the videos" }))
+    res.end()
+  }
+})
+
+
+// edit a video
+app.patch("/:ownerId/:videoId", async (req, res) => {
+    
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+
+  const ownerId = req.params.ownerId
+
+  if (!uuidValidate(ownerId)) {
+    console.error(`invalid owner id ${ownerId}`)
+    res.status(400)
+    res.write(JSON.stringify({ error: `invalid owner id ${ownerId}` }))
+    res.end()
+    return
+  }
+
+  const videoId = req.params.videoId
+
+  if (!uuidValidate(videoId)) {
+    console.error(`invalid video id ${videoId}`)
+    res.status(400)
+    res.write(JSON.stringify({ error: `invalid video id ${videoId}` }))
+    res.end()
+    return
+  }
+
+  let status: VideoStatus = "unknown"
+  try {
+    const request = req.body as { status: VideoStatus }
+    if (['pending', 'abort', 'delete', 'pause'].includes(request.status)) {
+      status = request.status
+    } else {
+      throw new Error(`invalid video status "${request.status}"`)
+    }
+  } catch (err) {
+    console.error(`invalid parameter (${err})`)
+    res.status(401)
+    res.write(JSON.stringify({ error: `invalid parameter (${err})` }))
+    res.end()
+    return
+  }
+
+  switch (status) {
+    case 'delete': 
+      try {
+        await markVideoAsToDelete(ownerId, videoId)
+        console.log(`deleting video ${videoId}`)
+        res.status(200)
+        res.write(JSON.stringify({ success: true }))
+        res.end()
+      } catch (err) {
+        console.error(`failed to delete video ${videoId} (${err})`)
+        res.status(500)
+        res.write(JSON.stringify({ error: `failed to delete video ${videoId}` }))
+        res.end()
+      }
+      break
+
+    case 'abort': 
+      try {
+        await markVideoAsToAbort(ownerId, videoId)
+        console.log(`aborted video ${videoId}`)
+        res.status(200)
+        res.write(JSON.stringify({ success: true }))
+        res.end()
+      } catch (err) {
+        console.error(`failed to abort video ${videoId} (${err})`)
+        res.status(500)
+        res.write(JSON.stringify({ error: `failed to abort video ${videoId}` }))
+        res.end()
+      }
+      break
+
+    case 'pause': 
+      try {
+        await markVideoAsToPause(ownerId, videoId)
+        console.log(`paused video ${videoId}`)
+        res.status(200)
+        res.write(JSON.stringify({ success: true }))
+        res.end()
+      } catch (err) {
+        console.error(`failed to pause video ${videoId} (${err})`)
+        res.status(500)
+        res.write(JSON.stringify({ error: `failed to pause video ${videoId}` }))
+        res.end()
+      }
+      break
+    
+    case 'pending': 
+      try {
+        await markVideoAsPending(ownerId, videoId)
+        console.log(`unpausing video ${videoId}`)
+        res.status(200)
+        res.write(JSON.stringify({ success: true }))
+        res.end()
+      } catch (err) {
+        console.error(`failed to unpause video ${videoId} (${err})`)
+        res.status(500)
+        res.write(JSON.stringify({ error: `failed to unpause video ${videoId}` }))
+        res.end()
+      }
+      break
+
+    default:
+      console.log(`unsupported status ${status}`)
+      res.status(401)
+      res.write(JSON.stringify({ error: `unsupported status ${status}` }))
+      res.end()
+  }
+})
+
+// delete a video - this is legacy, we should use other functions instead
+/*
 app.delete("/:id", async (req, res) => {
     
   if (!hasValidAuthorization(req.headers)) {
@@ -270,27 +414,32 @@ app.delete("/:id", async (req, res) => {
     return
   }
 
-  let task: VideoTask = null
+  // ecurity note: we always check the existence if the video first
+  // that's because we are going to delete all the associated files with a glob,
+  // so we must be sure the id is not a system path or something ^^
+  let video: Video = null
   try {
-    task = await getTask(ownerId, videoId)
+    video = await getVideo(ownerId, videoId)
   } catch (err) {
     console.error(err)
     res.status(404)
-    res.write(JSON.stringify({ error: "couldn't find this task" }))
+    res.write(JSON.stringify({ error: "couldn't find this video" }))
     res.end()
+    return
   }
 
   try {
-    await deleteTask(task)
+    await markVideoAsToDelete(ownerId, videoId)
     res.status(200)
     res.write(JSON.stringify({ success: true }))
     res.end()
   } catch (err) {
     console.error(err)
     res.status(500)
-    res.write(JSON.stringify({ success: false, error: "failed to delete the task" }))
+    res.write(JSON.stringify({ success: false, error: "failed to delete the video" }))
     res.end()
   }
 })
+*/
 
 app.listen(port, () => { console.log(`Open http://localhost:${port}`) })

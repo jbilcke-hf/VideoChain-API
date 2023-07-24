@@ -9,6 +9,6 @@ const response = await fetch(`${server}/${videoId}`, {
 });
 
 console.log('response:', response)
-const task = await response.json()
+const video = await response.json()
 
-console.log("task:", JSON.stringify(task, null, 2))
+console.log("video:", JSON.stringify(video, null, 2))

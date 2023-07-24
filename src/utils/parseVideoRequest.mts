@@ -3,7 +3,7 @@ import { HfInference } from "@huggingface/inference"
 
 // convert a request (which might be invalid)
 
-import { VideoTaskRequest, VideoTask, VideoShotMeta } from "../types.mts"
+import { VideoAPIRequest, Video } from "../types.mts"
 import { getValidNumber } from "./getValidNumber.mts"
 import { getValidResolution } from "./getValidResolution.mts"
 import { parseShotRequest } from "./parseShotRequest.mts"
@@ -13,7 +13,7 @@ import { sequenceFormatVersion } from "../config.mts"
 // const hfi = new HfInference(process.env._VC_HF_API_TOKEN)
 // const hf = hfi.endpoint(process.env.VC_INFERENCE_ENDPOINT_URL)
 
-export const parseVideoRequest = async (request: VideoTaskRequest): Promise<VideoTask> => {
+export const parseVideoRequest = async (ownerId: string, request: VideoAPIRequest): Promise<Video> => {
   // we don't want people to input their own ID or we might have trouble,
   // such as people attempting to use a non-UUID, a file path (to hack us), etc
   const id = uuidv4()
@@ -26,25 +26,18 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
     }
     request.shots = [{
       shotPrompt: request.prompt,
+      environmentPrompt: "",
+      photographyPrompt: "",
+      actionPrompt: "",
     }]
   }
 
-  // more or less check that we have a UUID
-  // (I think we can also have an exact match over length === 34)
-  if (uuidValidate(request.ownerId)) {
-    console.log("we have a valid owner:", request.ownerId)
-      // TODO: use llama2 to populate this!
-    request.ownerId
-  } else {
-    request.ownerId = uuidv4()
-  }
-
   // console.log("continuing..")
-  const task: VideoTask = {
+  const video: Video = {
     // ------------ VideoSequenceMeta -------------
     id,
 
-    ownerId: request.ownerId,
+    ownerId,
 
     // describe the whole movie
     videoPrompt: `${request.sequence.videoPrompt || ''}`,
@@ -80,10 +73,13 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
 
     // ---------- VideoSequenceData ---------
     version: sequenceFormatVersion,
-    fileName: `${request.ownerId}_${id}.mp4`,
+    fileName: `${ownerId}_${id}.mp4`,
+    status: "pending",
     hasAssembledVideo: false,
+    hasGeneratedSpecs: false,
     nbCompletedShots: 0,
     progressPercent: 0,
+    createdAt: new Date().toISOString(),
     completedAt: null,
     completed: false,
     error: '',
@@ -101,13 +97,13 @@ export const parseVideoRequest = async (request: VideoTaskRequest): Promise<Vide
   for (const maybeShot of maybeShots) {
     // console.log("trying shot", maybeShot)
     try {
-      const shot = await parseShotRequest(task, maybeShot)
-      task.shots.push(shot)
+      const shot = await parseShotRequest(video, maybeShot)
+      video.shots.push(shot)
     } catch (err) {
       console.log(`error parsing shot: `, maybeShot)
     }
 
   }
 
-  return task
+  return video
 }

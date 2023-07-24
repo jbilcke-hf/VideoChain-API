@@ -6,7 +6,7 @@
     "module": "nodenext",
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "target": "es2017"
+    "target": "es2022"
   },
   "include": ["**/*.ts", "**/*.mts"],
 }

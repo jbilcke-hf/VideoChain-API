@@ -1,3 +1,13 @@
+
+export type VideoStatus =
+  | 'pending'
+  | 'abort' // this is an order (the video might still being processed by a task)
+  | 'delete' // this is an order (the video might still being processed by a task)
+  | 'pause' // this is an order (the video might still being processed by a task)
+  | 'completed'
+  | 'unknown'
+
+
 export type VideoTransition =
   | 'dissolve'
   | 'bookflip'
@@ -105,6 +115,15 @@ export interface VideoShotMeta {
   shotPrompt: string
   // inputVideo?: string
 
+  // background, weather, lights, time of the day, etc
+  environmentPrompt: string
+
+  // camera parameters, angle, type of shot etc
+  photographyPrompt: string
+
+  // dynamic elements of the scene, movement etc
+  actionPrompt: string
+
   // describe the background audio (crowd, birds, wind, sea etc..)
   backgroundAudioPrompt: string
 
@@ -119,6 +138,8 @@ export interface VideoShotMeta {
 
   // describe the main actor dialogue line
   actorDialoguePrompt: string
+
+
 
   seed: number
   noise: boolean // add movie noise
@@ -139,6 +160,8 @@ export interface VideoShotMeta {
 export interface VideoShotData {
   // must be unique
   id: string
+  sequenceId: string
+  ownerId: string
 
   fileName: string
 
@@ -158,6 +181,7 @@ export interface VideoShotData {
   nbCompletedSteps: number
   nbTotalSteps: number
   progressPercent: number
+  createdAt: string
   completedAt: string
   completed: boolean
   error: string
@@ -212,9 +236,13 @@ export interface VideoSequenceData {
   // used to check compatibility
   version: number
 
+  status: VideoStatus
+
+  hasGeneratedSpecs: boolean
   hasAssembledVideo: boolean
   nbCompletedShots: number
   progressPercent: number
+  createdAt: string
   completedAt: string
   completed: boolean
   error: string
@@ -222,13 +250,21 @@ export interface VideoSequenceData {
 
 export type VideoSequence = VideoSequenceMeta & VideoSequenceData
 
-export type VideoTaskRequest = Partial<{
+export type VideoStatusRequest = {
+  status: VideoStatus
+}
+
+export type GenericAPIResponse = {
+  success?: boolean
+  error?: string
+}
+
+export type VideoAPIRequest = Partial<{
   prompt: string
-  ownerId: string // to uniquely identify where the video come from
   sequence: Partial<VideoSequenceMeta>
   shots: Array<Partial<VideoShotMeta>>
 }>
 
-export type VideoTask = VideoSequence & {
+export type Video = VideoSequence & {
   shots: VideoShot[]
 }
