@@ -57,7 +57,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
     steps: getValidNumber(maybeShotMeta.steps || sequence.steps, 10, 50, 45),
 
     // a video sequence MUST HAVE consistent frames per second
-    fps: getValidNumber(sequence.fps, 8, 60, 24),
+    fps: getValidNumber(sequence.fps, 8, 60, 30),
 
     // a video sequence MUST HAVE a consistent resolution
     resolution: sequence.resolution,

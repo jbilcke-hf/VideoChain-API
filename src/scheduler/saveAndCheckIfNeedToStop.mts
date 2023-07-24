@@ -63,6 +63,7 @@ export const saveAndCheckIfNeedToStop = async (video: Video): Promise<boolean> =
 
   await updatePendingVideo(video)
   
-  // tell the loop if it should be aborted or not
-  return mustStop
+  // if we return "true", it means we will yield, which can be an interesting thing
+  // for us, to increase parallelism
+  return true
 }

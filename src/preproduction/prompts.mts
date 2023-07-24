@@ -30,12 +30,16 @@ The format expected by the API must be in YAML. The TypeScript schema for this Y
   }>
 }
 \`\`\`
-# Guidelines
-You will generate 3 shots by default, unless more or less are specified.
-Is it crucial to repeat the elements consituting a sequence of multiple shots verbatim from one shot to another.
+# Guidelines for number of shots and their duration
+You will generate 1 shot by default, unless more or less are specified.
+A shot can only last 3 seconds max.
+So if you are asked to generate a 6 seconds videos, you need 2 shots, for a 9 seconds video, 3 shots, and so on.
+If you are asked to generate for instance a 11 seconds videos, you need three 3sec shots plus one 2sec shot.
+# Guidelines for writing descriptions
+Is it crucial to repeat the elements constituting a sequence of multiple shots verbatim from one shot to another.
 For instance, you will have to repeat exactly what a character or background look like, how they are dressed etc.
 This will ensure consistency from one scene to another.
-## Creating a movie
+## Choosing the right words
 Here are some guidelines regarding film-making:
 - The distance your subject is to the camera impacts how the audience feels about them.
 - Subject will appear largest in a close-up or choker shot and smallest in a wide or long shot.

@@ -4,13 +4,14 @@ import { v4 as uuidv4 } from "uuid"
 import tmpDir from "temp-dir"
 import ffmpeg from "fluent-ffmpeg"
 import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
+import { pendingFilesDirFilePath } from "../config.mts"
 
 export const postInterpolation = async (fileName: string, durationMs: number, nbFrames: number, noiseAmount: number): Promise<string> => {
   return new Promise((resolve,reject) => {
 
     const tmpFileName = `${uuidv4()}.mp4`
 
-    const filePath = path.join(tmpDir, fileName)
+    const filePath = path.join(pendingFilesDirFilePath, fileName)
     const tmpFilePath = path.join(tmpDir, tmpFileName)
 
     ffmpeg.ffprobe(filePath, function(err, metadata) {
@@ -34,7 +35,7 @@ export const postInterpolation = async (fileName: string, durationMs: number, nb
       .size("1280x720")
 
       .videoFilters([
-        `setpts=${durationRatio}*PTS`, // we make the video faster
+        `setpts=0.5*PTS`, // we make the video faster
         //'scale=-1:576:lanczos',
         // 'unsharp=5:5:0.2:5:5:0.2', // not recommended, this make the video more "pixely"
         `noise=c0s=${noiseAmount}:c0f=t+u` // add a movie grain noise

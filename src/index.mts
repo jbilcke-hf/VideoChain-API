@@ -95,6 +95,7 @@ app.get("/:ownerId/:videoId\.mp4", async (req, res) => {
   */
 
   const ownerId = req.params.ownerId
+  console.log("downloading..")
 
   if (!uuidValidate(ownerId)) {
     console.error("invalid owner id")

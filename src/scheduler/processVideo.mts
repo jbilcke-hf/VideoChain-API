@@ -1,21 +1,20 @@
 import { v4 as uuidv4 } from "uuid"
 
-import { Video } from "../types.mts"
+import { Video, VideoShot } from "../types.mts"
 
 import { generateVideo } from "../production/generateVideo.mts"
 import { upscaleVideo } from "../production/upscaleVideo.mts"
 import { interpolateVideo } from "../production/interpolateVideo.mts"
 import { postInterpolation } from "../production/postInterpolation.mts"
-import { assembleShots } from "../production/assembleShots.mts"
 import { generateAudio } from "../production/generateAudio.mts"
 import { addAudioToVideo } from "../production/addAudioToVideo.mts"
 
 import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
 import { copyVideoFromTmpToPending } from "../utils/copyVideoFromTmpToPending.mts"
-import { copyVideoFromPendingToCompleted } from "../utils/copyVideoFromPendingToCompleted.mts"
 
 import { saveAndCheckIfNeedToStop } from "./saveAndCheckIfNeedToStop.mts"
 import { enrichVideoSpecsUsingLLM } from "../llm/enrichVideoSpecsUsingLLM.mts"
+import { updateShotPreview } from "./updateShotPreview.mts"
 
 export const processVideo = async (video: Video) => {
 
@@ -35,13 +34,22 @@ export const processVideo = async (video: Video) => {
   let nbCompletedSteps = 0
 
   if (!video.hasGeneratedSpecs) {
-    await enrichVideoSpecsUsingLLM(video)
+    try {
+      await enrichVideoSpecsUsingLLM(video)
+    } catch (err) {
+      console.error(`LLM error: ${err}`)
+      video.error = `LLM error: ${err}`
+      video.status = "delete"
+      if (await saveAndCheckIfNeedToStop(video)) { return }
+    }
 
     nbCompletedSteps++
+    video.hasGeneratedSpecs = true
     video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
     if (await saveAndCheckIfNeedToStop(video)) { return }
   }
+
 
   for (const shot of video.shots) {
     nbCompletedSteps += shot.nbCompletedSteps
@@ -53,7 +61,6 @@ export const processVideo = async (video: Video) => {
 
     console.log(`need to complete shot ${shot.id}`)
 
-
     // currenty we cannot generate too many frames at once,
     // otherwise the upscaler will have trouble
 
@@ -61,7 +68,6 @@ export const processVideo = async (video: Video) => {
     // const nbFramesForBaseModel = Math.min(3, Math.max(1, Math.round(duration))) * 8
     const nbFramesForBaseModel = 24
 
-    if (await saveAndCheckIfNeedToStop(video)) { return }
 
     if (!shot.hasGeneratedPreview) {
       console.log("generating a preview of the final result..")
@@ -80,23 +86,32 @@ export const processVideo = async (video: Video) => {
 
         await copyVideoFromTmpToPending(shot.fileName)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
-
         shot.hasGeneratedPreview = true
         shot.nbCompletedSteps++
         nbCompletedSteps++
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
         video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
-
+       
+        await updateShotPreview(video, shot)
+    
         if (await saveAndCheckIfNeedToStop(video)) { return }
       } catch (err) {
         console.error(`failed to generate preview for shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
         video.error = `failed to generate preview for shot ${shot.id} (will try again later)`
         if (await saveAndCheckIfNeedToStop(video)) { return }
-        break
+
+        // always try to yield whenever possible
+        return
       }
 
+    }
+
+    const notAllShotsHavePreview = video.shots.some(s => !s.hasGeneratedPreview)
+
+    if (notAllShotsHavePreview) {
+      console.log(`step 2 isn't unlocked yet, because not all videos have generated preview`)
+      continue
     }
 
     if (!shot.hasGeneratedVideo) {
@@ -125,7 +140,7 @@ export const processVideo = async (video: Video) => {
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
         video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
+        await updateShotPreview(video, shot)
 
         if (await saveAndCheckIfNeedToStop(video)) { return }
       } catch (err) {
@@ -149,9 +164,9 @@ export const processVideo = async (video: Video) => {
         nbCompletedSteps++
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
         video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
-
-        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
-
+        
+        await updateShotPreview(video, shot)
+    
         if (await saveAndCheckIfNeedToStop(video)) { return }
 
       } catch (err) {
@@ -177,9 +192,9 @@ export const processVideo = async (video: Video) => {
       // ATTENTION 3:
       // the interpolation step parameters are currently not passed to the space,
       // so changing those two variables below will have no effect!
-      const interpolationSteps = 3
-      const interpolatedFramesPerSecond = 24
-      console.log('creating slow-mo video (910x512 @ 24 FPS)')
+      const interpolationSteps = 2
+      const interpolatedFramesPerSecond = 30
+      console.log('creating slow-mo video (910x512 @ 30 FPS)')
       try {
         await interpolateVideo(
           shot.fileName,
@@ -193,46 +208,35 @@ export const processVideo = async (video: Video) => {
         shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
         video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
 
-        if (await saveAndCheckIfNeedToStop(video)) { return }
+        // note: showing the intermediary result isn't very interesting here 
 
-      } catch (err) {
-        console.error(`failed to interpolate shot ${shot.id} (${err})`)
-        // something is wrong, let's put the whole thing back into the queue
-        video.error = `failed to interpolate shot ${shot.id} (will try again later)`
-        if (await saveAndCheckIfNeedToStop(video)) { return }
-        break
-      }
-    }
-
+        // with our current interpolation settings, the 3 seconds video generated by the model
+        // become a 7 seconds video, at 30 FPS
       
-    if (!shot.hasPostProcessedVideo) {
-      console.log("post-processing video..")
-     
-    // with our current interpolation settings, the 3 seconds video generated by the model
-    // become a 7 seconds video, at 24 FPS
-  
-    // so we want to scale it back to the desired duration length
-    // also, as a last trick we want to upscale it (without AI) and add some FXs
-    console.log('performing final scaling (1280x720 @ 24 FPS)')
+        // so we want to scale it back to the desired duration length
+        // also, as a last trick we want to upscale it (without AI) and add some FXs
+        console.log('performing final scaling (1280x720 @ 30 FPS)')
 
-      try {
-        await postInterpolation(shot.fileName, shot.durationMs, shot.fps, shot.noiseAmount)
-    
-        shot.hasPostProcessedVideo = true
-        shot.nbCompletedSteps++
-        nbCompletedSteps++
-        shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
-        video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
+        try {
+          await postInterpolation(shot.fileName, shot.durationMs, shot.fps, shot.noiseAmount)
+      
+          shot.hasPostProcessedVideo = true
+          shot.nbCompletedSteps++
+          nbCompletedSteps++
+          shot.progressPercent = Math.round((shot.nbCompletedSteps / shot.nbTotalSteps) * 100)
+          video.progressPercent = Math.round((nbCompletedSteps / nbTotalSteps) * 100)
 
-        await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
-
-        if (await saveAndCheckIfNeedToStop(video)) { return }
+          await updateShotPreview(video, shot)
+      
+          if (await saveAndCheckIfNeedToStop(video)) { return }
+        } catch (err) {
+          throw err
+        }
       } catch (err) {
-        console.error(`failed to post-process shot ${shot.id} (${err})`)
+        console.error(`failed to interpolate and post-process shot ${shot.id} (${err})`)
         // something is wrong, let's put the whole thing back into the queue
-        video.error = `failed to post-process shot ${shot.id} (will try again later)`
+        video.error = `failed to interpolate and shot ${shot.id} (will try again later)`
         if (await saveAndCheckIfNeedToStop(video)) { return }
         break
       }
@@ -256,7 +260,7 @@ export const processVideo = async (video: Video) => {
 
           await addAudioToVideo(shot.fileName, foregroundAudioFileName)
 
-          await copyVideoFromPendingToCompleted(shot.fileName, video.fileName)
+          await updateShotPreview(video, shot)
 
           if (await saveAndCheckIfNeedToStop(video)) { return }
 
@@ -292,12 +296,19 @@ export const processVideo = async (video: Video) => {
   
   // now time to check the end game
 
+
   if (video.nbCompletedShots === video.shots.length) {
-    console.log(`we have generated each individual shot!`)
-    console.log(`assembling the fonal..`)
+    console.log(`we have finished each individual shot!`)
 
     if (!video.hasAssembledVideo) {
-
+      video.hasAssembledVideo = true
+    }
+    /*
+    console.log(`assembling the final..`)
+    console.log(`note: this might be redundant..`)
+  
+    if (!video.hasAssembledVideo) {
+      video.hasAssembledVideo = true
     if (video.shots.length === 1) {
       console.log(`we only have one shot, so this gonna be easy`)
       video.hasAssembledVideo = true
@@ -322,10 +333,10 @@ export const processVideo = async (video: Video) => {
           // something is wrong, let's put the whole thing back into the queue
           video.error = `failed to assemble the shots together (will try again later)`
           if (await saveAndCheckIfNeedToStop(video)) { return }
-          return
         }
       }
     }
+    */
 
     nbCompletedSteps++
     video.completed = true

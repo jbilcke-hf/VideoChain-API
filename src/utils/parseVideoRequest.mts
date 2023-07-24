@@ -64,7 +64,7 @@ export const parseVideoRequest = async (ownerId: string, request: VideoAPIReques
 
     steps: getValidNumber(request.sequence.steps, 10, 50, 45),
 
-    fps: getValidNumber(request.sequence.fps, 8, 60, 24),
+    fps: getValidNumber(request.sequence.fps, 8, 60, 30),
 
     resolution: getValidResolution(request.sequence.resolution),
 

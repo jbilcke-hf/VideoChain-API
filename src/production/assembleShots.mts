@@ -4,6 +4,7 @@ import concat from 'ffmpeg-concat'
 
 import { VideoShot } from '../types.mts'
 import { pendingFilesDirFilePath } from "../config.mts"
+import { normalizePendingVideoToTmpFilePath } from "./normalizePendingVideoToTmpFilePath.mts"
 
 export const assembleShots = async (shots: VideoShot[], fileName: string) => {
 
@@ -26,6 +27,7 @@ export const assembleShots = async (shots: VideoShot[], fileName: string) => {
       // pass custom params to a transition
       params: { direction: [1, -1] },
     },
+    
     /*
     {
       name: 'squaresWire',
@@ -36,10 +38,12 @@ export const assembleShots = async (shots: VideoShot[], fileName: string) => {
 
   const videoFilePath = path.join(pendingFilesDirFilePath, fileName)
 
-  const shotFilesPaths = shots.map(shot => path.join(
-    pendingFilesDirFilePath,
-    shot.fileName
-  ))
+  // before performing assembly, we must normalize images
+  const shotFilesPaths: string[] = []
+  for (let shot of shots) {
+    const normalizedShotFilePath = await normalizePendingVideoToTmpFilePath(shot.fileName)
+    shotFilesPaths.push(normalizedShotFilePath)
+  }
 
   await concat({
     output: videoFilePath,

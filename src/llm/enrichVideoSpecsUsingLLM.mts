@@ -5,6 +5,7 @@ import { generateYAML } from "./openai/generateYAML.mts"
 import { HallucinatedVideoRequest, OpenAIErrorResponse } from "./types.mts"
 import { getQueryChatMessages } from "../preproduction/prompts.mts"
 import { getValidNumber } from "../utils/getValidNumber.mts"
+import { parseShotRequest } from "../utils/parseShotRequest.mts"
 
 
 export const enrichVideoSpecsUsingLLM = async (video: Video): Promise<Video> => {
@@ -13,15 +14,9 @@ export const enrichVideoSpecsUsingLLM = async (video: Video): Promise<Video> => 
   
   const defaultValue = {} as unknown as HallucinatedVideoRequest
 
-  // console.log("enrichVideoSpecsUsingLLM: messages = ", messages)
-
   let hallucinatedVideo: HallucinatedVideoRequest
-
-
-  const referenceShot = video.shots[0]
   video.shots = []
-  // console.log("referenceShot:", referenceShot)
-  
+
   try {
     hallucinatedVideo = await generateYAML<HallucinatedVideoRequest>(
       messages,
@@ -64,12 +59,13 @@ export const enrichVideoSpecsUsingLLM = async (video: Video): Promise<Video> => 
 
 
   for (const hallucinatedShot of hallucinatedShots) {
-    const shot = JSON.parse(JSON.stringify(referenceShot))
-    shot.shotPrompt = hallucinatedShot.shotPrompt || shot.shotPrompt
-    shot.environmentPrompt = hallucinatedShot.environmentPrompt || shot.environmentPrompt
-    shot.photographyPrompt = hallucinatedShot.photographyPrompt || shot.photographyPrompt
-    shot.actionPrompt = hallucinatedShot.actionPrompt || shot.actionPrompt
-    shot.foregroundAudioPrompt = hallucinatedShot.foregroundAudioPrompt || shot.foregroundAudioPrompt
+    const shot = await parseShotRequest(video, {
+      shotPrompt: hallucinatedShot.shotPrompt,
+      environmentPrompt: hallucinatedShot.environmentPrompt,
+      photographyPrompt: hallucinatedShot.photographyPrompt,
+      actionPrompt: hallucinatedShot.actionPrompt,
+      foregroundAudioPrompt: hallucinatedShot.foregroundAudioPrompt
+    })
     video.shots.push(shot)
   }
 
