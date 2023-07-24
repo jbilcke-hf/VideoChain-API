@@ -5,9 +5,11 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update
 
-RUN apt --yes install ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libgbm1 libasound2 libpangocairo-1.0-0 libxss1 libgtk-3-0
+# For FFMPEG and gl concat
+RUN apt --yes ffmpeg curl build-essential python3 python3-dev python python-dev libx11-dev libxext-dev libxext6 libglu1-mesa-dev xvfb libxi-dev libglew2.1 libglew-dev pkg-config
 
-RUN apt --yes install build-essential libxi-dev libglu1-mesa-dev libglew-dev pkg-config
+# For Puppeteer
+RUN apt --yes install libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libgbm1 libasound2 libpangocairo-1.0-0 libxss1 libgtk-3-0
 
 # Set up a new user named "user" with user ID 1000
 RUN useradd -o -u 1000 user
@@ -34,4 +36,4 @@ COPY --chown=user . $HOME/app
 
 EXPOSE 7860
 
-CMD [ "npm", "run", "start" ]
+CMD [ "xvfb-run", "-s", "-ac -screen 0 1920x1080x24", "npm", "run", "start" ]
