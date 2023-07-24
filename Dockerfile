@@ -6,7 +6,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update
 
 # For FFMPEG and gl concat
-RUN apt --yes install ffmpeg curl build-essential python3 python3-dev libx11-dev libxext-dev libxext6 libglu1-mesa-dev xvfb libxi-dev libglew2.1 libglew-dev pkg-config
+RUN apt --yes install ffmpeg curl build-essential python3 python3-dev libx11-dev libxext-dev libxext6 libglu1-mesa-dev xvfb libxi-dev libglew libglew-dev pkg-config
 
 # For Puppeteer
 RUN apt --yes install libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libgbm1 libasound2 libpangocairo-1.0-0 libxss1 libgtk-3-0
