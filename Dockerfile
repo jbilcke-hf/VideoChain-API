@@ -1,5 +1,5 @@
 FROM node:18
-
+# try this maybe
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -36,6 +36,6 @@ COPY --chown=user . $HOME/app
 
 EXPOSE 7860
 
-# TODO: we should use another docker image maybe
-CMD [ "xvfb-run", "-s", "-ac -screen 0 1920x1080x24", "npm", "run", "start" ]
-# CMD [ "npm", "run", "start" ]
+# we can't use this (it time out)
+# CMD [ "xvfb-run", "-s", "-ac -screen 0 1920x1080x24", "npm", "run", "start" ]
+CMD [ "npm", "run", "start" ]
