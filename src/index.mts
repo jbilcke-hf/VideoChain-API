@@ -227,8 +227,9 @@ app.get("/:ownerId", async (req, res) => {
   try {
     const videos = await getAllVideosForOwner(ownerId)
     sortVideosByYoungestFirst(videos)
+
     res.status(200)
-    res.write(JSON.stringify(videos, null, 2))
+    res.write(JSON.stringify(videos.filter(video => video.status !== "delete"), null, 2))
     res.end()
   } catch (err) {
     console.error(err)
