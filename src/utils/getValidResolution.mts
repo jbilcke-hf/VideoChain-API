@@ -3,8 +3,7 @@ import { getValidNumber } from "./getValidNumber.mts"
 export const getValidResolution = (something: any) => {
   const strValue = `${something || ''}`
   const chunks = strValue.split('x')
-  console.log("chunks:", chunks)
-  
+
   if (chunks.length !== 2) {
     return `1280x720`
   }

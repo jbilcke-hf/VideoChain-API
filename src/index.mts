@@ -102,6 +102,13 @@ app.post("/:ownerId", async (req, res) => {
 
   console.log(`creating video from request..`)
   console.log(`request: `, JSON.stringify(request))
+  if (!request?.prompt?.length) {
+    console.error(`failed to create video (prompt is empty})`)
+    res.status(400)
+    res.write(JSON.stringify({ error: "prompt is empty" }))
+    res.end()
+    return
+  }
   try {
     video = await parseVideoRequest(ownerId, request)
   } catch (err) {
