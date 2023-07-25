@@ -294,8 +294,7 @@ app.get("/", async (req, res) => {
     console.log("Invalid authorization")
     res.status(200)
     res.write(`<html><head></head><body>
-This space is the REST API used by VideoChain UI:<br/>
-<a href="https://jbilcke-hf-videochain-ui.hf.space" target="_blank">https://jbilcke-hf-videochain-ui.hf.space</a>
+This space is the rendering engine used by various demos spaces, such as <a href="https://jbilcke-hf-fishtank.hf.space" target="_blank">FishTank</a> and <a href="https://jbilcke-hf-videochain-ui.hf.space" target="_blank">VideoChain UI</a>
     </body></html>`)
     res.end()
     // res.status(401)
