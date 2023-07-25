@@ -3,6 +3,7 @@ import path from "node:path"
 
 import { validate as uuidValidate } from "uuid"
 import express from "express"
+import querystring from "node:querystring"
 
 import { Video, VideoStatus, VideoAPIRequest } from "./types.mts"
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
@@ -19,6 +20,8 @@ import { hasValidAuthorization } from "./utils/hasValidAuthorization.mts"
 import { getAllVideosForOwner } from "./scheduler/getAllVideosForOwner.mts"
 import { initFolders } from "./initFolders.mts"
 import { sortVideosByYoungestFirst } from "./utils/sortVideosByYoungestFirst.mts"
+import { generateVideo } from "./production/generateVideo.mts"
+import { generateSeed } from "./utils/generateSeed.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -29,6 +32,19 @@ const app = express()
 const port = 7860
 
 app.use(express.json())
+
+// a "fast track" pipeline
+app.post("/render", async (req, res) => { 
+  const url = await generateVideo(req.body as string, {
+    seed: generateSeed(),
+    nbFrames: 16,
+    nbSteps: 10,
+  })
+
+  res.status(200)
+  res.write(JSON.stringify({ url }))
+  res.end()
+})
 
 app.post("/:ownerId", async (req, res) => {
   const request = req.body as VideoAPIRequest
@@ -78,6 +94,7 @@ app.post("/:ownerId", async (req, res) => {
     res.end()
   }
 })
+
 
 app.get("/:ownerId/:videoId\.mp4", async (req, res) => {
     
