@@ -3,7 +3,6 @@ import path from "node:path"
 
 import { validate as uuidValidate } from "uuid"
 import express from "express"
-import querystring from "node:querystring"
 
 import { Video, VideoStatus, VideoAPIRequest } from "./types.mts"
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
@@ -22,6 +21,7 @@ import { initFolders } from "./initFolders.mts"
 import { sortVideosByYoungestFirst } from "./utils/sortVideosByYoungestFirst.mts"
 import { generateVideo } from "./production/generateVideo.mts"
 import { generateSeed } from "./utils/generateSeed.mts"
+import { renderScene } from "./production/renderScene.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -33,17 +33,48 @@ const port = 7860
 
 app.use(express.json())
 
-// a "fast track" pipeline
-app.post("/render", async (req, res) => { 
-  const url = await generateVideo(req.body as string, {
-    seed: generateSeed(),
-    nbFrames: 16,
-    nbSteps: 10,
-  })
+let isRendering = false
 
-  res.status(200)
-  res.write(JSON.stringify({ url }))
-  res.end()
+// a "fast track" pipeline
+app.post("/render", async (req, res) => {
+
+  const prompt = req.body.prompt as string
+  console.log(`/render: "${prompt}"`)
+  if (!prompt) {
+    console.log("Invalid prompt")
+    res.status(400)
+    res.write(JSON.stringify({ url: "", error: "invalid prompt" }))
+    res.end()
+    return
+  }
+
+  let result = { url: "", error: "" }
+  try {
+    result = await renderScene(prompt)
+  } catch (err) {
+    // console.log("failed to render scene!")
+    result.error = `failed to render scene: ${err}`
+  }
+
+  if (result.error === "already rendering") {
+    console.log("server busy")
+    res.status(200)
+    res.write(JSON.stringify({ url: "", error: result.error }))
+    res.end()
+    return
+  } else if (result.error.length > 0) {
+    // console.log("server error")
+    res.status(500)
+    res.write(JSON.stringify({ url: "", error: result.error }))
+    res.end()
+    return
+  } else {
+    // console.log("all good")
+    res.status(200)
+    res.write(JSON.stringify(result))
+    res.end()
+    return
+  }
 })
 
 app.post("/:ownerId", async (req, res) => {

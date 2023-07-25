@@ -1,11 +1,11 @@
 import { client } from "@gradio/client"
 
-
 import { generateSeed } from "../utils/generateSeed.mts"
 
 const instances: string[] = [
-  process.env.VC_VIDEO_GENERATION_SPACE_API_URL
-]
+  `${process.env.VC_VIDEO_GENERATION_SPACE_API_URL || ""}`,
+  `${process.env.VC_RENDERING_ENGINE_SPACE_API_URL || ""}`,
+].filter(instance => instance?.length > 0)
 
 export const generateVideo = async (prompt: string, options?: {
   seed: number;
