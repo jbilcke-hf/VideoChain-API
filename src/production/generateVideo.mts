@@ -1,6 +1,7 @@
 import { client } from "@gradio/client"
 
 import { generateSeed } from "../utils/generateSeed.mts"
+import { raw } from "express";
 
 const instances: string[] = [
   `${process.env.VC_ZEROSCOPE_SPACE_API_URL_1 || ""}`,
@@ -30,6 +31,8 @@ export const generateVideo = async (prompt: string, options?: {
     nbFrames, // 24 // it is the nb of frames per seconds I think?
     nbSteps, // 10, (numeric value between 10 and 50) in 'Number of inference steps' Slider component
   ]) as any
+  
+  console.log("rawResponse:", rawResponse)
   
   const { name } = rawResponse?.data?.[0]?.[0] as { name: string, orig_name: string }
 
