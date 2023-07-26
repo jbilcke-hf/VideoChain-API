@@ -1,12 +1,12 @@
 import { client } from "@gradio/client"
 
 import { generateSeed } from "../utils/generateSeed.mts"
-import { raw } from "express";
 
+// we don't use replicas yet, because it ain't easy to get their hostname
 const instances: string[] = [
   `${process.env.VC_ZEROSCOPE_SPACE_API_URL_1 || ""}`,
-  // `${process.env.VC_ZEROSCOPE_SPACE_API_URL_2 || ""}`,
-  // `${process.env.VC_ZEROSCOPE_SPACE_API_URL_3 || ""}`,
+  `${process.env.VC_ZEROSCOPE_SPACE_API_URL_2 || ""}`,
+  `${process.env.VC_ZEROSCOPE_SPACE_API_URL_3 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 export const generateVideo = async (prompt: string, options?: {
@@ -32,8 +32,8 @@ export const generateVideo = async (prompt: string, options?: {
     nbSteps, // 10, (numeric value between 10 and 50) in 'Number of inference steps' Slider component
   ]) as any
   
-  console.log("rawResponse:", rawResponse)
-  
+  // console.log("rawResponse:", rawResponse)
+
   const { name } = rawResponse?.data?.[0]?.[0] as { name: string, orig_name: string }
 
   return `${instance}/file=${name}`

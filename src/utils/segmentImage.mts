@@ -4,6 +4,7 @@ import { sleep } from "./sleep.mts"
 import { ImageSegment } from "../types.mts"
 import { downloadImageAsBase64 } from "./downloadFileAsBase64.mts"
 
+// we don't use replicas yet, because it ain't easy to get their hostname
 const instances: string[] = [
   `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_1 || ""}`,
   `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_2 || ""}`,
