@@ -77,6 +77,15 @@ app.post("/render", async (req, res) => {
   }
 })
 
+/*
+app.post("/segment", async (req, res) => {
+  const payload = req.body as 
+  try {
+    await segmentImage()
+  }
+})
+*/
+
 app.post("/:ownerId", async (req, res) => {
   const request = req.body as VideoAPIRequest
 

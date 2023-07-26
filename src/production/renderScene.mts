@@ -28,7 +28,7 @@ export async function renderScene(prompt: string) {
       seed: generateSeed(),
       // seed,
       nbFrames: 16,
-      nbSteps: 7,
+      nbSteps: 10,
     })
     // console.log("successfull generation")
     error = ""

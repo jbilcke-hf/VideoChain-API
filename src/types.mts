@@ -268,3 +268,9 @@ export type VideoAPIRequest = Partial<{
 export type Video = VideoSequence & {
   shots: VideoShot[]
 }
+
+
+export interface ImageSegmentationRequest {
+  image: string // in base64
+  keywords: string[]
+}
