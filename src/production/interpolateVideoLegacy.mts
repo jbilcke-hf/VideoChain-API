@@ -18,7 +18,9 @@ export const interpolateVideo = async (fileName: string, steps: number, fps: num
   const instance = instances.shift()
   instances.push(instance)
 
-  const api = await client(instance)
+  const api = await client(instance, {
+    hf_token: `${process.env.VC_HF_API_TOKEN}` as any
+  })
 
   const video = await fs.readFile(inputFilePath)
 

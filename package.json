@@ -8,7 +8,7 @@
     "test:submitVideo": "node --loader ts-node/esm src/tests/submitVideo.mts",
     "test:checkStatus": "node --loader ts-node/esm src/tests/checkStatus.mts",
     "test:downloadFileToTmp": "node --loader ts-node/esm src/tests/downloadFileToTmp.mts",
-    "test:stuff": "node --loader ts-node/esm src/stuff.mts",
+    "test:stuff": "node --loader ts-node/esm src/utils/segmentImage.mts",
     "docker": "npm run docker:build && npm run docker:run",
     "docker:build": "docker build -t videochain-api .",
     "docker:run": "docker run -it -p 7860:7860 videochain-api"

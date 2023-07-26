@@ -3,8 +3,9 @@ import { client } from "@gradio/client"
 import { generateSeed } from "../utils/generateSeed.mts"
 
 const instances: string[] = [
-  `${process.env.VC_VIDEO_GENERATION_SPACE_API_URL || ""}`,
-  `${process.env.VC_RENDERING_ENGINE_SPACE_API_URL || ""}`,
+  `${process.env.VC_ZEROSCOPE_SPACE_API_URL_1 || ""}`,
+  // `${process.env.VC_ZEROSCOPE_SPACE_API_URL_2 || ""}`,
+  // `${process.env.VC_ZEROSCOPE_SPACE_API_URL_3 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 export const generateVideo = async (prompt: string, options?: {
@@ -19,7 +20,9 @@ export const generateVideo = async (prompt: string, options?: {
   const instance = instances.shift()
   instances.push(instance)
 
-  const api = await client(instance)
+  const api = await client(instance, {
+    hf_token: `${process.env.VC_HF_API_TOKEN}` as any
+  })
 
   const rawResponse = await api.predict('/run', [		
     prompt, // string  in 'Prompt' Textbox component		

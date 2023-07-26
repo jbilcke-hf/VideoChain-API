@@ -4,7 +4,7 @@ import path from "node:path"
 import { validate as uuidValidate } from "uuid"
 import express from "express"
 
-import { Video, VideoStatus, VideoAPIRequest } from "./types.mts"
+import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderAPIResponse } from "./types.mts"
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
 import { savePendingVideo } from "./scheduler/savePendingVideo.mts"
 import { getVideo } from "./scheduler/getVideo.mts"
@@ -38,9 +38,9 @@ let isRendering = false
 // a "fast track" pipeline
 app.post("/render", async (req, res) => {
 
-  const prompt = req.body.prompt as string
-  console.log(`/render: "${prompt}"`)
-  if (!prompt) {
+  const request = req.body as RenderRequest
+  console.log(req.body)
+  if (!request.prompt) {
     console.log("Invalid prompt")
     res.status(400)
     res.write(JSON.stringify({ url: "", error: "invalid prompt" }))
@@ -48,9 +48,15 @@ app.post("/render", async (req, res) => {
     return
   }
 
-  let result = { url: "", error: "" }
+  let result: RenderAPIResponse = {
+    videoUrl: "",
+    maskBase64: "",
+    error: "",
+    segments: []
+  }
+  
   try {
-    result = await renderScene(prompt)
+    result = await renderScene(request)
   } catch (err) {
     // console.log("failed to render scene!")
     result.error = `failed to render scene: ${err}`

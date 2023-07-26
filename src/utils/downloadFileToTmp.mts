@@ -24,4 +24,6 @@ export const downloadFileToTmp = async (remoteUrl: string, fileName: string) => 
     filePath,
     Buffer.from(arrayBuffer)
   )
+
+  return filePath
 }
