@@ -18,39 +18,45 @@ export async function generateVoice(prompt: string, voiceFileName: string) {
     protocolTimeout: 800000,
   })
 
-  const page = await browser.newPage()
+  try {
+    const page = await browser.newPage()
 
-  await page.goto(instance, {
-    waitUntil: "networkidle2",
-  })
+    await page.goto(instance, {
+      waitUntil: "networkidle2",
+    })
 
-  await new Promise(r => setTimeout(r, 3000))
+    await new Promise(r => setTimeout(r, 3000))
 
-  const firstTextarea = await page.$('textarea[data-testid="textbox"]')
+    const firstTextarea = await page.$('textarea[data-testid="textbox"]')
 
-  await firstTextarea.type(prompt)
+    await firstTextarea.type(prompt)
 
-  // console.log("looking for the button to submit")
-  const submitButton = await page.$("button.lg")
+    // console.log("looking for the button to submit")
+    const submitButton = await page.$("button.lg")
 
-  // console.log("clicking on the button")
-  await submitButton.click()
+    // console.log("clicking on the button")
+    await submitButton.click()
 
-  await page.waitForSelector("audio", {
-    timeout: 800000, // need to be large enough in case someone else attemps to use our space
-  })
+    await page.waitForSelector("audio", {
+      timeout: 800000, // need to be large enough in case someone else attemps to use our space
+    })
 
-  const voiceRemoteUrl = await page.$$eval("audio", el => el.map(x => x.getAttribute("src"))[0])
-
-
-  console.log({
-    voiceRemoteUrl,
-  })
+    const voiceRemoteUrl = await page.$$eval("audio", el => el.map(x => x.getAttribute("src"))[0])
 
 
-  console.log(`- downloading ${voiceFileName} from ${voiceRemoteUrl}`)
+    console.log({
+      voiceRemoteUrl,
+    })
 
-  await downloadFileToTmp(voiceRemoteUrl, voiceFileName)
 
-  return voiceFileName
+    console.log(`- downloading ${voiceFileName} from ${voiceRemoteUrl}`)
+
+    await downloadFileToTmp(voiceRemoteUrl, voiceFileName)
+
+    return voiceFileName
+  } catch (err) {
+    throw err
+  } finally {
+    await browser.close()
+  }
 }

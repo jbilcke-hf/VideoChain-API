@@ -21,36 +21,42 @@ export async function generateAudio(prompt: string, audioFileName: string) {
     protocolTimeout: 120000,
   })
 
-  const page = await browser.newPage()
+  try {
+    const page = await browser.newPage()
 
-  await page.goto(instance, {
-    waitUntil: "networkidle2",
-  })
+    await page.goto(instance, {
+      waitUntil: "networkidle2",
+    })
 
-  await new Promise(r => setTimeout(r, 3000))
+    await new Promise(r => setTimeout(r, 3000))
 
-  const firstTextboxInput = await page.$('input[data-testid="textbox"]')
+    const firstTextboxInput = await page.$('input[data-testid="textbox"]')
 
-  await firstTextboxInput.type(prompt)
+    await firstTextboxInput.type(prompt)
 
-  // console.log("looking for the button to submit")
-  const submitButton = await page.$("button.lg")
+    // console.log("looking for the button to submit")
+    const submitButton = await page.$("button.lg")
 
-  // console.log("clicking on the button")
-  await submitButton.click()
+    // console.log("clicking on the button")
+    await submitButton.click()
 
-  await page.waitForSelector("a[download]", {
-    timeout: 120000, // no need to wait for too long, generation is quick
-  })
+    await page.waitForSelector("a[download]", {
+      timeout: 120000, // no need to wait for too long, generation is quick
+    })
 
-  const audioRemoteUrl = await page.$$eval("a[download]", el => el.map(x => x.getAttribute("href"))[0])
+    const audioRemoteUrl = await page.$$eval("a[download]", el => el.map(x => x.getAttribute("href"))[0])
 
 
-  // it is always a good idea to download to a tmp dir before saving to the pending dir
-  // because there is always a risk that the download will fail
-  
-  const tmpFileName = `${uuidv4()}.mp4`
+    // it is always a good idea to download to a tmp dir before saving to the pending dir
+    // because there is always a risk that the download will fail
+    
+    const tmpFileName = `${uuidv4()}.mp4`
 
-  await downloadFileToTmp(audioRemoteUrl, tmpFileName)
-  await moveFileFromTmpToPending(tmpFileName, audioFileName)
+    await downloadFileToTmp(audioRemoteUrl, tmpFileName)
+    await moveFileFromTmpToPending(tmpFileName, audioFileName)
+  } catch (err) {
+    throw err
+  } finally {
+    await browser.close()
+  }
 }

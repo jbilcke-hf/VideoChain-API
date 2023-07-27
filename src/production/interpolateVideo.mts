@@ -28,33 +28,39 @@ export async function interpolateVideo(fileName: string, steps: number, fps: num
     protocolTimeout: 400000,
   })
 
-  const page = await browser.newPage()
-  await page.goto(instance, { waitUntil: 'networkidle2' })
-  
-  await new Promise(r => setTimeout(r, 3000))
+  try {
+    const page = await browser.newPage()
+    await page.goto(instance, { waitUntil: 'networkidle2' })
+    
+    await new Promise(r => setTimeout(r, 3000))
 
-  const fileField = await page.$('input[type=file]')
+    const fileField = await page.$('input[type=file]')
 
-  // console.log(`uploading file..`)
-  await fileField.uploadFile(inputFilePath)
+    // console.log(`uploading file..`)
+    await fileField.uploadFile(inputFilePath)
 
-  // console.log('looking for the button to submit')
-  const submitButton = await page.$('button.lg')
+    // console.log('looking for the button to submit')
+    const submitButton = await page.$('button.lg')
 
-  // console.log('clicking on the button')
-  await submitButton.click()
+    // console.log('clicking on the button')
+    await submitButton.click()
 
-  await page.waitForSelector('a[download="interpolated_result.mp4"]', {
-    timeout: 400000, // need to be large enough in case someone else attemps to use our space
-  })
+    await page.waitForSelector('a[download="interpolated_result.mp4"]', {
+      timeout: 400000, // need to be large enough in case someone else attemps to use our space
+    })
 
-  const interpolatedFileUrl = await page.$$eval('a[download="interpolated_result.mp4"]', el => el.map(x => x.getAttribute("href"))[0])
+    const interpolatedFileUrl = await page.$$eval('a[download="interpolated_result.mp4"]', el => el.map(x => x.getAttribute("href"))[0])
 
-  // it is always a good idea to download to a tmp dir before saving to the pending dir
-  // because there is always a risk that the download will fail
+    // it is always a good idea to download to a tmp dir before saving to the pending dir
+    // because there is always a risk that the download will fail
 
-  const tmpFileName = `${uuidv4()}.mp4`
+    const tmpFileName = `${uuidv4()}.mp4`
 
-  await downloadFileToTmp(interpolatedFileUrl, tmpFileName)
-  await moveFileFromTmpToPending(tmpFileName, fileName)
+    await downloadFileToTmp(interpolatedFileUrl, tmpFileName)
+    await moveFileFromTmpToPending(tmpFileName, fileName)
+  } catch (err) {
+    throw err
+  } finally {
+    await browser.close()
+  }
 }
