@@ -32,8 +32,8 @@ export async function segmentImage(
   instances.push(instance)
 
   const browser = await puppeteer.launch({
-    headless: true,
-    protocolTimeout: 50000,
+    headless: false,
+    protocolTimeout: 40000,
   })
 
   const page = await browser.newPage()
@@ -60,7 +60,7 @@ export async function segmentImage(
   await submitButton.click()
 
   await page.waitForSelector('img[data-testid="detailed-image"]', {
-    timeout: 50000, // need to be large enough in case someone else attemps to use our space
+    timeout: 40000, // we keep it tight, to fail early
   })
 
   const maskUrl = await page.$$eval('img[data-testid="detailed-image"]', el => el.map(x => x.getAttribute("src"))[0])
