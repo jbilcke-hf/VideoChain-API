@@ -14,20 +14,23 @@ export async function renderStaticScene(scene: RenderRequest): Promise<RenderedS
   let imageBase64 = ""
   let error = ""
 
+  const width = 1024
+  const height = 512
+
   try {
     console.log(`calling generateImageSDXLAsBase64 with: `, JSON.stringify({
       positivePrompt: scene.prompt,
       seed: scene.seed || undefined,
       nbSteps: scene.nbSteps || undefined,
-      width: 1024,
-      height: 512
+      width,
+      height,
     }, null, 2))
     imageBase64 = await generateImageSDXLAsBase64({
       positivePrompt: scene.prompt,
       seed: scene.seed || undefined,
       nbSteps: scene.nbSteps || undefined,
-      width: 1024,
-      height: 512
+      width,
+      height
     })
     console.log("successful generation!", imageBase64.slice(0, 30))
     error = ""
@@ -64,7 +67,7 @@ export async function renderStaticScene(scene: RenderRequest): Promise<RenderedS
       error = "failed to segment the image"
     } else {
       console.log("got the first frame! segmenting..")
-      const result = await segmentImage(tmpImageFilePath, actionnables)
+      const result = await segmentImage(tmpImageFilePath, actionnables, width, height)
       mask = result.pngInBase64
       segments = result.segments
       console.log("success!", {  segments })

@@ -13,6 +13,9 @@ export async function renderVideoScene(scene: RenderRequest): Promise<RenderedSc
   let url = ""
   let error = ""
 
+  const width = 576
+  const height = 320
+
   try {
     url = await generateVideo(scene.prompt, {
       seed: getValidNumber(scene.seed, 0, 2147483647, generateSeed()),
@@ -50,7 +53,7 @@ export async function renderVideoScene(scene: RenderRequest): Promise<RenderedSc
         error = "failed to segment the image"
       } else {
         console.log("got the first frame! segmenting..")
-        const result = await segmentImage(firstFrameFilePath, actionnables)
+        const result = await segmentImage(firstFrameFilePath, actionnables, width, height)
         mask = result.pngInBase64
         segments = result.segments
         // console.log("success!", {  segments })

@@ -3,6 +3,7 @@ import puppeteer from "puppeteer"
 import { sleep } from "./sleep.mts"
 import { ImageSegment } from "../types.mts"
 import { downloadImageAsBase64 } from "./downloadFileAsBase64.mts"
+import { resizeBase64Image } from "./resizeBase64Image.mts"
 
 // we don't use replicas yet, because it ain't easy to get their hostname
 const instances: string[] = [
@@ -16,7 +17,9 @@ const instances: string[] = [
 // it takes about 30 seconds to compute
 export async function segmentImage(
   inputImageFilePath: string,
-  actionnables: string[]
+  actionnables: string[],
+  width: number,
+  height: number,
 ): Promise<{
   pngInBase64: string
   segments: ImageSegment[]
@@ -73,7 +76,10 @@ export async function segmentImage(
   // const tmpMaskFileName = `${uuidv4()}.png`
   // await downloadFileToTmp(maskUrl, tmpMaskFileName)
 
-  const pngInBase64 = await downloadImageAsBase64(maskUrl)
+  const rawPngInBase64 = await downloadImageAsBase64(maskUrl)
+
+  const pngInBase64 = await resizeBase64Image(rawPngInBase64, width, height)
+
   return {
     pngInBase64,
     segments,
