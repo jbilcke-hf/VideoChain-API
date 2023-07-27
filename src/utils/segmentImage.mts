@@ -29,7 +29,7 @@ export async function segmentImage(
 
   const browser = await puppeteer.launch({
     headless: true,
-    protocolTimeout: 70000,
+    protocolTimeout: 120000,
   })
 
   const page = await browser.newPage()
@@ -42,8 +42,6 @@ export async function segmentImage(
   // console.log(`uploading file..`)
   await fileField.uploadFile(inputImageFilePath)
 
-  await sleep(500)
-
   const firstTextarea = await page.$('textarea[data-testid="textbox"]')
 
   const conceptsToDetect = actionnables.join(" . ")
@@ -52,13 +50,13 @@ export async function segmentImage(
   // console.log('looking for the button to submit')
   const submitButton = await page.$('button.lg')
 
-  await sleep(500)
+  await sleep(200)
 
   // console.log('clicking on the button')
   await submitButton.click()
 
   await page.waitForSelector('img[data-testid="detailed-image"]', {
-    timeout: 70000, // need to be large enough in case someone else attemps to use our space
+    timeout: 120000, // need to be large enough in case someone else attemps to use our space
   })
 
   const maskUrl = await page.$$eval('img[data-testid="detailed-image"]', el => el.map(x => x.getAttribute("src"))[0])

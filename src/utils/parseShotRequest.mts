@@ -44,7 +44,7 @@ export const parseShotRequest = async (sequence: VideoSequence, maybeShotMeta: P
     actorDialoguePrompt: `${maybeShotMeta.actorDialoguePrompt || ""}`,
 
     // a video sequence SHOULD NOT HAVE a consistent seed, to avoid weird geometry similarities
-    seed: getValidNumber(maybeShotMeta.seed, 0, 4294967295, generateSeed()),
+    seed: getValidNumber(maybeShotMeta.seed, 0, 2147483647, generateSeed()),
 
     // a video sequence SHOULD HAVE a consistent grain
     noise: sequence.noise,

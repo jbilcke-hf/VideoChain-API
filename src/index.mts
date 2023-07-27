@@ -4,7 +4,7 @@ import path from "node:path"
 import { validate as uuidValidate } from "uuid"
 import express from "express"
 
-import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderAPIResponse } from "./types.mts"
+import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene } from "./types.mts"
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
 import { savePendingVideo } from "./scheduler/savePendingVideo.mts"
 import { getVideo } from "./scheduler/getVideo.mts"
@@ -48,8 +48,8 @@ app.post("/render", async (req, res) => {
     return
   }
 
-  let result: RenderAPIResponse = {
-    videoUrl: "",
+  let result: RenderedScene = {
+    assetUrl: "",
     maskBase64: "",
     error: "",
     segments: []
@@ -83,14 +83,50 @@ app.post("/render", async (req, res) => {
   }
 })
 
+// a "fast track" pipeline
 /*
 app.post("/segment", async (req, res) => {
-  const payload = req.body as 
+
+  const request = req.body as RenderRequest
+  console.log(req.body)
+
+  let result: RenderedScene = {
+    assetUrl: "",
+    maskBase64: "",
+    error: "",
+    segments: []
+  }
+  
   try {
-    await segmentImage()
+    result = await renderScene(request)
+  } catch (err) {
+    // console.log("failed to render scene!")
+    result.error = `failed to render scene: ${err}`
+  }
+
+  if (result.error === "already rendering") {
+    console.log("server busy")
+    res.status(200)
+    res.write(JSON.stringify({ url: "", error: result.error }))
+    res.end()
+    return
+  } else if (result.error.length > 0) {
+    // console.log("server error")
+    res.status(500)
+    res.write(JSON.stringify({ url: "", error: result.error }))
+    res.end()
+    return
+  } else {
+    // console.log("all good")
+    res.status(200)
+    res.write(JSON.stringify(result))
+    res.end()
+    return
   }
 })
 */
+
+
 
 app.post("/:ownerId", async (req, res) => {
   const request = req.body as VideoAPIRequest

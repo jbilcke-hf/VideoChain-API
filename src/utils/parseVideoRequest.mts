@@ -57,7 +57,7 @@ export const parseVideoRequest = async (ownerId: string, request: VideoAPIReques
     // describe the main actor dialogue line
     actorDialoguePrompt: `${request.sequence.actorDialoguePrompt || ''}`,
 
-    seed: getValidNumber(request.sequence.seed, 0, 4294967295, generateSeed()),
+    seed: getValidNumber(request.sequence.seed, 0, 2147483647, generateSeed()),
 
     noise: request.sequence.noise === true,
     noiseAmount: request.sequence.noise === true ? 2 : 0,
