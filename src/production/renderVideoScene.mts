@@ -16,21 +16,36 @@ export async function renderVideoScene(scene: RenderRequest): Promise<RenderedSc
   const width = 576
   const height = 320
 
+  const params = {
+    seed: getValidNumber(scene.seed, 0, 2147483647, generateSeed()),
+    nbFrames: getValidNumber(scene.nbFrames, 8, 24, 16), // 2 seconds by default
+    nbSteps: getValidNumber(scene.nbSteps, 1, 50, 10), // use 10 by default to go fast, but not too sloppy
+  }
+
   try {
-    url = await generateVideo(scene.prompt, {
-      seed: getValidNumber(scene.seed, 0, 2147483647, generateSeed()),
-      nbFrames: getValidNumber(scene.nbFrames, 8, 24, 16), // 2 seconds by default
-      nbSteps: getValidNumber(scene.nbSteps, 1, 50, 10), // use 10 by default to go fast, but not too sloppy
-    })
+    url = await generateVideo(scene.prompt, params)
     // console.log("successfull generation")
     error = ""
     if (!url?.length) {
       throw new Error(`url for the generated image is empty`)
     }
   } catch (err) {
-    error = `failed to render scene: ${err}`
-  }
+    console.error(`failed to render the scene.. but let's try again!`)
 
+    try {
+      url = await generateVideo(scene.prompt, params)
+      // console.log("successfull generation")
+      error = ""
+
+      if (!url?.length) {
+        throw new Error(`url for the generated image is empty`)
+      }
+      
+    } catch (err) {
+      console.error(`it failed the second time ${err}`)
+      error = `failed to render scene: ${err}`
+    }
+  }
 
 
   // TODO add segmentation here

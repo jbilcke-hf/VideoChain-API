@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from "uuid"
 import tmpDir from "temp-dir"
 
 import { ImageSegment, RenderedScene, RenderRequest } from "../types.mts"
-import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
 import { segmentImage } from "../utils/segmentImage.mts"
 import { generateImageSDXLAsBase64 } from "../utils/generateImageSDXL.mts"
 import { writeBase64ToFile } from "../utils/writeBase64ToFile.mts"
@@ -58,7 +57,7 @@ export async function renderStaticScene(scene: RenderRequest): Promise<RenderedS
 
     const tmpImageFilePath = path.join(tmpDir, `${uuidv4()}.png`)
 
-    console.log("beginning:", imageBase64.slice(0, 100))
+    // console.log("beginning:", imageBase64.slice(0, 100))
     await writeBase64ToFile(imageBase64, tmpImageFilePath)
     console.log("wrote the image to ", tmpImageFilePath)
   
@@ -67,10 +66,30 @@ export async function renderStaticScene(scene: RenderRequest): Promise<RenderedS
       error = "failed to segment the image"
     } else {
       console.log("got the first frame! segmenting..")
-      const result = await segmentImage(tmpImageFilePath, actionnables, width, height)
-      mask = result.pngInBase64
-      segments = result.segments
-      console.log("success!", {  segments })
+      try {
+        const result = await segmentImage(tmpImageFilePath, actionnables, width, height)
+        mask = result.pngInBase64
+        segments = result.segments
+        console.log(`it worked the first time! got ${segments.length} segments`)
+      } catch (err) {
+        console.log("this takes too long :/ trying another server..")
+        try {
+          const result = await segmentImage(tmpImageFilePath, actionnables, width, height)
+          mask = result.pngInBase64
+          segments = result.segments
+          console.log(`it worked the second time! got ${segments.length} segments`)
+        } catch (err) {
+          console.log("trying one last time, on a 3rd server..")
+          try {
+            const result = await segmentImage(tmpImageFilePath, actionnables, width, height)
+            mask = result.pngInBase64
+            segments = result.segments
+            console.log(`it worked the third time! got ${segments.length} segments`)
+          } catch (err) {
+            console.log("yeah, all servers are busy it seems.. aborting")
+          }
+        }
+      }
     }
   } else {
     console.log("no actionnables: just returning the image, then")

@@ -9,6 +9,7 @@ import { resizeBase64Image } from "./resizeBase64Image.mts"
 const instances: string[] = [
   `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_1 || ""}`,
   `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_2 || ""}`,
+  `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_3 || ""}`,
 ]
 
 // TODO we should use an inference endpoint instead
@@ -32,7 +33,7 @@ export async function segmentImage(
 
   const browser = await puppeteer.launch({
     headless: true,
-    protocolTimeout: 120000,
+    protocolTimeout: 50000,
   })
 
   const page = await browser.newPage()
@@ -53,13 +54,13 @@ export async function segmentImage(
   // console.log('looking for the button to submit')
   const submitButton = await page.$('button.lg')
 
-  await sleep(200)
+  await sleep(300)
 
   // console.log('clicking on the button')
   await submitButton.click()
 
   await page.waitForSelector('img[data-testid="detailed-image"]', {
-    timeout: 120000, // need to be large enough in case someone else attemps to use our space
+    timeout: 50000, // need to be large enough in case someone else attemps to use our space
   })
 
   const maskUrl = await page.$$eval('img[data-testid="detailed-image"]', el => el.map(x => x.getAttribute("src"))[0])
