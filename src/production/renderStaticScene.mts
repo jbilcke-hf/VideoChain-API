@@ -16,34 +16,41 @@ export async function renderStaticScene(scene: RenderRequest): Promise<RenderedS
   const width = 1024
   const height = 512
 
+  const params = {
+    positivePrompt: scene.prompt,
+    seed: scene.seed || undefined,
+    nbSteps: scene.nbSteps || undefined,
+    width,
+    height
+  }
+  console.log(`calling generateImageSDXLAsBase64 with: `, JSON.stringify(params, null, 2))
+
   try {
-    console.log(`calling generateImageSDXLAsBase64 with: `, JSON.stringify({
-      positivePrompt: scene.prompt,
-      seed: scene.seed || undefined,
-      nbSteps: scene.nbSteps || undefined,
-      width,
-      height,
-    }, null, 2))
-    imageBase64 = await generateImageSDXLAsBase64({
-      positivePrompt: scene.prompt,
-      seed: scene.seed || undefined,
-      nbSteps: scene.nbSteps || undefined,
-      width,
-      height
-    })
+    imageBase64 = await generateImageSDXLAsBase64(params)
     console.log("successful generation!", imageBase64.slice(0, 30))
     error = ""
     if (!imageBase64?.length) {
       throw new Error(`the generated image is empty`)
     }
   } catch (err) {
-    error = `failed to render scene: ${err}`
-    return {
-      assetUrl: imageBase64,
-      error,
-      maskBase64: "",
-      segments: []
-    } as RenderedScene
+    console.error(`failed to render.. but let's try again!`)
+    try {
+      imageBase64 = await generateImageSDXLAsBase64(params)
+      console.log("successful generation!", imageBase64.slice(0, 30))
+      error = ""
+      if (!imageBase64?.length) {
+        throw new Error(`the generated image is empty`)
+      }
+    } catch (err) {
+      console.error(`failed to generate the image, although ${err}`)
+      error = `failed to render scene: ${err}`
+      return {
+        assetUrl: imageBase64,
+        error,
+        maskBase64: "",
+        segments: []
+      } as RenderedScene
+    }
   }
 
   const actionnables = Array.isArray(scene.actionnables) ? scene.actionnables : []

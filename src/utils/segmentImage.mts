@@ -32,7 +32,7 @@ export async function segmentImage(
   instances.push(instance)
 
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     protocolTimeout: 40000,
   })
 
