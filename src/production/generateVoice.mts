@@ -14,7 +14,7 @@ export async function generateVoice(prompt: string, voiceFileName: string) {
   console.log("instance:", instance)
   
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     protocolTimeout: 800000,
   })
 
