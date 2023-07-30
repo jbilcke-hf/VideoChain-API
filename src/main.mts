@@ -7,9 +7,10 @@ export const main = async () => {
 
   const videos = await getPendingVideos()
   if (!videos.length) {
+    console.log(`no job to process.. going to try in 200 ms`)
     setTimeout(() => {
       main()
-    }, 500)
+    }, 200)
     return
   }
 
@@ -17,12 +18,24 @@ export const main = async () => {
 
   sortPendingVideosByLeastCompletedFirst(videos)
 
-  for (const video of videos) {
-    await processVideo(video)
-  }
-  console.log(`processed ${videos.length} videos`)
+  let somethingFailed = ""
+  await Promise.all(videos.map(async video => {
+    try {
+      const result = await processVideo(video)
+      return result
+    } catch (err) {
+      somethingFailed = `${err}`
+      // a video failed.. no big deal
+      return Promise.resolve(somethingFailed)
+    }
+  }))
 
-  setTimeout(() => {
-    main()
-  }, 1000)
+  if (somethingFailed) {
+    console.error(`one of the jobs failed: ${somethingFailed}, let's wait 3 seconds`)
+    setTimeout(() => { main() }, 3000)
+  } else {
+    console.log(`successfully worked on the jobs, let's immediately loop`)
+    setTimeout(() => { main() }, 50)
+  }
+
 }

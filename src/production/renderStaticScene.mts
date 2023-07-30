@@ -3,10 +3,13 @@ import path from "node:path"
 import { v4 as uuidv4 } from "uuid"
 import tmpDir from "temp-dir"
 
-import { ImageSegment, RenderedScene, RenderRequest } from "../types.mts"
+import { ImageSegment, RenderedScene, RenderingJob, RenderRequest } from "../types.mts"
 import { segmentImage } from "../utils/segmentImage.mts"
 import { generateImageSDXLAsBase64 } from "../utils/generateImageSDXL.mts"
 import { writeBase64ToFile } from "../utils/writeBase64ToFile.mts"
+
+
+const pendingJobs: RenderingJob[] = []
 
 export async function renderStaticScene(scene: RenderRequest): Promise<RenderedScene> {
 

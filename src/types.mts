@@ -313,3 +313,16 @@ export interface RenderedScene {
   maskBase64: string
   segments: ImageSegment[]
 }
+
+// note: for video generation we are always going to have slow jobs,
+// because we need multiple seconds, minutes, hours.. of video + audio
+// but for rendering we aim at shorter delays, less than 45 seconds
+// so the goal of rendering "jobs" is mostly to give the illusion that
+// things go faster, by already providing some things like the background image,
+// before we send 
+export interface RenderingJob {
+  scene: RenderRequest
+  result: RenderedScene
+
+  status: 'pending' | 'completed' | 'error'
+}
