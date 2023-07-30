@@ -34,7 +34,7 @@ export const main = async () => {
     console.error(`one of the jobs failed: ${somethingFailed}, let's wait 5 seconds`)
     setTimeout(() => { main() }, 5000)
   } else {
-    // console.log(`successfully worked on the jobs, let's immediately loop`)
+    console.log(`successfully worked on the jobs, let's immediately loop`)
     setTimeout(() => { main() }, 50)
   }
 
