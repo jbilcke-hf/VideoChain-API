@@ -7,7 +7,7 @@ export const main = async () => {
 
   const videos = await getPendingVideos()
   if (!videos.length) {
-    console.log(`no job to process.. going to try in 200 ms`)
+    // console.log(`no job to process.. going to try in 200 ms`)
     setTimeout(() => {
       main()
     }, 200)
