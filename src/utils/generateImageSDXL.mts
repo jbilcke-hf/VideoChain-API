@@ -42,6 +42,8 @@ export async function generateImageSDXLAsBase64(options: {
 
   const negative =  [
     negativePrompt,
+    "watermark",
+    "copyright",
     "blurry",
     // "artificial",
     // "cropped",
