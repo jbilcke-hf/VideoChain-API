@@ -32,10 +32,10 @@ export async function generateImageSDXLAsBase64(options: {
   instances.push(instance)
 
   const positive = [
-    positivePrompt,
     "beautiful",
-    "award winning",
     "intricate details",
+    positivePrompt,
+    "award winning",
     "high resolution"
   ].filter(word => word)
   .join(", ")

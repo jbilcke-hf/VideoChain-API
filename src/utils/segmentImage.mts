@@ -9,7 +9,7 @@ import { resizeBase64Image } from "./resizeBase64Image.mts"
 const instances: string[] = [
   `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_1 || ""}`,
   `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_2 || ""}`,
-  // `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_3 || ""}`,
+  `${process.env.VC_SEGMENTATION_MODULE_SPACE_API_URL_3 || ""}`,
 ]
 
 // TODO we should use an inference endpoint instead
