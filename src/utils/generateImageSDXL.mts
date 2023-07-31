@@ -6,6 +6,7 @@ import { getValidNumber } from "./getValidNumber.mts"
 // we don't use replicas yet, because it ain't easy to get their hostname
 const instances: string[] = [
   `${process.env.VC_SDXL_SPACE_API_URL_1 || ""}`,
+  `${process.env.VC_SDXL_SPACE_API_URL_2 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 export async function generateImageSDXLAsBase64(options: {
