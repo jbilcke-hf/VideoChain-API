@@ -10,7 +10,7 @@ export const state = {
 const instances: string[] = [
   `${process.env.VC_ZEROSCOPE_SPACE_API_URL_1 || ""}`,
   `${process.env.VC_ZEROSCOPE_SPACE_API_URL_2 || ""}`,
-  `${process.env.VC_ZEROSCOPE_SPACE_API_URL_3 || ""}`,
+  // `${process.env.VC_ZEROSCOPE_SPACE_API_URL_3 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 export const generateVideo = async (prompt: string, options?: {
