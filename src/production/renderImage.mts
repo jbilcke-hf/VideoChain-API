@@ -21,7 +21,7 @@ export async function renderImage(
     seed: request.seed,
     nbSteps: request.nbSteps,
     width: request.width,
-    request: request.height
+    height: request.height
   }
 
   console.log(`calling generateImageAsBase64 with: `, JSON.stringify(params, null, 2))
