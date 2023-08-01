@@ -1,7 +1,7 @@
 import { createReadStream, existsSync } from "node:fs"
 import path from "node:path"
 
-import { validate as uuidValidate } from "uuid"
+import { v4 as uuidv4, validate as uuidValidate } from "uuid"
 import express from "express"
 
 import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene } from "./types.mts"
@@ -21,7 +21,7 @@ import { initFolders } from "./initFolders.mts"
 import { sortVideosByYoungestFirst } from "./utils/sortVideosByYoungestFirst.mts"
 import { generateVideo } from "./production/generateVideo.mts"
 import { generateSeed } from "./utils/generateSeed.mts"
-import { renderScene } from "./production/renderScene.mts"
+import { getRenderedScene, renderScene } from "./production/renderScene.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -48,7 +48,9 @@ app.post("/render", async (req, res) => {
     return
   }
 
-  let result: RenderedScene = {
+  let response: RenderedScene = {
+    renderId: "",
+    status: "pending",
     assetUrl: "",
     maskBase64: "",
     error: "",
@@ -56,32 +58,83 @@ app.post("/render", async (req, res) => {
   }
   
   try {
-    result = await renderScene(request)
+    response = await renderScene(request)
   } catch (err) {
     // console.log("failed to render scene!")
-    result.error = `failed to render scene: ${err}`
+    response.error = `failed to render scene: ${err}`
   }
 
-  if (result.error === "already rendering") {
+  if (response.error === "already rendering") {
     console.log("server busy")
     res.status(200)
-    res.write(JSON.stringify({ url: "", error: result.error }))
+    res.write(JSON.stringify(response))
     res.end()
     return
-  } else if (result.error.length > 0) {
+  } else if (response.error.length > 0) {
     // console.log("server error")
     res.status(500)
-    res.write(JSON.stringify({ url: "", error: result.error }))
+    res.write(JSON.stringify(response))
     res.end()
     return
   } else {
     // console.log("all good")
     res.status(200)
-    res.write(JSON.stringify(result))
+    res.write(JSON.stringify(response))
     res.end()
     return
   }
 })
+
+// a "fast track" pipeline
+app.get("/render/:renderId", async (req, res) => {
+
+  const renderId = `${req.params.renderId}`
+
+  if (!uuidValidate(renderId)) {
+    console.error("invalid render id")
+    res.status(400)
+    res.write(JSON.stringify({ error: `invalid render id` }))
+    res.end()
+    return
+  }
+
+  let response: RenderedScene = {
+    renderId: "",
+    status: "pending",
+    assetUrl: "",
+    error: "",
+    maskBase64: "",
+    segments: []
+  }
+
+  try {
+    response = await getRenderedScene(renderId)
+  } catch (err) {
+    // console.log("failed to render scene!")
+    response.error = `failed to render scene: ${err}`
+  }
+
+  if (response.error === "already rendering") {
+    console.log("server busy")
+    res.status(200)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  } else if (response.error.length > 0) {
+    // console.log("server error")
+    res.status(500)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  } else {
+    // console.log("all good")
+    res.status(200)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  }
+})
+
 
 // a "fast track" pipeline
 /*

@@ -5,11 +5,11 @@ import { getValidNumber } from "./getValidNumber.mts"
 
 // we don't use replicas yet, because it ain't easy to get their hostname
 const instances: string[] = [
-  `${process.env.VC_SDXL_SPACE_API_URL_1 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_2 || ""}`,
+  `${process.env.VC_SDXL_360_SPACE_API_URL_1 || ""}`,
+ //  `${process.env.VC_SDXL_SPACE_API_URL_2 || ""}`,
 ].filter(instance => instance?.length > 0)
 
-export async function generateImageSDXLAsBase64(options: {
+export async function generateImageSDXL360AsBase64(options: {
   positivePrompt: string;
   negativePrompt?: string;
   seed?: number;
@@ -27,15 +27,16 @@ export async function generateImageSDXLAsBase64(options: {
   const width = getValidNumber(options?.width, 256, 1024, 512)
   const height = getValidNumber(options?.height, 256, 1024, 512)
   const nbSteps = getValidNumber(options?.nbSteps, 5, 100, 20)
-  console.log("SEED:", seed)
+  console.log("SEED FOR 360:", seed)
 
   const instance = instances.shift()
   instances.push(instance)
 
   const positive = [
+    "360 view",
+    positivePrompt,
     "beautiful",
     "intricate details",
-    positivePrompt,
     "award winning",
     "high resolution"
   ].filter(word => word)

@@ -269,6 +269,8 @@ export type Video = VideoSequence & {
   shots: VideoShot[]
 }
 
+export type ProjectionMode = 'cartesian' | 'spherical'
+
 export interface RenderRequest {
   prompt: string
 
@@ -292,6 +294,11 @@ export interface RenderRequest {
   nbSteps: number // min: 1, max: 50
 
   seed: number
+
+  width: number
+  height: number
+
+  projection: ProjectionMode
 }
 
 export interface ImageSegmentationRequest {
@@ -307,7 +314,11 @@ export interface ImageSegment {
   score: number 
 }
 
+export type RenderedSceneStatus = 'pending' | 'completed' | 'error'
+
 export interface RenderedScene {
+  renderId: string
+  status: RenderedSceneStatus
   assetUrl: string 
   error: string
   maskBase64: string
