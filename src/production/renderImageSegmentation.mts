@@ -17,7 +17,6 @@ export async function renderImageSegmentation(
 
   if (actionnables.length > 0) {
     console.log("we have some actionnables:", actionnables)
-    console.log("going to grab the first frame")
 
     const tmpImageFilePath = path.join(tmpDir, `${uuidv4()}.png`)
 
@@ -26,7 +25,7 @@ export async function renderImageSegmentation(
     console.log("wrote the image to ", tmpImageFilePath)
   
     if (!tmpImageFilePath) {
-      console.error("failed to get the image")
+      console.error("failed to segment the image")
       response.error = "failed to segment the image"
       response.status = "error"
     } else {

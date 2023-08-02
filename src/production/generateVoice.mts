@@ -36,7 +36,7 @@ export async function generateVoice(prompt: string, voiceFileName: string) {
         waitUntil: "networkidle2",
       })
 
-      await new Promise(r => setTimeout(r, 3000))
+      // await new Promise(r => setTimeout(r, 1000))
 
       const firstTextarea = await page.$('textarea[data-testid="textbox"]')
 

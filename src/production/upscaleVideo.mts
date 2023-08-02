@@ -35,7 +35,7 @@ export async function upscaleVideo(fileName: string, prompt: string) {
     const inputFilePath = path.join(pendingFilesDirFilePath, fileName)
     // console.log(`local file to upscale: ${inputFilePath}`)
     
-    await new Promise(r => setTimeout(r, 3000))
+    // await new Promise(r => setTimeout(r, 1000))
 
     const fileField = await page.$('input[type=file]')
 

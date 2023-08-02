@@ -5,6 +5,8 @@ import { renderImage } from "./renderImage.mts"
 import { renderVideo } from "./renderVideo.mts"
 import { renderImageSegmentation } from "./renderImageSegmentation.mts"
 import { renderVideoSegmentation } from "./renderVideoSegmentation.mts"
+import { upscaleImage } from "../utils/upscaleImage.mts"
+import { renderImageUpscaling } from "./renderImageUpscaling.mts"
 
 export async function renderPipeline(request: RenderRequest, response: RenderedScene) {
   const isVideo = request?.nbFrames > 1
@@ -18,7 +20,18 @@ export async function renderPipeline(request: RenderRequest, response: RenderedS
     console.log(`rendering an image..`)
   }
   await renderContent(request, response)
-  await renderSegmentation(request, response)
+
+  // we upscale images with esrgan
+  // and for videos, well.. let's just skip this part,
+  // but later we could use Zeroscope V2 XL maybe?
+  const optionalUpscalingStep = isVideo
+    ? Promise.resolve()
+    : renderImageUpscaling(request, response)
+
+  await Promise.all([
+    renderSegmentation(request, response),
+    optionalUpscalingStep
+  ])
 
   /*
   this is the optimized pipeline

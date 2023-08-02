@@ -40,7 +40,7 @@ export async function segmentImage(
     const page = await browser.newPage()
     await page.goto(instance, { waitUntil: 'networkidle2' })
     
-    await new Promise(r => setTimeout(r, 3000))
+    // await new Promise(r => setTimeout(r, 1000))
 
     const fileField = await page.$('input[type="file"]')
 
