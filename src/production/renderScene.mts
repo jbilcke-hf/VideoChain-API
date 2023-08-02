@@ -23,10 +23,10 @@ export async function renderScene(request: RenderRequest): Promise<RenderedScene
 
   if (isVideo) {
     request.width = getValidNumber(request.width, 256, 1024, 1024)
-    request.height = getValidNumber(request.width, 256, 1024, 512)
+    request.height = getValidNumber(request.height, 256, 1024, 512)
   } else {
     request.width = getValidNumber(request.width, 256, 1280, 576)
-    request.height = getValidNumber(request.width, 256, 720, 320)
+    request.height = getValidNumber(request.height, 256, 720, 320)
   }
 
   const response: RenderedScene = {
