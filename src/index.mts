@@ -52,7 +52,7 @@ app.post("/render", async (req, res) => {
     renderId: "",
     status: "pending",
     assetUrl: "",
-    maskBase64: "",
+    maskUrl: "",
     error: "",
     segments: []
   }
@@ -103,7 +103,7 @@ app.get("/render/:renderId", async (req, res) => {
     status: "pending",
     assetUrl: "",
     error: "",
-    maskBase64: "",
+    maskUrl: "",
     segments: []
   }
 
@@ -145,7 +145,7 @@ app.post("/segment", async (req, res) => {
 
   let result: RenderedScene = {
     assetUrl: "",
-    maskBase64: "",
+    maskUrl: "",
     error: "",
     segments: []
   }

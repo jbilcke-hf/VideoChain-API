@@ -22,7 +22,7 @@ export async function segmentImage(
   width: number,
   height: number,
 ): Promise<{
-  pngInBase64: string
+  maskUrl: string
   segments: ImageSegment[]
 }> {
 
@@ -64,7 +64,7 @@ export async function segmentImage(
       timeout: 40000, // we keep it tight, to fail early
     })
 
-    const maskUrl = await page.$$eval('img[data-testid="detailed-image"]', el => el.map(x => x.getAttribute("src"))[0])
+    const tmpMaskDownloadUrl = await page.$$eval('img[data-testid="detailed-image"]', el => el.map(x => x.getAttribute("src"))[0])
 
     let segments: ImageSegment[] = []
     
@@ -78,12 +78,12 @@ export async function segmentImage(
     // const tmpMaskFileName = `${uuidv4()}.png`
     // await downloadFileToTmp(maskUrl, tmpMaskFileName)
 
-    const rawPngInBase64 = await downloadImageAsBase64(maskUrl)
+    const rawPngInBase64 = await downloadImageAsBase64(tmpMaskDownloadUrl)
 
-    const pngInBase64 = await resizeBase64Image(rawPngInBase64, width, height)
+    const maskUrl = await resizeBase64Image(rawPngInBase64, width, height)
 
     return {
-      pngInBase64,
+      maskUrl,
       segments,
     }
   } catch (err) {

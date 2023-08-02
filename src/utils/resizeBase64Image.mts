@@ -12,5 +12,5 @@ export async function resizeBase64Image(imgBase64: string, targetWidth: number, 
   // Convert the buffer back to base64
   const resizedImageBase64 = resizedBuffer.toString('base64');
 
-  return resizedImageBase64;
+  return `data:image/png;base64,${resizedImageBase64}`
 }

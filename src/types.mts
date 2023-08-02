@@ -321,7 +321,7 @@ export interface RenderedScene {
   status: RenderedSceneStatus
   assetUrl: string 
   error: string
-  maskBase64: string
+  maskUrl: string
   segments: ImageSegment[]
 }
 

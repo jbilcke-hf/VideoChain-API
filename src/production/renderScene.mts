@@ -34,7 +34,7 @@ export async function renderScene(request: RenderRequest): Promise<RenderedScene
     status: "pending",
     assetUrl: "",
     error: "",
-    maskBase64: "",
+    maskUrl: "",
     segments: []
   }
 

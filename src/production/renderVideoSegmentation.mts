@@ -9,7 +9,7 @@ export async function renderVideoSegmentation(
   request: RenderRequest,
   response: RenderedScene
 ): Promise<RenderedScene> {
-  
+
   const actionnables = Array.isArray(request.actionnables) ? request.actionnables : []
 
   if (actionnables.length > 0) {
@@ -28,7 +28,7 @@ export async function renderVideoSegmentation(
       } else {
         console.log("got the first frame! segmenting..")
         const result = await segmentImage(firstFrameFilePath, actionnables, request.width, request.height)
-        response.maskBase64 = result.pngInBase64
+        response.maskUrl = result.maskUrl
         response.segments = result.segments
 
         // console.log("success!", {  segments })

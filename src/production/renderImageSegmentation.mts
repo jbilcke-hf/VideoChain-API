@@ -33,7 +33,7 @@ export async function renderImageSegmentation(
       console.log("got the first frame! segmenting..")
       try {
         const result = await segmentImage(tmpImageFilePath, actionnables, request.width, request.height)
-        response.maskBase64 = result.pngInBase64
+        response.maskUrl = result.maskUrl
         response.segments = result.segments
   
         console.log(`it worked the first time! got ${response.segments.length} segments`)
@@ -41,7 +41,7 @@ export async function renderImageSegmentation(
         console.log("this takes too long :/ trying another server..")
         try {
           const result = await segmentImage(tmpImageFilePath, actionnables, request.width, request.height)
-          response.maskBase64 = result.pngInBase64
+          response.maskUrl = result.maskUrl
           response.segments = result.segments
          
           console.log(`it worked the second time! got ${response.segments.length} segments`)
@@ -49,7 +49,7 @@ export async function renderImageSegmentation(
           console.log("trying one last time, on a 3rd server..")
           try {
             const result = await segmentImage(tmpImageFilePath, actionnables, request.width, request.height)
-            response.maskBase64 = result.pngInBase64
+            response.maskUrl = result.maskUrl
             response.segments = result.segments
         
             console.log(`it worked the third time! got ${response.segments.length} segments`)

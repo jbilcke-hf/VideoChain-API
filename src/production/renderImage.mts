@@ -1,7 +1,6 @@
 import { RenderedScene, RenderRequest } from "../types.mts"
 import { generateImageSDXLAsBase64 } from "../utils/generateImageSDXL.mts"
 import { generateImageSDXL360AsBase64 } from "../utils/generateImageSDXL360.mts"
-import { generateSeed } from "../utils/generateSeed.mts"
 
 export async function renderImage(
   request: RenderRequest,
