@@ -13,6 +13,8 @@ const instances: string[] = [
   // `${process.env.VC_ZEROSCOPE_SPACE_API_URL_3 || ""}`,
 ].filter(instance => instance?.length > 0)
 
+const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
+
 export const generateVideo = async (prompt: string, options?: {
   seed: number;
   nbFrames: number;
@@ -42,6 +44,7 @@ export const generateVideo = async (prompt: string, options?: {
       seed, // number (numeric value between 0 and 2147483647) in 'Seed' Slider component		
       nbFrames, // 24 // it is the nb of frames per seconds I think?
       nbSteps, // 10, (numeric value between 10 and 50) in 'Number of inference steps' Slider component
+      secretToken,
     ]) as any
     
     // console.log("rawResponse:", rawResponse)
