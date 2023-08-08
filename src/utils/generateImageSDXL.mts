@@ -9,6 +9,8 @@ const instances: string[] = [
   `${process.env.VC_SDXL_SPACE_API_URL_2 || ""}`,
 ].filter(instance => instance?.length > 0)
 
+const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
+
 export async function generateImageSDXLAsBase64(options: {
   positivePrompt: string;
   negativePrompt?: string;
@@ -73,7 +75,8 @@ export async function generateImageSDXLAsBase64(options: {
     8, // number (numeric value between 1 and 20) in 'Guidance scale for refiner' Slider component		
     nbSteps, // number (numeric value between 10 and 100) in 'Number of inference steps for base' Slider component		
     nbSteps, // number (numeric value between 10 and 100) in 'Number of inference steps for refiner' Slider component		
-    true, // boolean  in 'Apply refiner' Checkbox component
+    true, // boolean  in 'Apply refiner' Checkbox component,
+    secretToken
   ])) as any
     
   return rawResponse?.data?.[0] as string
