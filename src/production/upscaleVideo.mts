@@ -9,8 +9,10 @@ import { pendingFilesDirFilePath } from '../config.mts'
 import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
 
 const instances: string[] = [
-  process.env.VC_VIDEO_UPSCALE_SPACE_API_URL
-]
+  `${process.env.VC_VIDEO_UPSCALE_SPACE_API_URL_1 || ""}`
+].filter(instance => instance?.length > 0)
+
+const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
 
 // TODO we should use an inference endpoint instead (or a space which bakes generation + upscale at the same time)
 export async function upscaleVideo(fileName: string, prompt: string) {
@@ -28,6 +30,9 @@ export async function upscaleVideo(fileName: string, prompt: string) {
     await page.goto(instance, {
       waitUntil: 'networkidle2',
     })
+
+    const secretField = await page.$('input[type=text]')
+    await secretField.type(prompt)
 
     const promptField = await page.$('textarea')
     await promptField.type(prompt)

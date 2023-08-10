@@ -9,8 +9,8 @@ export const state = {
 }
 
 const instances: string[] = [
-  process.env.VC_AUDIO_GENERATION_SPACE_API_URL
-]
+  `${process.env.VC_AUDIO_GENERATION_SPACE_API_URL_1 || ""}`
+].filter(instance => instance?.length > 0)
 
 // TODO we should use an inference endpoint instead
 export async function generateAudio(prompt: string, audioFileName: string) {
