@@ -21,11 +21,15 @@ export const generateVideo = async (prompt: string, options?: {
   nbSteps: number;
 }) => {
 
+  /* let's disable load control, and let it use the queue */
+  /*
   if (state.load === instances.length) {
     throw new Error(`all video generation servers are busy, try again later..`)
   }
+  */
 
   state.load += 1
+  
 
   try {
     const seed = options?.seed || generateSeed()
