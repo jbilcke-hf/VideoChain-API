@@ -19,7 +19,18 @@ export async function renderPipeline(request: RenderRequest, response: RenderedS
   } else {
     console.log(`rendering an image..`)
   }
-  await renderContent(request, response)
+
+  try {
+    await renderContent(request, response)
+  } catch (err) {
+    console.log(`renderContent() failed, trying a 2nd time..`)
+    try {
+      await renderContent(request, response)
+    } catch (err2) {
+      console.log(`renderContent() failed, trying a 3th time..`)
+      await renderContent(request, response)
+    }
+  }
 
   // we upscale images with esrgan
   // and for videos, well.. let's just skip this part,
