@@ -16,6 +16,7 @@
   "author": "Julian Bilcke <julian.bilcke@huggingface.co>",
   "license": "Apache License",
   "dependencies": {
+    "@gorgonjs/file-provider": "^1.4.1",
     "@gorgonjs/gorgon": "^1.4.1",
     "@gradio/client": "^0.1.4",
     "@huggingface/inference": "^2.6.1",

@@ -1,10 +1,11 @@
 import { createReadStream, existsSync } from "node:fs"
 import path from "node:path"
 
-import { v4 as uuidv4, validate as uuidValidate } from "uuid"
+import { validate as uuidValidate } from "uuid"
 import express from "express"
 
 import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene } from "./types.mts"
+
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
 import { savePendingVideo } from "./scheduler/savePendingVideo.mts"
 import { getVideo } from "./scheduler/getVideo.mts"
@@ -19,9 +20,9 @@ import { hasValidAuthorization } from "./utils/hasValidAuthorization.mts"
 import { getAllVideosForOwner } from "./scheduler/getAllVideosForOwner.mts"
 import { initFolders } from "./initFolders.mts"
 import { sortVideosByYoungestFirst } from "./utils/sortVideosByYoungestFirst.mts"
-import { generateVideo } from "./production/generateVideo.mts"
-import { generateSeed } from "./utils/generateSeed.mts"
 import { getRenderedScene, renderScene } from "./production/renderScene.mts"
+import { parseRenderRequest } from "./utils/parseRenderRequest.mts"
+import { loadRenderedSceneFromCache } from "./utils/loadRenderedSceneFromCache.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -38,14 +39,26 @@ let isRendering = false
 // a "fast track" pipeline
 app.post("/render", async (req, res) => {
 
-  const request = req.body as RenderRequest
   console.log(req.body)
+
+  const request = parseRenderRequest(req.body as RenderRequest)
+
   if (!request.prompt) {
     console.log("Invalid prompt")
     res.status(400)
     res.write(JSON.stringify({ url: "", error: "invalid prompt" }))
     res.end()
     return
+  }
+
+  try {
+    const cached = await loadRenderedSceneFromCache(request)
+    const cachedJson = JSON.stringify(cached)
+    res.status(200)
+    res.write(cachedJson)
+    res.end()
+  } catch (err) {
+    // move along
   }
 
   let response: RenderedScene = {
@@ -56,7 +69,7 @@ app.post("/render", async (req, res) => {
     error: "",
     segments: []
   }
-  
+
   try {
     response = await renderScene(request)
   } catch (err) {
@@ -98,6 +111,16 @@ app.get("/render/:renderId", async (req, res) => {
     return
   }
 
+  try {
+    const cached = await loadRenderedSceneFromCache(undefined, renderId)
+    const cachedJson = JSON.stringify(cached)
+    res.status(200)
+    res.write(cachedJson)
+    res.end()
+  } catch (err) {
+    // move along
+  }
+
   let response: RenderedScene = {
     renderId: "",
     status: "pending",
@@ -134,52 +157,6 @@ app.get("/render/:renderId", async (req, res) => {
     return
   }
 })
-
-
-// a "fast track" pipeline
-/*
-app.post("/segment", async (req, res) => {
-
-  const request = req.body as RenderRequest
-  console.log(req.body)
-
-  let result: RenderedScene = {
-    assetUrl: "",
-    maskUrl: "",
-    error: "",
-    segments: []
-  }
-  
-  try {
-    result = await renderScene(request)
-  } catch (err) {
-    // console.log("failed to render scene!")
-    result.error = `failed to render scene: ${err}`
-  }
-
-  if (result.error === "already rendering") {
-    console.log("server busy")
-    res.status(200)
-    res.write(JSON.stringify({ url: "", error: result.error }))
-    res.end()
-    return
-  } else if (result.error.length > 0) {
-    // console.log("server error")
-    res.status(500)
-    res.write(JSON.stringify({ url: "", error: result.error }))
-    res.end()
-    return
-  } else {
-    // console.log("all good")
-    res.status(200)
-    res.write(JSON.stringify(result))
-    res.end()
-    return
-  }
-})
-*/
-
-
 
 app.post("/:ownerId", async (req, res) => {
   const request = req.body as VideoAPIRequest

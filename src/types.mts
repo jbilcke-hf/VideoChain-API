@@ -299,6 +299,8 @@ export interface RenderRequest {
   height: number
 
   projection: ProjectionMode
+
+  useCache: boolean
 }
 
 export interface ImageSegmentationRequest {
@@ -323,6 +325,12 @@ export interface RenderedScene {
   error: string
   maskUrl: string
   segments: ImageSegment[]
+}
+
+export interface RenderCache {
+  id: string
+  hash: string
+  scene: RenderedScene
 }
 
 // note: for video generation we are always going to have slow jobs,
