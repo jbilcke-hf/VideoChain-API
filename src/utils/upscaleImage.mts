@@ -6,7 +6,8 @@ import { getValidNumber } from "./getValidNumber.mts"
 // we don't use replicas yet, because it ain't easy to get their hostname
 const instances: string[] = [
   `${process.env.VC_UPSCALING_SPACE_API_URL_1 || ""}`,
-  // `${process.env.VC_UPSCALING_SPACE_API_URL_2 || ""}`,
+  `${process.env.VC_UPSCALING_SPACE_API_URL_2 || ""}`,
+  `${process.env.VC_UPSCALING_SPACE_API_URL_3 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 // this doesn't work because of this error.. I think the version of Gradio is too old/young?

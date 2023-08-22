@@ -276,6 +276,9 @@ export type CacheMode = "use" | "renew" | "ignore"
 export interface RenderRequest {
   prompt: string
 
+  // unused for now
+  negativePrompt: string
+
   // whether to use video segmentation
   // disabled (default)
   // firstframe: we only analyze the first frame
@@ -303,6 +306,8 @@ export interface RenderRequest {
   projection: ProjectionMode
 
   cache: CacheMode
+
+  wait: boolean // wait until the job is completed
 }
 
 export interface ImageSegmentationRequest {

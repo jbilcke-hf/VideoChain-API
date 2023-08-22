@@ -9,6 +9,9 @@ export function parseRenderRequest(request: RenderRequest) {
   try {
     request.nbFrames = getValidNumber(request.nbFrames, 1, 24, 16)
 
+    // wait! if we uncomment this, this will invalidate all the images already in cache..
+    // request.negativePrompt = request.negativePrompt || ""
+
     const isVideo = request?.nbFrames === 1
 
     // note that we accept a seed of 0
@@ -27,6 +30,7 @@ export function parseRenderRequest(request: RenderRequest) {
       request.height = getValidNumber(request.height, 256, 720, 320)
     }
 
+    request.wait = request?.wait || false
     request.cache = request?.cache || "ignore"
   } catch (err) {
     console.error(`failed to parse the render request: ${err}`)

@@ -24,6 +24,10 @@ export async function generateImageSDXLAsBase64(options: {
   if (!positivePrompt) {
     throw new Error("missing prompt")
   }
+
+  // the negative prompt CAN be missing, since we use a trick
+  // where we make the interface mandatory in the TS doc,
+  // but browsers might send something partial
   const negativePrompt = options?.negativePrompt || ""
   
   // we treat 0 as meaning "random seed"
@@ -38,9 +42,12 @@ export async function generateImageSDXLAsBase64(options: {
   instances.push(instance)
 
   const positive = [
+
+    // oh well.. is it too late to move this to the bottom?
     "beautiful",
     "intricate details",
     positivePrompt,
+
     "award winning",
     "high resolution"
   ].filter(word => word)

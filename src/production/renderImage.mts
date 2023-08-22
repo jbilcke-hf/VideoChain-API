@@ -17,6 +17,7 @@ export async function renderImage(
   
   const params = {
     positivePrompt: request.prompt,
+    negativePrompt: request.negativePrompt,
     seed: request.seed,
     nbSteps: request.nbSteps,
     width: request.width,
