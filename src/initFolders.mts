@@ -4,7 +4,9 @@ import {
   completedMetadataDirFilePath,
   filesDirPath,
   pendingFilesDirFilePath,
-  completedFilesDirFilePath
+  completedFilesDirFilePath,
+  cacheDirPath,
+  renderedDirFilePath
 } from "./config.mts"
 import { createDirIfNeeded } from "./utils/createDirIfNeeded.mts"
 
@@ -16,4 +18,6 @@ export const initFolders = () => {
   createDirIfNeeded(filesDirPath)
   createDirIfNeeded(pendingFilesDirFilePath)
   createDirIfNeeded(completedFilesDirFilePath)
+  createDirIfNeeded(cacheDirPath)
+  createDirIfNeeded(renderedDirFilePath)
 }

@@ -271,6 +271,8 @@ export type Video = VideoSequence & {
 
 export type ProjectionMode = 'cartesian' | 'spherical'
 
+export type CacheMode = "use" | "renew" | "ignore"
+
 export interface RenderRequest {
   prompt: string
 
@@ -300,7 +302,7 @@ export interface RenderRequest {
 
   projection: ProjectionMode
 
-  useCache: boolean
+  cache: CacheMode
 }
 
 export interface ImageSegmentationRequest {

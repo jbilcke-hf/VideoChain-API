@@ -5,13 +5,18 @@ import { getValidNumber } from "./getValidNumber.mts"
 
 export function parseRenderRequest(request: RenderRequest) {
 
+  console.log("parseRenderRequest: "+JSON.stringify(request, null, 2))
   try {
     request.nbFrames = getValidNumber(request.nbFrames, 1, 24, 16)
 
     const isVideo = request?.nbFrames === 1
 
-    // important: we need a consistent seed for our multiple rendering passes
-    request.seed = getValidNumber(request.seed, 0, 2147483647, generateSeed())
+    // note that we accept a seed of 0
+    // (this ensure we are able to cache the whote request by signing it)
+    request.seed = getValidNumber(request.seed, 0, 2147483647, 0)
+
+    // but obviously we will treat 0 as the random seed at a later stage
+
     request.nbSteps = getValidNumber(request.nbSteps, 5, 50, 10)
 
     if (isVideo) {
@@ -22,9 +27,11 @@ export function parseRenderRequest(request: RenderRequest) {
       request.height = getValidNumber(request.height, 256, 720, 320)
     }
 
-    request.useCache = getValidBoolean(request.useCache, false)
+    request.cache = request?.cache || "ignore"
   } catch (err) {
     console.error(`failed to parse the render request: ${err}`)
   }
+
+  console.log("parsed request: "+JSON.stringify(request, null, 2))
   return request
 }

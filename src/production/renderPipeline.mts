@@ -7,6 +7,7 @@ import { renderImageSegmentation } from "./renderImageSegmentation.mts"
 import { renderVideoSegmentation } from "./renderVideoSegmentation.mts"
 import { upscaleImage } from "../utils/upscaleImage.mts"
 import { renderImageUpscaling } from "./renderImageUpscaling.mts"
+import { saveRenderedSceneToCache } from "../utils/saveRenderedSceneToCache.mts"
 
 export async function renderPipeline(request: RenderRequest, response: RenderedScene) {
   const isVideo = request?.nbFrames > 1
@@ -67,4 +68,23 @@ export async function renderPipeline(request: RenderRequest, response: RenderedS
 
   response.status = "completed"
   response.error = ""
+
+  if (!request.cache || request.cache === "ignore") {
+    console.log("client asked to not use the cache in the rendering pipeline")
+    return
+  }
+
+  console.log("client asked this for cache: "+request.cache)
+
+  try {
+    // since the request is now completed we cache it
+    await saveRenderedSceneToCache(request, response)
+    console.log("successfully saved to cache")
+
+    // we don't really need to remove it from the in-memory cache 
+    // (the cache queue in src/production/renderScene.mts)
+    // since this cache queue has already an automatic pruning
+  } catch (err) {
+    console.error(`failed to save to cache, but no big deal: ${err}`)
+  }
 }

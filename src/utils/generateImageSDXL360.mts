@@ -25,7 +25,10 @@ export async function generateImageSDXL360AsBase64(options: {
     throw new Error("missing prompt")
   }
   const negativePrompt = options?.negativePrompt || ""
-  const seed = getValidNumber(options?.seed, 0, 2147483647, generateSeed())
+  
+  // we treat 0 as meaning "random seed"
+  const seed = (options?.seed ? options.seed : 0) || generateSeed()
+
   const width = getValidNumber(options?.width, 256, 1024, 512)
   const height = getValidNumber(options?.height, 256, 1024, 512)
   const nbSteps = getValidNumber(options?.nbSteps, 5, 100, 20)

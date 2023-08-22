@@ -8,7 +8,7 @@ import { getValidBoolean } from "../utils/getValidBoolean.mts"
 
 const cache: Record<string, RenderedScene> = {}
 const cacheQueue: string[] = []
-const maxCacheSize = 1000
+const maxCacheSize = 2000
 
 export async function renderScene(request: RenderRequest): Promise<RenderedScene> {
   // const key = getCacheKey(scene)

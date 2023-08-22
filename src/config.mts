@@ -13,7 +13,7 @@ export const completedFilesDirFilePath =  path.join(filesDirPath, "completed")
 
 // this is a semi-persistent storage (we want to renew it from time to time)
 export const cacheDirPath = path.join(storagePath, "cache")
-export const renderedDirFilePath = path.join(filesDirPath, "rendered")
+export const renderedDirFilePath = path.join(cacheDirPath, "rendered")
 
 export const shotFormatVersion = 1
 export const sequenceFormatVersion = 1

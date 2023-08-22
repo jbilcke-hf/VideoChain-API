@@ -1,6 +1,7 @@
 import { HfInference } from "@huggingface/inference"
-import { getValidNumber } from "./getValidNumber.mts";
-import { generateSeed } from "./generateSeed.mts";
+
+import { getValidNumber } from "./getValidNumber.mts"
+import { generateSeed } from "./generateSeed.mts"
 
 const hf = new HfInference(process.env.VC_HF_API_TOKEN)
 
@@ -18,7 +19,10 @@ export async function generateImage(options: {
     throw new Error("missing prompt")
   }
   const negativePrompt = options?.negativePrompt || ""
-  const seed = getValidNumber(options?.seed, 0, 2147483647, generateSeed())
+
+  // we treat 0 as meaning "random seed"
+  const seed = (options?.seed ? options.seed : 0) || generateSeed()
+
   const width = getValidNumber(options?.width, 256, 1024, 512)
   const height = getValidNumber(options?.height, 256, 1024, 512)
   const nbSteps = getValidNumber(options?.nbSteps, 5, 50, 25)

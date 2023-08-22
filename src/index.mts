@@ -51,14 +51,22 @@ app.post("/render", async (req, res) => {
     return
   }
 
-  try {
-    const cached = await loadRenderedSceneFromCache(request)
-    const cachedJson = JSON.stringify(cached)
-    res.status(200)
-    res.write(cachedJson)
-    res.end()
-  } catch (err) {
-    // move along
+  if (request.cache === "use") {
+    console.log("client requested to use the cache")
+    try {
+      const cached = await loadRenderedSceneFromCache(request)
+      const cachedJson = JSON.stringify(cached)
+      console.log(`request ${request} is in cache!`)
+      res.status(200)
+      res.write(cachedJson)
+      res.end()
+      return
+    } catch (err) {
+      console.log("request not found in cache: "+ err)
+      // move along
+    }
+  } else if (request.cache === "renew") {
+    console.log("client requested to renew the cache")
   }
 
   let response: RenderedScene = {
@@ -112,12 +120,16 @@ app.get("/render/:renderId", async (req, res) => {
   }
 
   try {
+    // we still try to search for it in the cache
     const cached = await loadRenderedSceneFromCache(undefined, renderId)
     const cachedJson = JSON.stringify(cached)
+    console.log(`request ${renderId} is already in cache, so we return that`)
     res.status(200)
     res.write(cachedJson)
     res.end()
+    return
   } catch (err) {
+    // console.log("renderId not found in cache: "+ err)
     // move along
   }
 
@@ -130,6 +142,7 @@ app.get("/render/:renderId", async (req, res) => {
     segments: []
   }
 
+  // console.log("going to render the scene!")
   try {
     response = await getRenderedScene(renderId)
   } catch (err) {

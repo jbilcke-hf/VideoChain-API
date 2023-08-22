@@ -32,7 +32,10 @@ export const generateVideo = async (prompt: string, options?: {
   
 
   try {
-    const seed = options?.seed || generateSeed()
+
+    // we treat 0 as meaning "random seed"
+    const seed = (options?.seed ? options.seed : 0) || generateSeed()
+
     const nbFrames = options?.nbFrames || 24 // we can go up to 48 frames, but then upscaling quill require too much memory!
     const nbSteps = options?.nbSteps || 35
 
