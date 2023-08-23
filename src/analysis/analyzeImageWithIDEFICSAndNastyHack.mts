@@ -70,12 +70,13 @@ export async function analyzeImage(image: string, prompt: string) {
     console.log(`uploading file..`)
     await fileField.uploadFile(tmpImageFilePath)
     // console.log(`did it work? did it do something?`)
+    // await sleep(2000)
 
     // console.log('looking for the button to submit')
     const submitButton = await page.$('button.lg')
 
     // console.log('clicking on the submit')
-    // await submitButton.click()
+    await submitButton.click()
 
     console.log("waiting for bot response..")
     await page.$('.message.bot')
@@ -87,9 +88,9 @@ export async function analyzeImage(image: string, prompt: string) {
     await sleep(12000)
 
     const message = await page.$$eval(".message.bot p", el => el.map(x => x.innerText)[0])
-    console.log("message:", message)
+    console.log("response:", message)
 
-    return message
+    return message || ""
   } catch (err) {
     throw err
   } finally {
