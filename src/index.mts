@@ -23,7 +23,7 @@ import { sortVideosByYoungestFirst } from "./utils/sortVideosByYoungestFirst.mts
 import { getRenderedScene, renderScene } from "./production/renderScene.mts"
 import { parseRenderRequest } from "./utils/parseRenderRequest.mts"
 import { loadRenderedSceneFromCache } from "./utils/loadRenderedSceneFromCache.mts"
-import { analyzeImage } from "./analysis/analyzeImage.mts"
+import { analyzeImage } from "./analysis/analyzeImageWithIDEFICSAndNastyHack.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -39,8 +39,6 @@ let isRendering = false
 
 // an image analyzing pipeline
 app.post("/analyze", async (req, res) => {
-
-  console.log(req.body)
 
   const request = req.body as ImageAnalysisRequest
 
@@ -60,6 +58,11 @@ app.post("/analyze", async (req, res) => {
     return
   }
 
+  console.log("/analyze called with: ", {
+    prompt: request.prompt,
+    image: request.image.slice(0, 50)
+  })
+
   const response: ImageAnalysisResponse = {
     result: "",
     error: ""
@@ -68,7 +71,8 @@ app.post("/analyze", async (req, res) => {
   try {
     response.result = await analyzeImage(request.image, request.prompt)
   } catch (err) {
-    // console.log("failed to render scene!")
+    console.log("failed to render scene!")
+    console.log(err)
     response.error = `failed to render scene: ${err}`
   }
 

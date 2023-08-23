@@ -11,7 +11,7 @@ export async function writeBase64ToFile(content: string, filePath: string): Prom
   // Write binary data to file
   try {
     await fs.writeFile(filePath, data)
-    console.log("File written successfully")
+    // console.log("File written successfully")
   } catch (error) {
     console.error("An error occurred:", error)
   }
