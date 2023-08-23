@@ -4,7 +4,7 @@ import path from "node:path"
 import { validate as uuidValidate } from "uuid"
 import express from "express"
 
-import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene } from "./types.mts"
+import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene, ImageAnalysisRequest, ImageAnalysisResponse } from "./types.mts"
 
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
 import { savePendingVideo } from "./scheduler/savePendingVideo.mts"
@@ -23,6 +23,7 @@ import { sortVideosByYoungestFirst } from "./utils/sortVideosByYoungestFirst.mts
 import { getRenderedScene, renderScene } from "./production/renderScene.mts"
 import { parseRenderRequest } from "./utils/parseRenderRequest.mts"
 import { loadRenderedSceneFromCache } from "./utils/loadRenderedSceneFromCache.mts"
+import { analyzeImage } from "./analysis/analyzeImage.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -35,6 +36,56 @@ const port = 7860
 app.use(express.json())
 
 let isRendering = false
+
+// an image analyzing pipeline
+app.post("/analyze", async (req, res) => {
+
+  console.log(req.body)
+
+  const request = req.body as ImageAnalysisRequest
+
+  if (!request.prompt) {
+    console.log("Invalid prompt")
+    res.status(400)
+    res.write(JSON.stringify({ result: "", error: "invalid prompt" }))
+    res.end()
+    return
+  }
+
+  if (!request.image) {
+    console.log("Invalid image")
+    res.status(400)
+    res.write(JSON.stringify({ result: "", error: "invalid image" }))
+    res.end()
+    return
+  }
+
+  const response: ImageAnalysisResponse = {
+    result: "",
+    error: ""
+  }
+
+  try {
+    response.result = await analyzeImage(request.image, request.prompt)
+  } catch (err) {
+    // console.log("failed to render scene!")
+    response.error = `failed to render scene: ${err}`
+  }
+
+  if (response.error.length > 0) {
+    // console.log("server error")
+    res.status(500)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  } else {
+    // console.log("all good")
+    res.status(200)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  }
+})
 
 // a "fast track" pipeline
 app.post("/render", async (req, res) => {
@@ -226,7 +277,6 @@ app.post("/:ownerId", async (req, res) => {
     res.end()
   }
 })
-
 
 app.get("/:ownerId/:videoId\.mp4", async (req, res) => {
     

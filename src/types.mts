@@ -310,6 +310,17 @@ export interface RenderRequest {
   wait: boolean // wait until the job is completed
 }
 
+export interface ImageAnalysisRequest {
+  image: string // in base64
+  prompt: string
+}
+
+export interface ImageAnalysisResponse {
+  result: string
+  error?: string
+}
+
+
 export interface ImageSegmentationRequest {
   image: string // in base64
   keywords: string[]
