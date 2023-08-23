@@ -3,7 +3,6 @@ import path from "node:path"
 
 import { validate as uuidValidate } from "uuid"
 import express from "express"
-
 import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene, ImageAnalysisRequest, ImageAnalysisResponse } from "./types.mts"
 
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
@@ -33,13 +32,14 @@ main()
 const app = express()
 const port = 7860
 
-app.use(express.json())
-
 let isRendering = false
 
 // fix this error: "PayloadTooLargeError: request entity too large"
+// there are multiple version because.. yeah well, it's Express!
+// app.use(bodyParser.json({limit: '50mb'}));
+//app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb', extended: true}));
 
 // an image analyzing pipeline
 app.post("/analyze", async (req, res) => {
