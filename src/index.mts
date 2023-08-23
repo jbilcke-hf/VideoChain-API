@@ -37,6 +37,10 @@ app.use(express.json())
 
 let isRendering = false
 
+// fix this error: "PayloadTooLargeError: request entity too large"
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
+
 // an image analyzing pipeline
 app.post("/analyze", async (req, res) => {
 
