@@ -11,7 +11,8 @@ export async function speechToText(sound: string): Promise<string> {
   const wavFilePath = await convertMp3ToWavFilePath(sound)
 
   const result = await nodewhisper(wavFilePath, {
-    modelName: 'base.en', //Downloaded models name
+    modelName: "base.en", //Downloaded models name
+    autoDownloadModelName: "base.en"
   })
 
   console.log(result)
