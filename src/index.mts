@@ -23,7 +23,7 @@ import { getRenderedScene, renderScene } from "./production/renderScene.mts"
 import { parseRenderRequest } from "./utils/parseRenderRequest.mts"
 import { loadRenderedSceneFromCache } from "./utils/loadRenderedSceneFromCache.mts"
 import { analyzeImage } from "./analysis/analyzeImageWithIDEFICSAndNastyHack.mts"
-import { speechToText } from "./speechToText/speechToTextWithWhisperLib.mts"
+// import { speechToText } from "./speechToText/speechToTextWithWhisperLib.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -98,6 +98,8 @@ app.post("/analyze", async (req, res) => {
 
 
 // a sound recognition pipeline
+// it is currently broken
+/*
 app.post("/listen", async (req, res) => {
 
   const request = req.body as SoundAnalysisRequest
@@ -141,6 +143,7 @@ app.post("/listen", async (req, res) => {
     return
   }
 })
+*/
 
 // a "fast track" pipeline
 app.post("/render", async (req, res) => {
