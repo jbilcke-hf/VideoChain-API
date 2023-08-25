@@ -3,7 +3,7 @@ import path from "node:path"
 
 import { validate as uuidValidate } from "uuid"
 import express from "express"
-import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene, ImageAnalysisRequest, ImageAnalysisResponse } from "./types.mts"
+import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene, ImageAnalysisRequest, ImageAnalysisResponse, SoundAnalysisResponse, SoundAnalysisRequest } from "./types.mts"
 
 import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
 import { savePendingVideo } from "./scheduler/savePendingVideo.mts"
@@ -23,6 +23,7 @@ import { getRenderedScene, renderScene } from "./production/renderScene.mts"
 import { parseRenderRequest } from "./utils/parseRenderRequest.mts"
 import { loadRenderedSceneFromCache } from "./utils/loadRenderedSceneFromCache.mts"
 import { analyzeImage } from "./analysis/analyzeImageWithIDEFICSAndNastyHack.mts"
+import { speechToText } from "./speechToText/speechToTextWithWhisperLib.mts"
 
 initFolders()
 // to disable all processing (eg. to debug)
@@ -75,9 +76,55 @@ app.post("/analyze", async (req, res) => {
   try {
     response.result = await analyzeImage(request.image, request.prompt)
   } catch (err) {
-    console.log("failed to render scene!")
+    console.log("failed to analyze the image!")
     console.log(err)
-    response.error = `failed to render scene: ${err}`
+    response.error = `failed to analyze the image: ${err}`
+  }
+
+  if (response.error.length > 0) {
+    // console.log("server error")
+    res.status(500)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  } else {
+    // console.log("all good")
+    res.status(200)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  }
+})
+
+
+// a sound recognition pipeline
+app.post("/listen", async (req, res) => {
+
+  const request = req.body as SoundAnalysisRequest
+
+  if (!request.sound) {
+    console.log("Invalid sound")
+    res.status(400)
+    res.write(JSON.stringify({ result: "", error: "invalid sound" }))
+    res.end()
+    return
+  }
+
+  console.log("/listen called with: ", {
+    sound: request.sound.slice(0, 50)
+  })
+
+  const response: SoundAnalysisResponse = {
+    result: "",
+    error: ""
+  }
+
+  try {
+    response.result = await speechToText(request.sound)
+  } catch (err) {
+    console.log("failed to listen to the sound!")
+    console.log(err)
+    response.error = `failed to listen to the sound: ${err}`
   }
 
   if (response.error.length > 0) {

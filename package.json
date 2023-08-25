@@ -30,12 +30,14 @@
     "fs-extra": "^11.1.1",
     "gpt-tokens": "^1.1.1",
     "node-fetch": "^3.3.1",
+    "nodejs-whisper": "^0.1.4",
     "openai": "^3.3.0",
     "puppeteer": "^20.8.0",
     "resize-base64": "^1.0.12",
     "sharp": "^0.32.4",
     "temp-dir": "^3.0.0",
     "ts-node": "^10.9.1",
+    "tts-react": "^3.0.1",
     "uuid": "^9.0.0",
     "yaml": "^2.3.1"
   }

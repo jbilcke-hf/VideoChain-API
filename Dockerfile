@@ -31,6 +31,7 @@ COPY --chown=user package*.json $HOME/app
 
 RUN npm install
 
+
 # Copy the current directory contents into the container at $HOME/app setting the owner to the user
 COPY --chown=user . $HOME/app
 
