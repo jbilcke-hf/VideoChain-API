@@ -20,7 +20,7 @@ export function parseRenderRequest(request: RenderRequest) {
 
     // but obviously we will treat 0 as the random seed at a later stage
 
-    request.upscaling = getValidNumber(request.upscaling, 0, 4, 0)
+    request.upscalingFactor = getValidNumber(request.upscalingFactor, 0, 4, 0)
 
     request.nbSteps = getValidNumber(request.nbSteps, 5, 50, 10)
 
