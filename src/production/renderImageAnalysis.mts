@@ -10,12 +10,12 @@ export async function renderImageAnalysis(
   
   try {
     // note: this converts a base64 PNG to a base64 JPG (which is good, actually!)
-    response.assetUrl = await analyzeImage(response.assetUrl, request.prompt)
+    response.alt = await analyzeImage(response.assetUrl, request.prompt)
     console.log(`analysis worked on the first try!`)
   } catch (err) {
     console.error(`analysis failed the first time.. let's try again..`)
     try {
-      response.assetUrl = await analyzeImage(response.assetUrl, request.prompt)
+      response.alt = await analyzeImage(response.assetUrl, request.prompt)
       console.log(`analysis worked on the second try!`)
     } catch (err) {
       console.error(`analysis failed on the second attempt.. let's keep the prompt as a fallback, then :|`)
