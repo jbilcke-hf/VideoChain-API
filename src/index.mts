@@ -182,6 +182,7 @@ app.post("/render", async (req, res) => {
     renderId: "",
     status: "pending",
     assetUrl: "",
+    alt: request.prompt || "",
     maskUrl: "",
     error: "",
     segments: []
@@ -246,6 +247,7 @@ app.get("/render/:renderId", async (req, res) => {
     renderId: "",
     status: "pending",
     assetUrl: "",
+    alt: "",
     error: "",
     maskUrl: "",
     segments: []

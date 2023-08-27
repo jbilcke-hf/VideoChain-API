@@ -1,10 +1,7 @@
 import { v4 as uuidv4 } from "uuid"
 
 import { RenderedScene, RenderRequest } from "../types.mts"
-import { generateSeed } from "../utils/generateSeed.mts"
-import { getValidNumber } from "../utils/getValidNumber.mts"
 import { renderPipeline } from "./renderPipeline.mts"
-import { getValidBoolean } from "../utils/getValidBoolean.mts"
 
 const cache: Record<string, RenderedScene> = {}
 const cacheQueue: string[] = []
@@ -19,6 +16,7 @@ export async function renderScene(request: RenderRequest): Promise<RenderedScene
     renderId,
     status: "pending",
     assetUrl: "",
+    alt: request.prompt || "",
     error: "",
     maskUrl: "",
     segments: []

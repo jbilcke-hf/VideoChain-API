@@ -24,6 +24,8 @@ export function parseRenderRequest(request: RenderRequest) {
 
     request.nbSteps = getValidNumber(request.nbSteps, 5, 50, 10)
 
+    request.analyze = request?.analyze ? true : false
+
     if (isVideo) {
       request.width = getValidNumber(request.width, 256, 1024, 1024)
       request.height = getValidNumber(request.height, 256, 1024, 512)

@@ -5,9 +5,9 @@ import { renderImage } from "./renderImage.mts"
 import { renderVideo } from "./renderVideo.mts"
 import { renderImageSegmentation } from "./renderImageSegmentation.mts"
 import { renderVideoSegmentation } from "./renderVideoSegmentation.mts"
-import { upscaleImage } from "../utils/upscaleImage.mts"
 import { renderImageUpscaling } from "./renderImageUpscaling.mts"
 import { saveRenderedSceneToCache } from "../utils/saveRenderedSceneToCache.mts"
+import { renderImageAnalysis } from "./renderImageAnalysis.mts"
 
 export async function renderPipeline(request: RenderRequest, response: RenderedScene) {
   const isVideo = request?.nbFrames > 1
@@ -40,8 +40,13 @@ export async function renderPipeline(request: RenderRequest, response: RenderedS
     ? Promise.resolve()
     : renderImageUpscaling(request, response)
 
+  const optionalAnalysisStep = request.analyze
+    ? renderImageAnalysis(request, response)
+    : Promise.resolve()
+
   await Promise.all([
     renderSegmentation(request, response),
+    optionalAnalysisStep,
     optionalUpscalingStep
   ])
 
