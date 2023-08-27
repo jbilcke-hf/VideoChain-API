@@ -16,9 +16,15 @@ const instances: string[] = [
 //    at processTicksAndRejections (node:internal/process/task_queues:95:5)
 export async function upscaleImage(src: string, factor?: number) {
 
-  // bu default we do a 4X scale
-  const scaleFactor = getValidNumber(factor, 2, 10, 4)
+  // by default we do a 2X scale
+  // VideoQuest will use 4X
+  // 4 is really the max/limit, as this can generate PNGs of 50 Mb..
+  const scaleFactor = getValidNumber(factor, 0, 4, 2)
 
+  if (scaleFactor < 2) {
+    return src
+  }
+  
   const instance = instances.shift()
   instances.push(instance)
 

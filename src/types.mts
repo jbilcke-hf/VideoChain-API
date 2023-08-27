@@ -303,6 +303,14 @@ export interface RenderRequest {
   width: number
   height: number
 
+  // upscaling factor
+  // 0: no upscaling
+  // 1: no upscaling
+  // 2: 2x larger
+  // 3: 3x larger
+  // 4x: 4x larger, up to 4096x4096 (warning: a PNG of this size can be 50 Mb!)
+  upscalingFactor: number
+
   projection: ProjectionMode
 
   cache: CacheMode
