@@ -5,6 +5,7 @@ export function hashRequest(request: RenderRequest) {
 
   // we ignore the commands associated to cache and stuff
   const hashable = {
+    version: 1,
     prompt: request.prompt,
     segmentation: request.segmentation,
     actionnables: request.actionnables,
