@@ -8,12 +8,12 @@ export function hashRequest(request: RenderRequest) {
     prompt: request.prompt,
     segmentation: request.segmentation,
     actionnables: request.actionnables,
-    nbFrames: request.actionnables,
-    nbSteps: request.actionnables,
-    seed: request.actionnables,
-    width: request.actionnables,
-    height: request.actionnables,
-    projection: request.actionnables,
+    nbFrames: request.nbFrames,
+    nbSteps: request.nbSteps,
+    seed: request.seed,
+    width: request.width,
+    height: request.height,
+    projection: request.projection,
   }
 
   const requestJson = JSON.stringify(hashable)
