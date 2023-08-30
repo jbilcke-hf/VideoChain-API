@@ -11,7 +11,7 @@ export function hashRequest(request: RenderRequest) {
     actionnables: request.actionnables,
     nbFrames: request.nbFrames,
     nbSteps: request.nbSteps,
-    seed: request.seed,
+    // seed: request.seed,
     width: request.width,
     height: request.height,
     projection: request.projection,
