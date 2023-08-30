@@ -15,6 +15,8 @@ const instances: string[] = [
   `${process.env.VC_SDXL_SPACE_API_URL_8 || ""}`,
   `${process.env.VC_SDXL_SPACE_API_URL_9 || ""}`,
   `${process.env.VC_SDXL_SPACE_API_URL_10 || ""}`,
+  `${process.env.VC_SDXL_SPACE_API_URL_11 || ""}`,
+  `${process.env.VC_SDXL_SPACE_API_URL_12 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
