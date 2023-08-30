@@ -63,10 +63,12 @@ app.post("/analyze", async (req, res) => {
     return
   }
 
+  /*
   console.log("/analyze called with: ", {
     prompt: request.prompt,
     image: request.image.slice(0, 50)
   })
+  */
 
   const response: ImageAnalysisResponse = {
     result: "",
@@ -161,21 +163,21 @@ app.post("/render", async (req, res) => {
   }
 
   if (request.cache === "use") {
-    console.log("client requested to use the cache")
+    // console.log("client requested to use the cache")
     try {
       const cached = await loadRenderedSceneFromCache(request)
       const cachedJson = JSON.stringify(cached)
-      console.log(`request ${request} is in cache!`)
+      // console.log(`request ${request} is in cache!`)
       res.status(200)
       res.write(cachedJson)
       res.end()
       return
     } catch (err) {
-      console.log("request not found in cache: "+ err)
+      // console.log("request not found in cache: "+ err)
       // move along
     }
   } else if (request.cache === "renew") {
-    console.log("client requested to renew the cache")
+    // console.log("client requested to renew the cache")
   }
 
   let response: RenderedScene = {
@@ -196,7 +198,7 @@ app.post("/render", async (req, res) => {
   }
 
   if (response.error === "already rendering") {
-    console.log("server busy")
+    // console.log("server busy")
     res.status(200)
     res.write(JSON.stringify(response))
     res.end()
@@ -233,7 +235,7 @@ app.get("/render/:renderId", async (req, res) => {
     // we still try to search for it in the cache
     const cached = await loadRenderedSceneFromCache(undefined, renderId)
     const cachedJson = JSON.stringify(cached)
-    console.log(`request ${renderId} is already in cache, so we return that`)
+    // console.log(`request ${renderId} is already in cache, so we return that`)
     res.status(200)
     res.write(cachedJson)
     res.end()
@@ -306,7 +308,7 @@ app.post("/:ownerId", async (req, res) => {
   let video: Video = null
 
   console.log(`creating video from request..`)
-  console.log(`request: `, JSON.stringify(request))
+  // console.log(`request: `, JSON.stringify(request))
   if (!request?.prompt?.length) {
     console.error(`failed to create video (prompt is empty})`)
     res.status(400)
