@@ -99,5 +99,9 @@ export async function generateImageSDXLAsBase64(options: {
     secretToken
   ])) as any
     
-  return rawResponse?.data?.[0] as string
+  const result = rawResponse?.data?.[0] as string
+  if (!result?.length) {
+    throw new Error(`the returned image was empty`)
+  }
+  return result
 }
