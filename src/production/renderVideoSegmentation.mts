@@ -13,20 +13,20 @@ export async function renderVideoSegmentation(
   const actionnables = Array.isArray(request.actionnables) ? request.actionnables : []
 
   if (actionnables.length > 0) {
-    console.log("we have some actionnables:", actionnables)
+    // console.log("we have some actionnables:", actionnables)
     if (request.segmentation === "firstframe") {
-      console.log("going to grab the first frame")
+      // console.log("going to grab the first frame")
       const tmpVideoFilePath = await downloadFileToTmp(response.assetUrl, `${uuidv4()}`)
-      console.log("downloaded the first frame to ", tmpVideoFilePath)
+      // console.log("downloaded the first frame to ", tmpVideoFilePath)
       const firstFrameFilePath = await getFirstVideoFrame(tmpVideoFilePath)
-      console.log("downloaded the first frame to ", firstFrameFilePath)
+      // console.log("downloaded the first frame to ", firstFrameFilePath)
       
       if (!firstFrameFilePath) {
-        console.error("failed to get the image")
+        // console.error("failed to get the image")
         response.error = "failed to segment the image"
         response.status = "error"
       } else {
-        console.log("got the first frame! segmenting..")
+       // console.log("got the first frame! segmenting..")
         const result = await segmentImage(firstFrameFilePath, actionnables, request.width, request.height)
         response.maskUrl = result.maskUrl
         response.segments = result.segments

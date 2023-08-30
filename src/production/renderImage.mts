@@ -13,7 +13,7 @@ export async function renderImage(
     ? generateImageSDXL360AsBase64
     : generateImageSDXLAsBase64
 
-  console.log(`going to generate an image using ${request.projection || "default (cartesian)"} projection`)
+  // console.log(`going to generate an image using ${request.projection || "default (cartesian)"} projection`)
   
   const params = {
     positivePrompt: request.prompt,
@@ -24,21 +24,21 @@ export async function renderImage(
     height: request.height
   }
 
-  console.log(`calling generateImageAsBase64 with: `, JSON.stringify(params, null, 2))
+  // console.log(`calling generateImageAsBase64 with: `, JSON.stringify(params, null, 2))
 
 
   // first we generate a quick low quality version
   try {
     response.assetUrl = await generateImageAsBase64(params)
-    console.log("successful generation!", response.assetUrl.slice(0, 30))
+    // console.log("successful generation!", response.assetUrl.slice(0, 30))
     if (!response.assetUrl?.length) {
       throw new Error(`the generated image is empty`)
     }
   } catch (err) {
-    console.error(`failed to render.. but let's try again!`)
+    // console.error(`failed to render.. but let's try again!`)
     try {
       response.assetUrl = await generateImageAsBase64(params)
-      console.log("successful generation!", response.assetUrl.slice(0, 30))
+      // console.log("successful generation!", response.assetUrl.slice(0, 30))
       if (!response.assetUrl?.length) {
         throw new Error(`the generated image is empty`)
       }

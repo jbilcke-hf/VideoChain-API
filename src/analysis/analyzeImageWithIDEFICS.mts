@@ -14,7 +14,7 @@ export async function analyzeImage(src: string, prompt: string): Promise<string>
     hf_token: `${process.env.VC_HF_API_TOKEN}` as any
   })
 
-  console.log("/analyzeImage: calling api.predict(6, ...)")
+  // console.log("/analyzeImage: calling api.predict(6, ...)")
 
   /*
   the chat history has this format:

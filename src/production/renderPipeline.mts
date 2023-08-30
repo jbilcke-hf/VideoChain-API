@@ -16,19 +16,19 @@ export async function renderPipeline(request: RenderRequest, response: RenderedS
   const renderSegmentation  = isVideo ? renderVideoSegmentation : renderImageSegmentation 
 
   if (isVideo) {
-    console.log(`rendering a video..`)
+    // console.log(`rendering a video..`)
   } else {
-    console.log(`rendering an image..`)
+    // console.log(`rendering an image..`)
   }
 
   try {
     await renderContent(request, response)
   } catch (err) {
-    console.log(`renderContent() failed, trying a 2nd time..`)
+    // console.log(`renderContent() failed, trying a 2nd time..`)
     try {
       await renderContent(request, response)
     } catch (err2) {
-      console.log(`renderContent() failed, trying a 3th time..`)
+      // console.log(`renderContent() failed, trying a 3th time..`)
       await renderContent(request, response)
     }
   }
@@ -75,16 +75,16 @@ export async function renderPipeline(request: RenderRequest, response: RenderedS
   response.error = ""
 
   if (!request.cache || request.cache === "ignore") {
-    console.log("client asked to not use the cache in the rendering pipeline")
+    // console.log("client asked to not use the cache in the rendering pipeline")
     return
   }
 
-  console.log("client asked this for cache: "+request.cache)
+  // console.log("client asked this for cache: "+request.cache)
 
   try {
     // since the request is now completed we cache it
     await saveRenderedSceneToCache(request, response)
-    console.log("successfully saved to cache")
+    // console.log("successfully saved to cache")
 
     // we don't really need to remove it from the in-memory cache 
     // (the cache queue in src/production/renderScene.mts)

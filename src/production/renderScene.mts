@@ -33,7 +33,7 @@ export async function renderScene(request: RenderRequest): Promise<RenderedScene
   // we start it, but we do not await for the response
   renderPipeline(request, response)
 
-  console.log("renderScene: yielding the scene", response)
+  // console.log("renderScene: yielding the scene", response)
   return response
 }
 
