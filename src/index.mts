@@ -256,11 +256,11 @@ app.post("/upscale", async (req, res) => {
   let assetUrl = ""
   try {
     try {
-      assetUrl = await upscaleImage(image, 2)
+      assetUrl = await upscaleImage(image, req.body.factor)
     } catch (err) {
       // hmm.. let's try again?
       try {
-        assetUrl = await upscaleImage(image, 2)
+        assetUrl = await upscaleImage(image, req.body.factor)
       } catch (err) {
         throw new Error(`second attempt to upscale the image failed (${err})`)
       }
