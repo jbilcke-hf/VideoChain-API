@@ -11,7 +11,7 @@ export const filesDirPath = path.join(storagePath, "files")
 export const pendingFilesDirFilePath = path.join(filesDirPath, "pending")
 export const completedFilesDirFilePath =  path.join(filesDirPath, "completed")
 
-// this is a semi-persistent storage (we want to renew it from time to time)
+// this is a semi-persistent storage (we will want to renew it from time to time)
 export const cacheDirPath = path.join(storagePath, "cache")
 export const renderedDirFilePath = path.join(cacheDirPath, "rendered")
 

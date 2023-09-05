@@ -23,6 +23,7 @@ import { getRenderedScene, renderScene } from "./production/renderScene.mts"
 import { parseRenderRequest } from "./utils/parseRenderRequest.mts"
 import { loadRenderedSceneFromCache } from "./utils/loadRenderedSceneFromCache.mts"
 import { analyzeImage } from "./analysis/analyzeImageWithIDEFICSAndNastyHack.mts"
+import { upscaleImage } from "./utils/upscaleImage.mts"
 // import { speechToText } from "./speechToText/speechToTextWithWhisperLib.mts"
 
 initFolders()
@@ -150,6 +151,14 @@ app.post("/listen", async (req, res) => {
 // a "fast track" pipeline
 app.post("/render", async (req, res) => {
 
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+  
   console.log(req.body)
 
   const request = parseRenderRequest(req.body as RenderRequest)
@@ -215,6 +224,121 @@ app.post("/render", async (req, res) => {
     res.write(JSON.stringify(response))
     res.end()
     return
+  }
+})
+
+// upscale an arbitrary image
+app.post("/upscale", async (req, res) => {
+
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+
+  const image = `${req.body.image}`
+
+  if (!image) {
+    console.error("invalid input image")
+    res.status(400)
+    res.write(JSON.stringify({ error: `invalid input image` }))
+    res.end()
+    return
+  }
+
+  let response = {
+    assetUrl: "",
+    error: "",
+  }
+
+  let assetUrl = ""
+  try {
+    try {
+      assetUrl = await upscaleImage(image, 2)
+    } catch (err) {
+      // hmm.. let's try again?
+      try {
+        assetUrl = await upscaleImage(image, 2)
+      } catch (err) {
+        throw new Error(`second attempt to upscale the image failed (${err})`)
+      }
+    }
+    if (!assetUrl) {
+      throw new Error(`no image to return`)
+    }
+
+    response.assetUrl = assetUrl
+    // console.log(`request ${renderId} is already in cache, so we return that`)
+    res.status(200)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  } catch (err) {
+    response.error = `${err}`
+    console.error(`${err}`)
+    res.status(500)
+    res.write(JSON.stringify(response))
+    res.end()
+  }
+})
+
+
+// used to upscale an existing image
+// the image has to be completed for this to work
+// ie it has to be in cache
+// it's a bit of a hack endpoint I've added to reduce the laod
+// on the AI Comic Factory, but we don't really need it for other applications
+app.post("/upscale/:renderId", async (req, res) => {
+
+  const renderId = `${req.params.renderId}`
+
+  if (!uuidValidate(renderId)) {
+    console.error("invalid render id")
+    res.status(400)
+    res.write(JSON.stringify({ error: `invalid render id` }))
+    res.end()
+    return
+  }
+
+  let response = {
+    assetUrl: "",
+    error: "",
+  }
+
+  let assetUrl = ""
+  try {
+    // we still try to search for it in the cache
+    const cached = await loadRenderedSceneFromCache(undefined, renderId)
+    try {
+      assetUrl = await upscaleImage(cached.assetUrl, 2)
+    } catch (err) {
+      // hmm.. let's try again?
+      try {
+        assetUrl = await upscaleImage(cached.assetUrl, 2)
+      } catch (err) {
+        throw new Error(`second attempt to upscale the image failed (${err})`)
+      }
+    }
+    if (!assetUrl) {
+      throw new Error(`no image to return`)
+    }
+
+    response.assetUrl = assetUrl
+    // console.log(`request ${renderId} is already in cache, so we return that`)
+    res.status(200)
+    res.write(response)
+    res.end()
+    return
+  } catch (err) {
+    // console.log("renderId not found in cache: "+ err)
+    // move along
+    response.error = `${err}`
+    console.error(`${err}`)
+    res.status(500)
+    res.write(JSON.stringify(response))
+    res.end()
   }
 })
 
