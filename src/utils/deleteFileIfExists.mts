@@ -1,17 +1,19 @@
 import { existsSync, promises as fs } from "node:fs"
 
 export const deleteFileIfExists = async (filePath: string) => {
-  // this function scares me a bit, 
-  if (filePath === "/" || filePath === "~" || filePath === ".") {
+
+  const safePath = filePath.trim()
+  // just a sanity check
+  if (safePath.includes("*") ||safePath === "/" || safePath === "~" || safePath === ".") {
     throw new Error(`lol, no.`)
   }
 
   if (existsSync(filePath)) {
     try {
-      await fs.unlink(filePath)
+      await fs.unlink(safePath)
       return true
     } catch (err) {
-      console.log(`failed to delete file ${filePath}`)
+      console.log(`failed to delete file ${safePath}`)
     }
   }
   return false

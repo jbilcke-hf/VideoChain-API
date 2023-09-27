@@ -3,7 +3,9 @@ import { client } from "@gradio/client"
 import { generateSeed } from "../utils/generateSeed.mts"
 import { getValidNumber } from "./getValidNumber.mts"
 
-// we don't use replicas yet, because it ain't easy to get their hostname
+// note: to reduce costs we use the small A10s
+// anyway, we will soon not need to use this cloud anymore 
+// since we will be able to leverage the Inference API
 const instances: string[] = [
   `${process.env.VC_SDXL_SPACE_API_URL_1 || ""}`,
   `${process.env.VC_SDXL_SPACE_API_URL_2 || ""}`,
@@ -19,7 +21,8 @@ const instances: string[] = [
   `${process.env.VC_SDXL_SPACE_API_URL_12 || ""}`,
   `${process.env.VC_SDXL_SPACE_API_URL_13 || ""}`,
   `${process.env.VC_SDXL_SPACE_API_URL_14 || ""}`,
-
+  `${process.env.VC_SDXL_SPACE_API_URL_15 || ""}`,
+  `${process.env.VC_SDXL_SPACE_API_URL_16 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
