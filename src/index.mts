@@ -626,6 +626,7 @@ app.get("/:ownerId", async (req, res) => {
 })
 
 // caption an audio sample
+/*
 app.post("/audio/caption", async (req, res) => {
 
   if (!hasValidAuthorization(req.headers)) {
@@ -680,6 +681,8 @@ app.post("/audio/caption", async (req, res) => {
     res.end()
   }
 })
+
+*/
 
 // get all pending videos - this is for admin usage only
 app.get("/", async (req, res) => {
