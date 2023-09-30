@@ -1,6 +1,6 @@
+import { generateImageSDXLAsBase64 } from "../providers/image-generation/generateImageSDXL.mts"
+import { generateImageSDXL360AsBase64 } from "../providers/image-generation/generateImageSDXL360.mts"
 import { RenderedScene, RenderRequest } from "../types.mts"
-import { generateImageSDXLAsBase64 } from "../utils/generateImageSDXL.mts"
-import { generateImageSDXL360AsBase64 } from "../utils/generateImageSDXL360.mts"
 
 export async function renderImage(
   request: RenderRequest,

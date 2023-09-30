@@ -2,7 +2,7 @@ import path from "node:path"
 
 // due to Docker issues, we disable OpenGL transitions for now
 // import concat from 'ffmpeg-concat'
-import concat from './concatNoGL.mts'
+import concat from '../utils/video/concatNoGL.mts'
 
 import { VideoShot } from '../types.mts'
 import { pendingFilesDirFilePath } from "../config.mts"

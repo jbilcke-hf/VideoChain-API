@@ -2,19 +2,20 @@ import { v4 as uuidv4 } from "uuid"
 
 import { Video, VideoShot } from "../types.mts"
 
-import { generateVideo } from "../production/generateVideo.mts"
-import { upscaleVideo } from "../production/upscaleVideo.mts"
-import { interpolateVideo } from "../production/interpolateVideo.mts"
+import { generateVideo } from "../providers/video-generation/generateVideo.mts"
+import { upscaleVideo } from "../providers/video-upscaling/upscaleVideo.mts"
+import { interpolateVideo } from "../providers/video-interpolation/interpolateVideo.mts"
 import { postInterpolation } from "../production/postInterpolation.mts"
-import { generateAudio } from "../production/generateAudio.mts"
-import { addAudioToVideo } from "../production/addAudioToVideo.mts"
+import { generateAudio } from "../providers/audio-generation/generateAudio.mts"
+import { addAudioToVideo } from "../utils/video/addAudioToVideo.mts"
 
-import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
-import { copyVideoFromTmpToPending } from "../utils/copyVideoFromTmpToPending.mts"
+import { downloadFileToTmp } from "../utils/download/downloadFileToTmp.mts"
+import { copyVideoFromTmpToPending } from "./copyVideoFromTmpToPending.mts"
 
 import { saveAndCheckIfNeedToStop } from "./saveAndCheckIfNeedToStop.mts"
-import { enrichVideoSpecsUsingLLM } from "../llm/enrichVideoSpecsUsingLLM.mts"
+
 import { updateShotPreview } from "./updateShotPreview.mts"
+import { enrichVideoSpecsUsingLLM } from "../providers/language-model/enrichVideoSpecsUsingLLM.mts"
 
 export const processVideo = async (video: Video) => {
 

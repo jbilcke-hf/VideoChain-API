@@ -1,5 +1,5 @@
 import { RenderedScene, RenderRequest } from "../types.mts"
-import { upscaleImage } from "../utils/upscaleImage.mts"
+import { upscaleImage } from "../providers/image-upscaling/upscaleImage.mts"
 
 export async function renderImageUpscaling(
   request: RenderRequest,

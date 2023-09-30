@@ -1,6 +1,6 @@
-import { analyzeImage } from "../analysis/analyzeImageWithIDEFICSAndNastyHack.mts"
+
 import { RenderedScene, RenderRequest } from "../types.mts"
-import { upscaleImage } from "../utils/upscaleImage.mts"
+import { analyzeImage } from "../providers/image-caption/analyzeImageWithIDEFICSAndNastyHack.mts"
 
 export async function renderImageAnalysis(
   request: RenderRequest,

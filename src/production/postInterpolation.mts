@@ -3,7 +3,7 @@ import path from "node:path"
 import { v4 as uuidv4 } from "uuid"
 import tmpDir from "temp-dir"
 import ffmpeg from "fluent-ffmpeg"
-import { moveFileFromTmpToPending } from "../utils/moveFileFromTmpToPending.mts"
+import { moveFileFromTmpToPending } from "../utils/filesystem/moveFileFromTmpToPending.mts"
 import { pendingFilesDirFilePath } from "../config.mts"
 
 export const postInterpolation = async (fileName: string, durationMs: number, nbFrames: number, noiseAmount: number): Promise<string> => {

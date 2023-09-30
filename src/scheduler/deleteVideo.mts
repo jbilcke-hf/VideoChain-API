@@ -2,7 +2,7 @@ import tmpDir from "temp-dir"
 import { validate as uuidValidate } from "uuid"
 
 import { completedMetadataDirFilePath, completedFilesDirFilePath, pendingMetadataDirFilePath, pendingFilesDirFilePath } from "../config.mts"
-import { deleteFilesWithName } from "../utils/deleteAllFilesWith.mts"
+import { deleteFilesWithName } from "../utils/filesystem/deleteAllFilesWith.mts"
 
 
 // note: we make sure ownerId and videoId are *VALID*

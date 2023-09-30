@@ -111,7 +111,7 @@ export type VideoTransition =
   | 'x_axistranslation'
 
 
-export interface VideoShotMeta {
+export type VideoShotMeta = {
   shotPrompt: string
   // inputVideo?: string
 
@@ -157,7 +157,7 @@ export interface VideoShotMeta {
 }
 
 
-export interface VideoShotData {
+export type VideoShotData = {
   // must be unique
   id: string
   sequenceId: string
@@ -189,7 +189,7 @@ export interface VideoShotData {
 
 export type VideoShot = VideoShotMeta & VideoShotData
 
-export interface VideoSequenceMeta {
+export type VideoSequenceMeta = {
 
   // describe the whole movie
   videoPrompt: string
@@ -225,7 +225,7 @@ export interface VideoSequenceMeta {
 }
 
 
-export interface VideoSequenceData {
+export type VideoSequenceData = {
   // must be unique
   id: string
 
@@ -273,7 +273,7 @@ export type ProjectionMode = 'cartesian' | 'spherical'
 
 export type CacheMode = "use" | "renew" | "ignore"
 
-export interface RenderRequest {
+export type RenderRequest = {
   prompt: string
 
   // unused for now
@@ -320,33 +320,33 @@ export interface RenderRequest {
   analyze: boolean // analyze the image to generate a caption (optional)
 }
 
-export interface ImageAnalysisRequest {
+export type ImageAnalysisRequest = {
   image: string // in base64
   prompt: string
 }
 
-export interface ImageAnalysisResponse {
+export type ImageAnalysisResponse = {
   result: string
   error?: string
 }
 
-export interface SoundAnalysisRequest {
+export type SoundAnalysisRequest = {
   sound: string // in base64
   prompt: string
 }
 
-export interface SoundAnalysisResponse {
+export type SoundAnalysisResponse = {
   result: string
   error?: string
 }
 
 
-export interface ImageSegmentationRequest {
+export type ImageSegmentationRequest = {
   image: string // in base64
   keywords: string[]
 }
 
-export interface ImageSegment {
+export type ImageSegment = {
   id: number
   box: number[]
   color: number[]
@@ -356,7 +356,7 @@ export interface ImageSegment {
 
 export type RenderedSceneStatus = 'pending' | 'completed' | 'error'
 
-export interface RenderedScene {
+export type RenderedScene = {
   renderId: string
   status: RenderedSceneStatus
   assetUrl: string 
@@ -366,7 +366,7 @@ export interface RenderedScene {
   segments: ImageSegment[]
 }
 
-export interface RenderCache {
+export type RenderCache = {
   id: string
   hash: string
   scene: RenderedScene
@@ -378,7 +378,7 @@ export interface RenderCache {
 // so the goal of rendering "jobs" is mostly to give the illusion that
 // things go faster, by already providing some things like the background image,
 // before we send 
-export interface RenderingJob {
+export type RenderingJob = {
   scene: RenderRequest
   result: RenderedScene
 

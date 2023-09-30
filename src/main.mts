@@ -1,7 +1,7 @@
-import { initFolders } from "./initFolders.mts"
+
 import { getPendingVideos } from "./scheduler/getPendingVideos.mts"
 import { processVideo } from "./scheduler/processVideo.mts"
-import { sortPendingVideosByLeastCompletedFirst } from "./utils/sortPendingVideosByLeastCompletedFirst.mts"
+import { sortPendingVideosByLeastCompletedFirst } from "./scheduler/sortPendingVideosByLeastCompletedFirst.mts"
 
 export const main = async () => {
 

@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from "uuid"
 
 import { RenderedScene, RenderRequest } from "../types.mts"
-import { downloadFileToTmp } from "../utils/downloadFileToTmp.mts"
-import { getFirstVideoFrame } from "../utils/getFirstVideoFrame.mts"
-import { segmentImage } from "../utils/segmentImage.mts"
+import { downloadFileToTmp } from "../utils/download/downloadFileToTmp.mts"
+import { getFirstVideoFrame } from "../scheduler/getFirstVideoFrame.mts"
+import { segmentImage } from "../providers/image-segmentation/segmentImage.mts"
 
 export async function renderVideoSegmentation(
   request: RenderRequest,

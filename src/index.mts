@@ -5,7 +5,7 @@ import { validate as uuidValidate } from "uuid"
 import express from "express"
 import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene, ImageAnalysisRequest, ImageAnalysisResponse, SoundAnalysisResponse, SoundAnalysisRequest } from "./types.mts"
 
-import { parseVideoRequest } from "./utils/parseVideoRequest.mts"
+import { parseVideoRequest } from "./utils/requests/parseVideoRequest.mts"
 import { savePendingVideo } from "./scheduler/savePendingVideo.mts"
 import { getVideo } from "./scheduler/getVideo.mts"
 import { main } from "./main.mts"
@@ -15,15 +15,16 @@ import { markVideoAsToAbort } from "./scheduler/markVideoAsToAbort.mts"
 import { markVideoAsToPause } from "./scheduler/markVideoAsToPause.mts"
 import { markVideoAsPending } from "./scheduler/markVideoAsPending.mts"
 import { getPendingVideos } from "./scheduler/getPendingVideos.mts"
-import { hasValidAuthorization } from "./utils/hasValidAuthorization.mts"
+import { hasValidAuthorization } from "./utils/requests/hasValidAuthorization.mts"
 import { getAllVideosForOwner } from "./scheduler/getAllVideosForOwner.mts"
-import { initFolders } from "./initFolders.mts"
-import { sortVideosByYoungestFirst } from "./utils/sortVideosByYoungestFirst.mts"
+import { initFolders } from "./utils/filesystem/initFolders.mts"
+import { sortVideosByYoungestFirst } from "./scheduler/sortVideosByYoungestFirst.mts"
 import { getRenderedScene, renderScene } from "./production/renderScene.mts"
-import { parseRenderRequest } from "./utils/parseRenderRequest.mts"
-import { loadRenderedSceneFromCache } from "./utils/loadRenderedSceneFromCache.mts"
-import { analyzeImage } from "./analysis/analyzeImageWithIDEFICSAndNastyHack.mts"
-import { upscaleImage } from "./utils/upscaleImage.mts"
+import { parseRenderRequest } from "./utils/requests/parseRenderRequest.mts"
+import { loadRenderedSceneFromCache } from "./utils/requests/loadRenderedSceneFromCache.mts"
+
+import { upscaleImage } from "./providers/image-upscaling/upscaleImage.mts"
+import { analyzeImage } from "./providers/image-caption/analyzeImageWithIDEFICSAndNastyHack.mts"
 // import { speechToText } from "./speechToText/speechToTextWithWhisperLib.mts"
 
 initFolders()
@@ -620,6 +621,62 @@ app.get("/:ownerId", async (req, res) => {
     console.error(err)
     res.status(500)
     res.write(JSON.stringify({ error: `couldn't get the videos for owner ${ownerId}` }))
+    res.end()
+  }
+})
+
+// caption an audio sample
+app.post("/audio/caption", async (req, res) => {
+
+  if (!hasValidAuthorization(req.headers)) {
+    console.log("Invalid authorization")
+    res.status(401)
+    res.write(JSON.stringify({ error: "invalid token" }))
+    res.end()
+    return
+  }
+
+  const image = `${req.body.image}`
+
+  if (!image) {
+    console.error("invalid input image")
+    res.status(400)
+    res.write(JSON.stringify({ error: `invalid input image` }))
+    res.end()
+    return
+  }
+
+  let response = {
+    caption: "",
+    error: "",
+  }
+
+  let caption = ""
+  try {
+    try {
+      caption = await audioToCaption(audio, req.body.factor)
+    } catch (err) {
+      // hmm.. let's try again?
+      try {
+        caption = await audioToCaption(audio, req.body.factor)
+      } catch (err) {
+        throw new Error(`second attempt to caption the audio failed (${err})`)
+      }
+    }
+    if (!caption) {
+      throw new Error(`no caption to return`)
+    }
+
+    response.caption = caption
+    res.status(200)
+    res.write(JSON.stringify(response))
+    res.end()
+    return
+  } catch (err) {
+    response.error = `${err}`
+    console.error(`${err}`)
+    res.status(500)
+    res.write(JSON.stringify(response))
     res.end()
   }
 })

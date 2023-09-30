@@ -4,8 +4,9 @@ import { v4 as uuidv4 } from "uuid"
 import tmpDir from "temp-dir"
 
 import { RenderedScene, RenderRequest } from "../types.mts"
-import { segmentImage } from "../utils/segmentImage.mts"
-import { writeBase64ToFile } from "../utils/writeBase64ToFile.mts"
+
+import { writeBase64ToFile } from "../utils/filesystem/writeBase64ToFile.mts"
+import { segmentImage } from "../providers/image-segmentation/segmentImage.mts"
 
 
 export async function renderImageSegmentation(

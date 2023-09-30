@@ -1,6 +1,6 @@
 import { assembleShots } from "../production/assembleShots.mts"
 import { Video, VideoShot } from "../types.mts"
-import { copyVideoFromPendingToCompleted } from "../utils/copyVideoFromPendingToCompleted.mts"
+import { copyVideoFromPendingToCompleted } from "./copyVideoFromPendingToCompleted.mts"
 
 export const updateShotPreview = async (video: Video, shot: VideoShot) => {
   // copy the individual shot

@@ -1,0 +1,52 @@
+
+// installed using:
+// npx api install @coqui-api/v1.0#fbrqr4dllng0lnk
+import sdk from "@api/coqui-api"
+
+export const generateVoiceWithCoqui = async ({
+  dialogueLine = "",
+  characterDescription = "",
+  characterName = "",
+}: {
+  dialogueLine: string
+  characterDescription: string
+  characterName: string
+}) => {
+  if (!dialogueLine) {
+    throw new Error("Missing dialogue line")
+  }
+  if (!characterDescription) {
+    throw new Error("Missing character description")
+  }
+  if (!characterName) {
+    throw new Error("Missing character name")
+  }
+  const coquiToken = `${process.env.PROVIDER_COQUI_API_TOKEN || ""}`
+  if (!coquiToken) {
+    throw new Error("Missing Coqui API token")
+  }
+
+  sdk.auth(coquiToken)
+
+  const something = await sdk.samples_xtts_render_from_prompt_create({
+    prompt: characterDescription,
+    name: characterName,
+    text: dialogueLine,
+    speed: 1
+  })
+
+  if (!something.data) {
+    throw new Error(`requiest failed: ${something.data}`)
+  }
+
+  /*
+  audio_url: 
+"https://coqui-prod-creator-app-synthesized-samples.s3.amazonaws.com/xtts_samples/03050b77-489d-4999-b0fc-d7a56ff62b78.wav"
+created_at: "2023-09-18T21:47:49.357225Z"
+id: "03050b77-489d-4999-b0fc-d7a56ff62b78"
+language: "en"
+name: "Al Dongino"
+text: "Keep your friends close, but your enemies closer."
+*/
+  return something.data
+}

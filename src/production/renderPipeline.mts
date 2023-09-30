@@ -6,7 +6,7 @@ import { renderVideo } from "./renderVideo.mts"
 import { renderImageSegmentation } from "./renderImageSegmentation.mts"
 import { renderVideoSegmentation } from "./renderVideoSegmentation.mts"
 import { renderImageUpscaling } from "./renderImageUpscaling.mts"
-import { saveRenderedSceneToCache } from "../utils/saveRenderedSceneToCache.mts"
+import { saveRenderedSceneToCache } from "../utils/filesystem/saveRenderedSceneToCache.mts"
 import { renderImageAnalysis } from "./renderImageAnalysis.mts"
 
 export async function renderPipeline(request: RenderRequest, response: RenderedScene) {
