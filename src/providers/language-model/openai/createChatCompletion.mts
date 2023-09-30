@@ -29,7 +29,7 @@ export const createChatCompletion = async (
   // for doc: https://www.npmjs.com/package/gpt-tokens
   const usageInfo = new GPTTokens({
     // Plus enjoy a 25% cost reduction for input tokens on GPT-3.5 Turbo (0.0015 per 1K input tokens)
-    plus    : false,
+    // plus    : false,
     model   : "gpt-4",
     messages: messages as any,
   })
