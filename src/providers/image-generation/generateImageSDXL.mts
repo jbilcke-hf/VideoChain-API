@@ -3,7 +3,7 @@ import { client } from "@gradio/client"
 import { generateSeed } from "../../utils/misc/generateSeed.mts"
 import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
 
-// note: to reduce costs we use the small A10s
+// note: to reduce costs I use the small A10s (not the large)
 // anyway, we will soon not need to use this cloud anymore 
 // since we will be able to leverage the Inference API
 const instances: string[] = [
@@ -23,6 +23,8 @@ const instances: string[] = [
   `${process.env.VC_SDXL_SPACE_API_URL_14 || ""}`,
   `${process.env.VC_SDXL_SPACE_API_URL_15 || ""}`,
   `${process.env.VC_SDXL_SPACE_API_URL_16 || ""}`,
+  `${process.env.VC_SDXL_SPACE_API_URL_17 || ""}`,
+  `${process.env.VC_SDXL_SPACE_API_URL_18 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
@@ -52,7 +54,7 @@ export async function generateImageSDXLAsBase64(options: {
   const width = getValidNumber(options?.width, 256, 1024, 512)
   const height = getValidNumber(options?.height, 256, 1024, 512)
   const nbSteps = getValidNumber(options?.nbSteps, 5, 100, 20)
-  console.log("SEED:", seed)
+  // console.log("SEED:", seed)
 
   const instance = instances.shift()
   instances.push(instance)
