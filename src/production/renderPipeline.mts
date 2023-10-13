@@ -1,53 +1,19 @@
 
 import { RenderedScene, RenderRequest } from "../types.mts"
 
-import { renderImage } from "./renderImage.mts"
-import { renderVideo } from "./renderVideo.mts"
-import { renderImageSegmentation } from "./renderImageSegmentation.mts"
-import { renderVideoSegmentation } from "./renderVideoSegmentation.mts"
-import { renderImageUpscaling } from "./renderImageUpscaling.mts"
 import { saveRenderedSceneToCache } from "../utils/filesystem/saveRenderedSceneToCache.mts"
-import { renderImageAnalysis } from "./renderImageAnalysis.mts"
+import { renderSegmentation } from "./renderSegmentation.mts"
+import { renderUpscaling } from "./renderUpscaling.mts"
+import { renderContent } from "./renderContent.mts"
+import { renderAnalysis } from "./renderAnalysis.mts"
 
 export async function renderPipeline(request: RenderRequest, response: RenderedScene) {
-  const isVideo = request?.nbFrames > 1
-
-  const renderContent = isVideo ? renderVideo : renderImage
-  const renderSegmentation  = isVideo ? renderVideoSegmentation : renderImageSegmentation 
-
-  if (isVideo) {
-    // console.log(`rendering a video..`)
-  } else {
-    // console.log(`rendering an image..`)
-  }
-
-  try {
-    await renderContent(request, response)
-  } catch (err) {
-    // console.log(`renderContent() failed, trying a 2nd time..`)
-    try {
-      await renderContent(request, response)
-    } catch (err2) {
-      // console.log(`renderContent() failed, trying a 3th time..`)
-      await renderContent(request, response)
-    }
-  }
-
-  // we upscale images with esrgan
-  // and for videos, well.. let's just skip this part,
-  // but later we could use Zeroscope V2 XL maybe?
-  const optionalUpscalingStep = isVideo
-    ? Promise.resolve()
-    : renderImageUpscaling(request, response)
-
-  const optionalAnalysisStep = request.analyze
-    ? renderImageAnalysis(request, response)
-    : Promise.resolve()
+  await renderContent(request, response)
 
   await Promise.all([
     renderSegmentation(request, response),
-    optionalAnalysisStep,
-    optionalUpscalingStep
+    renderAnalysis(request, response),
+    renderUpscaling(request, response)
   ])
 
   /*

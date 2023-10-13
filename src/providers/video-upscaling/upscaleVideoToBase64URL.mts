@@ -1,12 +1,10 @@
 import path from "node:path"
 
-import { v4 as uuidv4 } from "uuid"
-import tmpDir from "temp-dir"
+
 import puppeteer from "puppeteer"
 
-import { downloadFileToTmp } from '../../utils/download/downloadFileToTmp.mts'
 import { pendingFilesDirFilePath } from '../../config.mts'
-import { moveFileFromTmpToPending } from "../../utils/filesystem/moveFileFromTmpToPending.mts"
+import { downloadFileAsBase64URL } from "../../utils/download/downloadFileAsBase64URL.mts"
 
 const instances: string[] = [
   `${process.env.VC_VIDEO_UPSCALE_SPACE_API_URL_1 || ""}`
@@ -15,7 +13,7 @@ const instances: string[] = [
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
 
 // TODO we should use an inference endpoint instead (or a space which bakes generation + upscale at the same time)
-export async function upscaleVideo(fileName: string, prompt: string) {
+export async function upscaleVideoToBase64URL(fileName: string, prompt: string) {
   const instance = instances.shift()
   instances.push(instance)
 
@@ -68,13 +66,11 @@ export async function upscaleVideo(fileName: string, prompt: string) {
 
     const upscaledFileUrl = await page.$$eval('a[download="xl_result.mp4"]', el => el.map(x => x.getAttribute("href"))[0])
 
-    // it is always a good idea to download to a tmp dir before saving to the pending dir
-    // because there is always a risk that the download will fail
-    
-    const tmpFileName = `${uuidv4()}.mp4`
+    // we download the whole file
+    // it's only a few seconds of video, so it should be < 2MB
+    const assetUrl = await downloadFileAsBase64URL(upscaledFileUrl)
 
-    await downloadFileToTmp(upscaledFileUrl, tmpFileName)
-    await moveFileFromTmpToPending(tmpFileName, fileName)
+    return assetUrl
   } catch (err) {
     throw err
   } finally {

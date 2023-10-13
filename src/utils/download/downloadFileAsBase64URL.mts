@@ -1,7 +1,7 @@
-export const downloadFileAsBase64 = async (remoteUrl: string): Promise<string> => {
+export const downloadFileAsBase64URL = async (remoteUrl: string): Promise<string> => {
   const controller = new AbortController()
 
-  // download the image
+  // download the file
   const response = await fetch(remoteUrl, {
     signal: controller.signal
   })
@@ -13,5 +13,8 @@ export const downloadFileAsBase64 = async (remoteUrl: string): Promise<string> =
   // convert it to base64
   const base64 = buffer.toString('base64')
 
-  return base64
+  const contentType = response.headers.get('content-type')
+
+  const assetUrl = `data:${contentType};base64,${base64}`
+  return assetUrl
 };

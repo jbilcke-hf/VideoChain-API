@@ -2,7 +2,7 @@ import puppeteer from "puppeteer"
 
 import { sleep } from "../../utils/misc/sleep.mts"
 import { ImageSegment } from "../../types.mts"
-import { downloadImageAsBase64 } from "../../utils/download/downloadFileAsBase64.mts"
+import { downloadFileAsBase64 } from "../../utils/download/downloadFileAsBase64.mts"
 import { resizeBase64Image } from "../../utils/image/resizeBase64Image.mts"
 
 // we don't use replicas yet, because it ain't easy to get their hostname
@@ -78,7 +78,7 @@ export async function segmentImage(
     // const tmpMaskFileName = `${uuidv4()}.png`
     // await downloadFileToTmp(maskUrl, tmpMaskFileName)
 
-    const rawPngInBase64 = await downloadImageAsBase64(tmpMaskDownloadUrl)
+    const rawPngInBase64 = await downloadFileAsBase64(tmpMaskDownloadUrl)
 
     const maskUrl = await resizeBase64Image(rawPngInBase64, width, height)
 
