@@ -384,3 +384,17 @@ export type RenderingJob = {
 
   status: 'pending' | 'completed' | 'error'
 }
+
+// vendor-specific types
+
+export type HotshotImageInferenceSize =
+| '320x768'
+| '384x672'
+| '416x608'
+| '512x512'
+| '608x416'
+| '672x384'
+| '768x320'
+| '1024x1024' // custom ratio - this isn't supported / supposed to work properly
+| '1024x512' // custom panoramic ratio - this isn't supported / supposed to work properly
+| '1024x576' // movie ratio (16:9) this isn't supported / supposed to work properly

@@ -1,5 +1,5 @@
 import { RenderedScene, RenderRequest } from "../types.mts"
-import { generateVideo } from "../providers/video-generation/generateVideo.mts"
+import { generateVideo } from "../providers/video-generation/generateVideoWithZeroscope.mts"
 
 export async function renderVideo(
   request: RenderRequest,

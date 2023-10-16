@@ -9,9 +9,6 @@ export const state = {
 // we don't use replicas yet, because it ain't easy to get their hostname
 const instances: string[] = [
   `${process.env.VC_ZEROSCOPE_SPACE_API_URL_1 || ""}`,
-  `${process.env.VC_ZEROSCOPE_SPACE_API_URL_2 || ""}`,
-  `${process.env.VC_ZEROSCOPE_SPACE_API_URL_3 || ""}`,
-  `${process.env.VC_ZEROSCOPE_SPACE_API_URL_4 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
@@ -21,6 +18,7 @@ export const generateVideo = async (prompt: string, options?: {
   nbFrames: number;
   nbSteps: number;
 }) => {
+  throw new Error("Not implemented yet")
 
   /* let's disable load control, and let it use the queue */
   /*

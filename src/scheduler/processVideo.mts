@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid"
 
 import { Video, VideoShot } from "../types.mts"
 
-import { generateVideo } from "../providers/video-generation/generateVideo.mts"
+import { generateVideo } from "../providers/video-generation/generateVideoWithZeroscope.mts"
 import { upscaleVideo } from "../providers/video-upscaling/upscaleVideo.mts"
 import { interpolateVideo } from "../providers/video-interpolation/interpolateVideo.mts"
 import { postInterpolation } from "../production/postInterpolation.mts"
