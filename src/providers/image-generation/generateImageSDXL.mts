@@ -4,8 +4,7 @@ import { generateSeed } from "../../utils/misc/generateSeed.mts"
 import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
 
 // TODO add a system to mark failed instances as "unavailable" for a couple of minutes
-
-
+console.log("process.env:", process.env)
 
 // note: to reduce costs I use the small A10s (not the large)
 // anyway, we will soon not need to use this cloud anymore 
@@ -32,6 +31,8 @@ const instances: string[] = [
 ].filter(instance => instance?.length > 0)
 
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
+
+console.log("DEBUG:", JSON.stringify({ instances, secretToken }, null, 2))
 
 export async function generateImageSDXLAsBase64(options: {
   positivePrompt: string;

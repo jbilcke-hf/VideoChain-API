@@ -1,27 +1,10 @@
 import { createReadStream, existsSync } from "node:fs"
 import path from "node:path"
-import fs from "node:fs"
 
 import { validate as uuidValidate } from "uuid"
 import express from "express"
 
-import dotenv from "dotenv"
-
-dotenv.config()
-
-try {
-  if (fs.existsSync(".env.local")) {
-    const result = dotenv.config({ path: ".env.local" })
-    console.log("using .env.local")
-    process.env = {
-      ...process.env,
-      ...result.parsed,
-    }
-  }
-} catch (err) {
-  // do nothing
-  console.log("using .env")
-}
+import { completedFilesDirFilePath } from "./config.mts"
 
 import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene, ImageAnalysisRequest, ImageAnalysisResponse, SoundAnalysisResponse, SoundAnalysisRequest } from "./types.mts"
 
@@ -29,7 +12,6 @@ import { parseVideoRequest } from "./utils/requests/parseVideoRequest.mts"
 import { savePendingVideo } from "./scheduler/savePendingVideo.mts"
 import { getVideo } from "./scheduler/getVideo.mts"
 import { main } from "./main.mts"
-import { completedFilesDirFilePath } from "./config.mts"
 import { markVideoAsToDelete } from "./scheduler/markVideoAsToDelete.mts"
 import { markVideoAsToAbort } from "./scheduler/markVideoAsToAbort.mts"
 import { markVideoAsToPause } from "./scheduler/markVideoAsToPause.mts"

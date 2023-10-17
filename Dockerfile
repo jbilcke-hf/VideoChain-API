@@ -29,6 +29,9 @@ WORKDIR $HOME/app
 # where available (npm@5+)
 COPY --chown=user package*.json $HOME/app
 
+# make sure the .env is copied as well
+COPY --chown=user .env $HOME/app
+
 RUN npm install
 
 
