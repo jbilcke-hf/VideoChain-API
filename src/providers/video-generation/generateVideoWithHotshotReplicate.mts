@@ -8,8 +8,8 @@ import { getNegativePrompt, getPositivePrompt } from "./defaultPrompts.mts"
 import { VideoGenerationOptions } from "./types.mts"
 
 const replicateToken = `${process.env.AUTH_REPLICATE_API_TOKEN || ""}`
-const replicateModel = `${process.env.HOTSHOT_XL_REPLICATE_MODEL || ""}`
-const replicateModelVersion = `${process.env.HOTSHOT_XL_REPLICATE_MODEL_VERSION || ""}`
+const replicateModel = `${process.env.VC_HOTSHOT_XL_REPLICATE_MODEL || ""}`
+const replicateModelVersion = `${process.env.VC_HOTSHOT_XL_REPLICATE_MODEL_VERSION || ""}`
 
 if (!replicateToken) {
   throw new Error(`you need to configure your AUTH_REPLICATE_API_TOKEN`)
@@ -49,11 +49,11 @@ export async function generateVideoWithHotshotReplicate({
   }
 
   if (!replicateModel) {
-    throw new Error(`you need to configure your HOTSHOT_XL_REPLICATE_MODEL`)
+    throw new Error(`you need to configure your VC_HOTSHOT_XL_REPLICATE_MODEL`)
   }
 
   if (!replicateModelVersion) {
-    throw new Error(`you need to configure your HOTSHOT_XL_REPLICATE_MODEL_VERSION`)
+    throw new Error(`you need to configure your VC_HOTSHOT_XL_REPLICATE_MODEL_VERSION`)
   }
 
   // pimp the prompt

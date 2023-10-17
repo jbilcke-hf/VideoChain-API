@@ -3,6 +3,11 @@ import path from "node:path"
 
 import { validate as uuidValidate } from "uuid"
 import express from "express"
+
+import dotenv from "dotenv"
+
+dotenv.config({ path: ".env.local" })
+
 import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene, ImageAnalysisRequest, ImageAnalysisResponse, SoundAnalysisResponse, SoundAnalysisRequest } from "./types.mts"
 
 import { parseVideoRequest } from "./utils/requests/parseVideoRequest.mts"

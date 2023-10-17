@@ -7,6 +7,13 @@ import { generateSeed } from "../../utils/misc/generateSeed.mts"
 // we don't use replicas yet, because it ain't easy to get their hostname
 const instances: string[] = [
   `${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_1 || ""}`,
+  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_2 || ""}`,
+  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_3 || ""}`,
+  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_4 || ""}`,
+  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_5 || ""}`,
+  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_6 || ""}`,
+  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_7 || ""}`,
+  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_8 || ""}`,
 ].filter(instance => instance?.length > 0)
 
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`

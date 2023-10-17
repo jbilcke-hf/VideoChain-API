@@ -9,8 +9,8 @@ import Replicate from "replicate"
 import { sleep } from "../../utils/misc/sleep.mts"
 
 const replicateToken = `${process.env.AUTH_REPLICATE_API_TOKEN || ""}`
-const replicateModel = `${process.env.STMFNET_REPLICATE_MODEL || ""}`
-const replicateModelVersion = `${process.env.STMFNET_REPLICATE_MODEL_VERSION || ""}`
+const replicateModel = `${process.env.VC_VIDEO_INTERPOLATION_STMFNET_REPLICATE_MODEL || ""}`
+const replicateModelVersion = `${process.env.VC_VIDEO_INTERPOLATION_STMFNET_REPLICATE_MODEL_VERSION || ""}`
 
 if (!replicateToken) {
   throw new Error(`you need to configure your AUTH_REPLICATE_API_TOKEN`)
@@ -45,11 +45,11 @@ export async function interpolateVideoWithReplicate({
   }
 
   if (!replicateModel) {
-    throw new Error(`you need to configure your STMFNET_REPLICATE_MODEL`)
+    throw new Error(`you need to configure your VC_VIDEO_INTERPOLATION_STMFNET_REPLICATE_MODEL`)
   }
 
   if (!replicateModelVersion) {
-    throw new Error(`you need to configure your STMFNET_REPLICATE_MODEL_VERSION`)
+    throw new Error(`you need to configure your VC_VIDEO_INTERPOLATION_STMFNET_REPLICATE_MODEL_VERSION`)
   }
 
   // for params and doc see https://replicate.com/zsxkib/st-mfnet
