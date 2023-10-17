@@ -1,12 +1,27 @@
 import { createReadStream, existsSync } from "node:fs"
 import path from "node:path"
+import fs from "node:fs"
 
 import { validate as uuidValidate } from "uuid"
 import express from "express"
 
 import dotenv from "dotenv"
 
-dotenv.config({ path: ".env.local" })
+dotenv.config()
+
+try {
+  if (fs.existsSync(".env.local")) {
+    const result = dotenv.config({ path: ".env.local" })
+    console.log("using .env.local")
+    process.env = {
+      ...process.env,
+      ...result.parsed,
+    }
+  }
+} catch (err) {
+  // do nothing
+  console.log("using .env")
+}
 
 import { Video, VideoStatus, VideoAPIRequest, RenderRequest, RenderedScene, ImageAnalysisRequest, ImageAnalysisResponse, SoundAnalysisResponse, SoundAnalysisRequest } from "./types.mts"
 
