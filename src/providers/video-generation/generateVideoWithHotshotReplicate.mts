@@ -7,12 +7,12 @@ import { sleep } from "../../utils/misc/sleep.mts"
 import { getNegativePrompt, getPositivePrompt } from "./defaultPrompts.mts"
 import { VideoGenerationOptions } from "./types.mts"
 
-const replicateToken = `${process.env.AUTH_REPLICATE_API_TOKEN || ""}`
+const replicateToken = `${process.env.VC_REPLICATE_API_TOKEN || ""}`
 const replicateModel = `${process.env.VC_HOTSHOT_XL_REPLICATE_MODEL || ""}`
 const replicateModelVersion = `${process.env.VC_HOTSHOT_XL_REPLICATE_MODEL_VERSION || ""}`
 
 if (!replicateToken) {
-  throw new Error(`you need to configure your AUTH_REPLICATE_API_TOKEN`)
+  throw new Error(`you need to configure your VC_REPLICATE_API_TOKEN`)
 }
 
 const replicate = new Replicate({ auth: replicateToken })

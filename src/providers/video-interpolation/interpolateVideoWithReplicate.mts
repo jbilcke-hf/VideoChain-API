@@ -8,12 +8,12 @@ import Replicate from "replicate"
 
 import { sleep } from "../../utils/misc/sleep.mts"
 
-const replicateToken = `${process.env.AUTH_REPLICATE_API_TOKEN || ""}`
+const replicateToken = `${process.env.VC_REPLICATE_API_TOKEN || ""}`
 const replicateModel = `${process.env.VC_VIDEO_INTERPOLATION_STMFNET_REPLICATE_MODEL || ""}`
 const replicateModelVersion = `${process.env.VC_VIDEO_INTERPOLATION_STMFNET_REPLICATE_MODEL_VERSION || ""}`
 
 if (!replicateToken) {
-  throw new Error(`you need to configure your AUTH_REPLICATE_API_TOKEN`)
+  throw new Error(`you need to configure your VC_REPLICATE_API_TOKEN`)
 }
 
 const replicate = new Replicate({ auth: replicateToken })
