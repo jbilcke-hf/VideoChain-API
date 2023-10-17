@@ -7,13 +7,14 @@ export async function renderVideo(
 ): Promise<RenderedScene> {
 
   const params = {
+    positivePrompt: request.prompt,
     seed: request.seed,
     nbFrames: request.nbFrames,
     nbSteps: request.nbSteps,
   }
 
   try {
-    response.assetUrl = await generateVideo(request.prompt, params)
+    response.assetUrl = await generateVideo(params)
     // console.log("successfull generation")
 
     if (!response.assetUrl?.length) {
@@ -23,7 +24,7 @@ export async function renderVideo(
     console.error(`failed to render the video scene.. but let's try again!`)
 
     try {
-      response.assetUrl = await generateVideo(request.prompt, params)
+      response.assetUrl = await generateVideo(params)
       // console.log("successfull generation")
 
       if (!response.assetUrl?.length) {
@@ -31,9 +32,19 @@ export async function renderVideo(
       }
       
     } catch (err) {
-      console.error(`it failed the video for second time ${err}`)
-      response.error = `failed to render video scene: ${err}`
-      response.status = "error"
+      try {
+        response.assetUrl = await generateVideo(params)
+        // console.log("successfull generation")
+  
+        if (!response.assetUrl?.length) {
+          throw new Error(`url for the generated video is empty`)
+        }
+        
+      } catch (err) {
+        console.error(`it failed the video for third time ${err}`)
+        response.error = `failed to render video scene: ${err}`
+        response.status = "error"
+      }
     }
   }
 
