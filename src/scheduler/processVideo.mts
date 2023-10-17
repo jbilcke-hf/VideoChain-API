@@ -74,7 +74,8 @@ export const processVideo = async (video: Video) => {
       console.log("generating a preview of the final result..")
       let generatedPreviewVideoUrl = ""
       try {
-        generatedPreviewVideoUrl = await generateVideo(shot.shotPrompt, {
+        generatedPreviewVideoUrl = await generateVideo({
+          positivePrompt: shot.shotPrompt,
           seed: shot.seed,
           nbFrames: nbFramesForBaseModel,
           nbSteps: 10, // for the preview, we only give a rough approximation
@@ -123,7 +124,8 @@ export const processVideo = async (video: Video) => {
       const nbFramesForBaseModel = 24
 
       try {
-        generatedVideoUrl = await generateVideo(shot.shotPrompt, {
+        generatedVideoUrl = await generateVideo({
+          positivePrompt: shot.shotPrompt,
           seed: shot.seed,
           nbFrames: nbFramesForBaseModel,
           nbSteps: shot.steps,
