@@ -26,8 +26,7 @@ export async function renderImage(
 
   // console.log(`calling generateImageAsBase64 with: `, JSON.stringify(params, null, 2))
 
-
-  // first we generate a quick low quality version
+  // we try at least 3 different servers
   try {
     response.assetUrl = await generateImageAsBase64(params)
     // console.log("successful generation!", response.assetUrl.slice(0, 30))
@@ -43,10 +42,18 @@ export async function renderImage(
         throw new Error(`the generated image is empty`)
       }
     } catch (err) {
-      console.error(`failed to generate the image, although ${err}`)
-      response.error = `failed to render scene: ${err}`
-      response.status = "error"
-      response.assetUrl = ""
+      try {
+        response.assetUrl = await generateImageAsBase64(params)
+        // console.log("successful generation!", response.assetUrl.slice(0, 30))
+        if (!response.assetUrl?.length) {
+          throw new Error(`the generated image is empty`)
+        }
+      } catch (err) {
+        console.error(`failed to generate the image, although ${err}`)
+        response.error = `failed to render scene: ${err}`
+        response.status = "error"
+        response.assetUrl = ""
+      }
     }
   }
 

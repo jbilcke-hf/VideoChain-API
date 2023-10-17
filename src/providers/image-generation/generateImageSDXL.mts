@@ -3,6 +3,10 @@ import { client } from "@gradio/client"
 import { generateSeed } from "../../utils/misc/generateSeed.mts"
 import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
 
+// TODO add a system to mark failed instances as "unavailable" for a couple of minutes
+
+
+
 // note: to reduce costs I use the small A10s (not the large)
 // anyway, we will soon not need to use this cloud anymore 
 // since we will be able to leverage the Inference API
