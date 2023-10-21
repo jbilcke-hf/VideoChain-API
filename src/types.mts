@@ -398,3 +398,4 @@ export type HotshotImageInferenceSize =
 | '1024x1024' // custom ratio - this isn't supported / supposed to work properly
 | '1024x512' // custom panoramic ratio - this isn't supported / supposed to work properly
 | '1024x576' // movie ratio (16:9) this isn't supported / supposed to work properly
+| '576x1024' // tiktok ratio (9:16) this isn't supported / supposed to work properly

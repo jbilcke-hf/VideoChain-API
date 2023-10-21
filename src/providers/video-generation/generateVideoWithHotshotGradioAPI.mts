@@ -46,7 +46,9 @@ export const generateVideo = async ({
 
   try {
 
-    const rawResponse = await api.predict('/run', [
+    const rawResponse = await api.predict(
+      1, // <- important!
+      [
       secretToken,
 			positivePrompt, // string  in 'Prompt' Textbox component		
 			negativePrompt || "", 
