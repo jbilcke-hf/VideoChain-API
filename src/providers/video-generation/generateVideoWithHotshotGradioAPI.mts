@@ -1,21 +1,9 @@
-import { client } from "@gradio/client"
-
 import { VideoGenerationOptions } from "./types.mts"
 import { getNegativePrompt, getPositivePrompt } from "./defaultPrompts.mts"
 import { generateSeed } from "../../utils/misc/generateSeed.mts"
 
 // we don't use replicas yet, because it ain't easy to get their hostname
-const instances: string[] = [
-  `${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_1 || ""}`,
-  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_2 || ""}`,
-  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_3 || ""}`,
-  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_4 || ""}`,
-  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_5 || ""}`,
-  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_6 || ""}`,
-  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_7 || ""}`,
-  //`${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL_8 || ""}`,
-].filter(instance => instance?.length > 0)
-
+const instance = `${process.env.VC_HOTSHOT_XL_GRADIO_SPACE_API_URL || ""}`
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
 
 export const generateVideo = async ({
@@ -32,13 +20,6 @@ export const generateVideo = async ({
 
   huggingFaceLora = "jbilcke-hf/sdxl-cinematic-2",
 }: VideoGenerationOptions) => {
-
-  const instance = instances.shift()
-  instances.push(instance)
-
-  const api = await client(instance, {
-    hf_token: `${process.env.VC_HF_API_TOKEN}` as any
-  })
   
   // pimp the prompt
   positivePrompt = getPositivePrompt(positivePrompt, triggerWord)
@@ -46,26 +27,42 @@ export const generateVideo = async ({
 
   try {
 
-    const rawResponse = await api.predict(
-      1, // <- important!
-      [
-      secretToken,
-			positivePrompt, // string  in 'Prompt' Textbox component		
-			negativePrompt || "", 
-      huggingFaceLora?.length || undefined, // string  in 'Public LoRA ID' Textbox component		
-			size || '512x512', // string (Option from: [('320x768', '320x768'), ('384x672', '384x672'), ('416x608', '416x608'), ('512x512', '512x512'), ('608x416', '608x416'), ('672x384', '672x384'), ('768x320', '768x320')]) in 'Size' Dropdown component		
-      !isNaN(seed) && isFinite(seed) ? seed : generateSeed(), // number (numeric value between -1 and 423538377342) in 'Seed' Slider component, -1 to set to random
-      nbSteps || 30, 
-      nbFrames || 8,
-      videoDuration || 1000,
-    ]) as any
-
-    // console.log("rawResponse:", rawResponse)
-
-    console.log("data:", rawResponse?.data)
-    const { name } = rawResponse?.data?.[0]?.[0] as { name: string, orig_name: string }
-
-    return `${instance}/file=${name}`
+    const res = await fetch(instance + (instance.endsWith("/") ? "" : "/") + "api/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        fn_index: 1, // <- important!
+        data: [
+          secretToken,
+          positivePrompt,
+          negativePrompt,
+          huggingFaceLora,
+          size,
+          generateSeed(),
+          nbSteps,
+          nbFrames,
+          videoDuration,
+        ],
+      }),
+      cache: "no-store",
+      // we can also use this (see https://vercel.com/blog/vercel-cache-api-nextjs-cache)
+      // next: { revalidate: 1 }
+    })
+  
+    const { data } = await res.json()
+  
+    // console.log("data:", data)
+    // Recommendation: handle errors
+    if (res.status !== 200 || !Array.isArray(data)) {
+      // This will activate the closest `error.js` Error Boundary
+      throw new Error(`Failed to fetch data (status: ${res.status})`)
+    }
+    // console.log("data:", data.slice(0, 50))
+  
+    return data[0]
   } catch (err) {
     throw err
   }

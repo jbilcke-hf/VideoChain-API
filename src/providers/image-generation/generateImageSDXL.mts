@@ -9,27 +9,7 @@ import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
 // note: to reduce costs I use the small A10s (not the large)
 // anyway, we will soon not need to use this cloud anymore 
 // since we will be able to leverage the Inference API
-const instances: string[] = [
-  `${process.env.VC_SDXL_SPACE_API_URL_1 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_2 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_3 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_4 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_5 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_6 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_7 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_8 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_9 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_10 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_11 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_12 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_13 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_14 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_15 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_16 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_17 || ""}`,
-  `${process.env.VC_SDXL_SPACE_API_URL_18 || ""}`,
-].filter(instance => instance?.length > 0)
-
+const instance = `${process.env.VC_SDXL_SPACE_API_URL || ""}`
 const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
 
 // console.log("DEBUG:", JSON.stringify({ instances, secretToken }, null, 2))
@@ -60,9 +40,6 @@ export async function generateImageSDXLAsBase64(options: {
   const height = getValidNumber(options?.height, 256, 1024, 512)
   const nbSteps = getValidNumber(options?.nbSteps, 5, 100, 20)
   // console.log("SEED:", seed)
-
-  const instance = instances.shift()
-  instances.push(instance)
 
   const positive = [
 

@@ -4,13 +4,7 @@ import { client } from "@gradio/client"
 import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
 
 // we don't use replicas yet, because it ain't easy to get their hostname
-const instances: string[] = [
-  `${process.env.VC_UPSCALING_SPACE_API_URL_1 || ""}`,
-  `${process.env.VC_UPSCALING_SPACE_API_URL_2 || ""}`,
-  `${process.env.VC_UPSCALING_SPACE_API_URL_3 || ""}`,
-  `${process.env.VC_UPSCALING_SPACE_API_URL_4 || ""}`,
-  `${process.env.VC_UPSCALING_SPACE_API_URL_5 || ""}`,
-].filter(instance => instance?.length > 0)
+const instance = `${process.env.VC_UPSCALING_SPACE_API_URL || ""}`
 
 // this doesn't work because of this error.. I think the version of Gradio is too old/young?
 // ReferenceError: addEventListener is not defined
@@ -27,9 +21,6 @@ export async function upscaleImage(src: string, factor?: number) {
     return src
   }
   
-  const instance = instances.shift()
-  instances.push(instance)
-
   const api = await client(instance, {
     hf_token: `${process.env.VC_HF_API_TOKEN}` as any
   })
