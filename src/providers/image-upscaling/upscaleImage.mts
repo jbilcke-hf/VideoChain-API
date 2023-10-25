@@ -5,6 +5,7 @@ import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
 
 // we don't use replicas yet, because it ain't easy to get their hostname
 const instance = `${process.env.VC_UPSCALING_SPACE_API_URL || ""}`
+const secretToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
 
 // this doesn't work because of this error.. I think the version of Gradio is too old/young?
 // ReferenceError: addEventListener is not defined
@@ -26,6 +27,7 @@ export async function upscaleImage(src: string, factor?: number) {
   })
   
   const result = await api.predict("/upscale", [
+    secretToken,
     src, 	// blob in 'Source Image' Image component		
     "realesr-general-x4v3", // string (Option from: ['RealESRGAN_x4plus', 'RealESRNet_x4plus', 'RealESRGAN_x4plus_anime_6B', 'RealESRGAN_x2plus', 'realesr-general-x4v3']) in 'Real-ESRGAN inference model to be used' Dropdown component		
     0.5, // number (numeric value between 0 and 1) in 'Denoise Strength (Used only with the realesr-general-x4v3 model)' Slider component		
