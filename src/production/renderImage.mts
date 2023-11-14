@@ -1,3 +1,4 @@
+import { generateImageLCMAsBase64 } from "../providers/image-generation/generateImageLCM.mts"
 import { generateImageSDXLAsBase64 } from "../providers/image-generation/generateImageSDXL.mts"
 import { generateImageSDXL360AsBase64 } from "../providers/image-generation/generateImageSDXL360.mts"
 import { RenderedScene, RenderRequest } from "../types.mts"
@@ -11,6 +12,8 @@ export async function renderImage(
 
   const generateImageAsBase64 = isSpherical
     ? generateImageSDXL360AsBase64
+    : request.turbo
+    ? generateImageLCMAsBase64
     : generateImageSDXLAsBase64
 
   // console.log(`going to generate an image using ${request.projection || "default (cartesian)"} projection`)

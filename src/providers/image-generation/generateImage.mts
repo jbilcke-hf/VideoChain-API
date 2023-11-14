@@ -32,7 +32,7 @@ export async function generateImage(options: {
       positivePrompt,
       "bautiful",
       "award winning",
-      "intricate details",
+      // "intricate details",
       "high resolution"
     ].filter(word => word)
     .join(", "),

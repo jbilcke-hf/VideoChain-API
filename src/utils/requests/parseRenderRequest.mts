@@ -34,6 +34,8 @@ export function parseRenderRequest(request: RenderRequest) {
       request.height = getValidNumber(request.height, 256, 720, 320)
     }
 
+    request.turbo = getValidBoolean(request.turbo, false)
+
     request.wait = request?.wait || false
     request.cache = request?.cache || "ignore"
   } catch (err) {

@@ -41,7 +41,7 @@ export async function generateImageSDXL360AsBase64(options: {
     "360 view",
     positivePrompt,
     "beautiful",
-    "intricate details",
+    // "intricate details",
     "award winning",
     "high resolution"
   ].filter(word => word)

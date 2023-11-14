@@ -313,6 +313,14 @@ export type RenderRequest = {
 
   projection: ProjectionMode
 
+  /**
+   * Use turbo mode
+   * 
+   * At the time of writing this will use SSD-1B + LCM
+   * https://huggingface.co/spaces/jbilcke-hf/fast-image-server
+   */
+  turbo: boolean
+
   cache: CacheMode
 
   wait: boolean // wait until the job is completed

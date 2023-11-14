@@ -1,5 +1,4 @@
-FROM node:18
-# try this maybe
+FROM node:20
 
 ARG DEBIAN_FRONTEND=noninteractive
 
