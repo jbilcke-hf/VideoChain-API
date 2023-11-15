@@ -5,7 +5,7 @@ import { getValidNumber } from "../validators/getValidNumber.mts"
 
 export function parseRenderRequest(request: RenderRequest) {
 
-  console.log("parseRenderRequest: "+JSON.stringify(request, null, 2))
+  // console.log("parseRenderRequest: "+JSON.stringify(request, null, 2))
   try {
     request.nbFrames = getValidNumber(request.nbFrames, 1, 24, 16)
 
@@ -22,16 +22,16 @@ export function parseRenderRequest(request: RenderRequest) {
 
     request.upscalingFactor = getValidNumber(request.upscalingFactor, 0, 4, 0)
 
-    request.nbSteps = getValidNumber(request.nbSteps, 5, 50, 10)
+    request.nbSteps = getValidNumber(request.nbSteps, 1, 50, 10)
 
     request.analyze = request?.analyze ? true : false
 
     if (isVideo) {
-      request.width = getValidNumber(request.width, 256, 1024, 1024)
-      request.height = getValidNumber(request.height, 256, 1024, 512)
+      request.width = getValidNumber(request.width, 256, 2048, 576)
+      request.height = getValidNumber(request.height, 256, 2048, 320)
     } else {
-      request.width = getValidNumber(request.width, 256, 1280, 576)
-      request.height = getValidNumber(request.height, 256, 720, 320)
+      request.width = getValidNumber(request.width, 256, 2048, 1024)
+      request.height = getValidNumber(request.height, 256, 2048, 1024)
     }
 
     request.turbo = getValidBoolean(request.turbo, false)
@@ -42,6 +42,6 @@ export function parseRenderRequest(request: RenderRequest) {
     console.error(`failed to parse the render request: ${err}`)
   }
 
-  console.log("parsed request: "+JSON.stringify(request, null, 2))
+  // console.log("parsed request: "+JSON.stringify(request, null, 2))
   return request
 }

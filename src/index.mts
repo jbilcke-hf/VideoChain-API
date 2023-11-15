@@ -162,7 +162,7 @@ app.post("/render", async (req, res) => {
     return
   }
   
-  console.log(req.body)
+  // console.log(req.body)
 
   const request = parseRenderRequest(req.body as RenderRequest)
 

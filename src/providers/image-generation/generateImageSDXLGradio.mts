@@ -21,7 +21,7 @@ export async function generateImageSDXLAsBase64(options: {
   width?: number;
   height?: number;
   nbSteps?: number;
-}) {
+}): Promise<string> {
 
   const positivePrompt = options?.positivePrompt || ""
   if (!positivePrompt) {

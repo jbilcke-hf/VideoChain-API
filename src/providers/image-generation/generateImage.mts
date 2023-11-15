@@ -30,7 +30,7 @@ export async function generateImage(options: {
   const blob = await hf.textToImage({
     inputs: [
       positivePrompt,
-      "bautiful",
+      "beautiful",
       "award winning",
       // "intricate details",
       "high resolution"

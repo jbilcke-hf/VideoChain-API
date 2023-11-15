@@ -1,5 +1,5 @@
-import { generateImageLCMAsBase64 } from "../providers/image-generation/generateImageLCM.mts"
-import { generateImageSDXLAsBase64 } from "../providers/image-generation/generateImageSDXL.mts"
+import { generateImageLCMAsBase64 } from "../providers/image-generation/generateImageLCMGradio.mts"
+import { generateImageSDXLAsBase64 } from "../providers/image-generation/generateImageSDXLGradio.mts"
 import { generateImageSDXL360AsBase64 } from "../providers/image-generation/generateImageSDXL360.mts"
 import { RenderedScene, RenderRequest } from "../types.mts"
 
@@ -52,7 +52,7 @@ export async function renderImage(
           throw new Error(`the generated image is empty`)
         }
       } catch (err) {
-        console.error(`failed to generate the image, although ${err}`)
+        // console.error(`failed to generate the image, due to`, err)
         response.error = `failed to render scene: ${err}`
         response.status = "error"
         response.assetUrl = ""

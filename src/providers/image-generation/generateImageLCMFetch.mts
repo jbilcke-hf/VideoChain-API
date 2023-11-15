@@ -21,9 +21,9 @@ export async function generateImageLCMAsBase64(options: {
   width?: number;
   height?: number;
   nbSteps?: number;
-}) {
+}): Promise<string> {
 
-  console.log("querying " + instance)
+  // console.log("querying " + instance)
   const positivePrompt = options?.positivePrompt || ""
   if (!positivePrompt) {
     throw new Error("missing prompt")
@@ -39,7 +39,7 @@ export async function generateImageLCMAsBase64(options: {
 
   const width = getValidNumber(options?.width, 256, 1024, 512)
   const height = getValidNumber(options?.height, 256, 1024, 512)
-  const nbSteps = getValidNumber(options?.nbSteps, 2, 40, 20)
+  const nbSteps = getValidNumber(options?.nbSteps, 1, 8, 4)
   // console.log("SEED:", seed)
 
   const positive = [
@@ -69,26 +69,41 @@ export async function generateImageLCMAsBase64(options: {
   ].filter(word => word)
   .join(", ")
 
-  const api = await client(instance, {
-    hf_token: `${process.env.VC_HF_API_TOKEN}` as any
+  const res = await fetch(instance + (instance.endsWith("/") ? "" : "/") + "api/predict", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      // Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      fn_index: 1, // <- important!
+      data: [
+        positive, // string  in 'Prompt' Textbox component		
+        negative, // string  in 'Negative prompt' Textbox component		
+        seed, // number (numeric value between 0 and 2147483647) in 'Seed' Slider component		
+        width, // number (numeric value between 256 and 1024) in 'Width' Slider component		
+        height, // number (numeric value between 256 and 1024) in 'Height' Slider component		
+        0.0, // can be disabled for LCM-LORA-SSD-1B
+        nbSteps, // number (numeric value between 2 and 8) in 'Number of inference steps for base' Slider component			
+        secretToken
+      ],
+    }),
+    cache: "no-store",
   })
 
-  
-  const rawResponse = (await api.predict("/run", [		
-    positive, // string  in 'Prompt' Textbox component		
-    negative, // string  in 'Negative prompt' Textbox component		
-    true, // boolean  in 'Use negative prompt' Checkbox component		
-    seed, // number (numeric value between 0 and 2147483647) in 'Seed' Slider component		
-    width, // number (numeric value between 256 and 1024) in 'Width' Slider component		
-    height, // number (numeric value between 256 and 1024) in 'Height' Slider component		
-    8, // number (numeric value between 1 and 20) in 'Guidance scale for base' Slider component		
-    nbSteps, // number (numeric value between 210 and 40) in 'Number of inference steps for base' Slider component			
-    secretToken
-  ])) as any
-    
-  const result = rawResponse?.data?.[0] as string
-  if (!result?.length) {
+  const { data } = await res.json()
+
+
+  // Recommendation: handle errors
+  if (res.status !== 200 || !Array.isArray(data)) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error(`Failed to fetch data (status: ${res.status})`)
+  }
+  // console.log("data:", data.slice(0, 50))
+
+  if (!data[0]) {
     throw new Error(`the returned image was empty`)
   }
-  return result
+
+  return data[0] as string
 }
