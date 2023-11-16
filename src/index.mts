@@ -39,6 +39,14 @@ const port = 7860
 
 let isRendering = false
 
+process.on('unhandledRejection', (reason: string, p: Promise<any>) => {
+  console.error('Unhandled Rejection at:', p, 'reason:', reason);
+})
+
+process.on('uncaughtException', (error: Error) => {
+  console.error(`Caught exception: ${error}\n` + `Exception origin: ${error.stack}`);
+})
+
 // fix this error: "PayloadTooLargeError: request entity too large"
 // there are multiple version because.. yeah well, it's Express!
 // app.use(bodyParser.json({limit: '50mb'}));
