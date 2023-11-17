@@ -2,6 +2,7 @@ import { client } from "@gradio/client"
 
 import { generateSeed } from "../../utils/misc/generateSeed.mts"
 import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
+import { convertToWebp } from "../../utils/image/convertToWebp.mts"
 
 // TODO add a system to mark failed instances as "unavailable" for a couple of minutes
 // console.log("process.env:", process.env)
@@ -93,5 +94,12 @@ export async function generateImageSDXLAsBase64(options: {
   if (!result?.length) {
     throw new Error(`the returned image was empty`)
   }
-  return result
+
+  try {
+    const finalImage = await convertToWebp(result)
+    return finalImage
+  } catch (err) {
+    // console.log("err:", err)
+    throw new Error(err)
+  }
 }

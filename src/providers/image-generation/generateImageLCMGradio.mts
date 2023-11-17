@@ -81,7 +81,7 @@ export async function generateImageLCMAsBase64(options: {
     seed, // number (numeric value between 0 and 2147483647) in 'Seed' Slider component		
     width, // number (numeric value between 256 and 1024) in 'Width' Slider component		
     height, // number (numeric value between 256 and 1024) in 'Height' Slider component		
-    0.0, // can be disabled for LCM-LORA-SSD-1B
+    0.0, // can be disabled for LCM SDXL
     nbSteps, // number (numeric value between 2 and 8) in 'Number of inference steps for base' Slider component			
     secretToken
   ])) as any
@@ -91,8 +91,11 @@ export async function generateImageLCMAsBase64(options: {
     throw new Error(`the returned image was empty`)
   }
 
-  // const finalImage = await convertToWebp(result)
-  // return finalImage
-
-  return result
+  try {
+    const finalImage = await convertToWebp(result)
+    return finalImage
+  } catch (err) {
+    // console.log("err:", err)
+    throw new Error(err)
+  }
 }

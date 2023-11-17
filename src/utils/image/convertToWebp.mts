@@ -1,8 +1,16 @@
 import sharp from "sharp"
 
-export async function convertToWebp(imgBase64: string): Promise<string> {
+export async function convertToWebp(imgBase64: string = ""): Promise<string> {
+
+  const base64WithoutHeader = imgBase64.split(";base64,")[1] || ""
+
+  if (!base64WithoutHeader) {
+    const slice = `${imgBase64 || ""}`.slice(0, 50)
+    throw new Error(`couldn't process input image "${slice}..."`)
+  }
+
   // Convert base64 to buffer
-  const tmpBuffer = Buffer.from(imgBase64, 'base64')
+  const tmpBuffer = Buffer.from(base64WithoutHeader, 'base64')
 
   // Resize the buffer to the target size
   const newBuffer = await sharp(tmpBuffer)
