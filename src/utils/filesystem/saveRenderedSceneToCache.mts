@@ -36,7 +36,7 @@ export async function saveRenderedSceneToCache(
   */
 
   await fs.writeFile(cacheFilePath, renderedSceneJson, "utf8")
-  console.log(`saved result to cache`)
+  // console.log(`saved result to cache`)
 
   return scene
 }

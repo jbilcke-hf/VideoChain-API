@@ -9,13 +9,12 @@ export function parseRenderRequest(request: RenderRequest) {
   try {
     request.nbFrames = getValidNumber(request.nbFrames, 1, 24, 16)
 
-    // wait! if we uncomment this, this will invalidate all the images already in cache..
-    // request.negativePrompt = request.negativePrompt || ""
+    request.negativePrompt = request.negativePrompt || ""
 
     const isVideo = request?.nbFrames === 1
 
     // note that we accept a seed of 0
-    // (this ensure we are able to cache the whote request by signing it)
+    // (this ensure we are able to cache the whole request by signing it)
     request.seed = getValidNumber(request.seed, 0, 2147483647, 0)
 
     // but obviously we will treat 0 as the random seed at a later stage

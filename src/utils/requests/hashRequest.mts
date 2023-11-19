@@ -7,11 +7,12 @@ export function hashRequest(request: RenderRequest) {
   const hashable = {
     version: 1,
     prompt: request.prompt,
+    negativePrompt: request.negativePrompt,
     segmentation: request.segmentation,
     actionnables: request.actionnables,
     nbFrames: request.nbFrames,
     nbSteps: request.nbSteps,
-    // seed: request.seed,
+    seed: request.seed,
     width: request.width,
     height: request.height,
     projection: request.projection,
