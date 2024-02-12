@@ -135,11 +135,11 @@ export const generateVideoWithAnimateLCM = async ({
         // next: { revalidate: 1 }
       })
 
-      console.log("res:", res)
+      // console.log("res:", res)
 
       const { data } = await res.json()
 
-      console.log("data:", data)
+      // console.log("data:", data)
       // Recommendation: handle errors
       if (res.status !== 200 || !Array.isArray(data)) {
         // This will activate the closest `error.js` Error Boundary
