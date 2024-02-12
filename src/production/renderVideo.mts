@@ -1,54 +1,34 @@
-import { RenderedScene, RenderRequest } from "../types.mts"
+import { RenderedScene, RenderRequest, VideoGenerationParams } from "../types.mts"
 
 // import { generateVideo } from "../providers/video-generation/generateVideoWithZeroscope.mts"
-import { generateVideo } from "../providers/video-generation/generateVideoWithHotshotGradioAPI.mts"
+// import { generateVideo } from "../providers/video-generation/generateVideoWithHotshotGradioAPI.mts"
+import { generateVideoWithAnimateLCM } from "../providers/video-generation/generateVideoWithAnimateLCM.mts"
+import { generateSeed } from "../utils/misc/generateSeed.mts"
 
 export async function renderVideo(
   request: RenderRequest,
   response: RenderedScene
 ): Promise<RenderedScene> {
 
-  const params = {
-    positivePrompt: request.prompt,
-    seed: request.seed,
-    nbFrames: request.nbFrames,
-    nbSteps: request.nbSteps,
+  const params: VideoGenerationParams = {
+    prompt: request.prompt,
+    // image?: undefined, // can be empty (and thus, is empty)
+    // lora?: string // hardcoded on "3D render"
+    // style?: string // hardcoded on "3D render" for now
+    orientation: "landscape",
+    projection: "cartesian",
+    width: 512,
+    height: 256,
+    
+    // ok, now what about those? they are in the gradio, are not exposed yet in the API
+    // nbFrames: request.nbFrames,
+    // nbSteps: request.nbSteps,
+
+    seed: request.seed || generateSeed(),
+    debug: true,
   }
 
-  try {
-    response.assetUrl = await generateVideo(params)
-    // console.log("successfull generation")
-
-    if (!response.assetUrl?.length) {
-      throw new Error(`url for the generated video is empty`)
-    }
-  } catch (err) {
-    console.error(`failed to render the video scene.. but let's try again!`)
-
-    try {
-      response.assetUrl = await generateVideo(params)
-      // console.log("successfull generation")
-
-      if (!response.assetUrl?.length) {
-        throw new Error(`url for the generated video is empty`)
-      }
-      
-    } catch (err) {
-      try {
-        response.assetUrl = await generateVideo(params)
-        // console.log("successfull generation")
-  
-        if (!response.assetUrl?.length) {
-          throw new Error(`url for the generated video is empty`)
-        }
-        
-      } catch (err) {
-        console.error(`it failed the video for third time ${err}`)
-        response.error = `failed to render video scene: ${err}`
-        response.status = "error"
-      }
-    }
-  }
+  response.assetUrl = await generateVideoWithAnimateLCM(params)
 
   return response
 }

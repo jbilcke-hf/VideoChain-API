@@ -407,3 +407,25 @@ export type HotshotImageInferenceSize =
 | '1024x512' // custom panoramic ratio - this isn't supported / supposed to work properly
 | '1024x576' // movie ratio (16:9) this isn't supported / supposed to work properly
 | '576x1024' // tiktok ratio (9:16) this isn't supported / supposed to work properly
+
+export type VideoOrientation =
+  | "portrait"
+  | "landscape"
+  | "square"
+
+export type VideoProjection =
+  | "cartesian" // this is the default
+  | "equirectangular"
+
+export type VideoGenerationParams = {
+  prompt: string // can be empty
+  image?: string // can be empty
+  lora?: string
+  style?: string
+  orientation: VideoOrientation
+  projection: VideoProjection
+  width: number
+  height: number
+  seed?: number
+  debug?: boolean
+}
