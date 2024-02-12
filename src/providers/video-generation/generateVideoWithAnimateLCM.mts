@@ -24,12 +24,14 @@ export const generateVideoWithAnimateLCM = async ({
   const actualFunction = async () => {
     const negPrompt = ""
     prompt = prompt || ""
-    seed = seed | generateSeed()
+    
+    // seed = seed || generateSeed()
+    seed = generateSeed()
 
     // label="Sampling steps", value=6, minimum=1, maximum=25, step=1
     // we wanna keep this one low (this is LCM after all)
     // but values like 10 also give nice results
-    const nbSteps = 50
+    const nbSteps = 6 // 25
   
 
     // label="LoRA alpha", value=0.8, minimum=0, maximum=2
@@ -53,6 +55,7 @@ export const generateVideoWithAnimateLCM = async ({
 
     // pimp the prompt
 
+    /*
     // we put it at the start, to make sure it is always part of the prompt
     const positivePrompt = getPositivePrompt([
       style,
@@ -60,6 +63,9 @@ export const generateVideoWithAnimateLCM = async ({
     ].map(x => x.trim()).filter(x => x).join(", "))
 
     const negativePrompt = getNegativePrompt(negPrompt)
+    */
+   const positivePrompt = "Close-up of the dancing duo as they take a bow. The orange tabby cat wears a sequined top hat, and the Siamese cat hugs their shoulders, also wearing a sequined outfit"
+   const negativePrompt = ""
 
     try {
       if (debug) {
@@ -129,10 +135,11 @@ export const generateVideoWithAnimateLCM = async ({
         // next: { revalidate: 1 }
       })
 
+      console.log("res:", res)
 
       const { data } = await res.json()
-    
-      // console.log("data:", data)
+
+      console.log("data:", data)
       // Recommendation: handle errors
       if (res.status !== 200 || !Array.isArray(data)) {
         // This will activate the closest `error.js` Error Boundary
