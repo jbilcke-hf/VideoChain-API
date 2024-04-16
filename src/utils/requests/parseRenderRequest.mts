@@ -35,7 +35,8 @@ export function parseRenderRequest(request: RenderRequest) {
 
     request.turbo = getValidBoolean(request.turbo, false)
 
-    request.wait = request?.wait || false
+    request.wait = getValidBoolean(request?.wait, false)
+
     request.cache = request?.cache || "ignore"
   } catch (err) {
     console.error(`failed to parse the render request: ${err}`)

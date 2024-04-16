@@ -29,9 +29,13 @@ export async function renderScene(request: RenderRequest): Promise<RenderedScene
     delete cache[toRemove]
   }
 
-  // this is a fire-and-forget asynchronous pipeline:
-  // we start it, but we do not await for the response
-  renderPipeline(request, response)
+  if (request.wait) {
+    await renderPipeline(request, response)
+  } else {
+        // this is a fire-and-forget asynchronous pipeline:
+    // we start it, but we do not await for the response
+    renderPipeline(request, response)
+  }
 
   // console.log("renderScene: yielding the scene", response)
   return response
