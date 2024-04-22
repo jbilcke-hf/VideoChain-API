@@ -14,9 +14,13 @@ export function addWordsIfNotPartOfThePrompt(prompt: string = "", words: string[
  export function getPositivePrompt(prompt: string, triggerWord = "") {
   return addWordsIfNotPartOfThePrompt(prompt, [
     triggerWord,
-    "crisp",
+    "sublime",
+    "pro quality",
     "sharp",
+    "crisp",
     "beautiful",
+    "impressive",
+    "amazing",
     "4K",
     "hd"
   ])
@@ -28,9 +32,13 @@ export function getNegativePrompt(prompt: string) {
     // "underexposed", // <-- can be a desired style
     // "overexposed", // <-- can be a desired style
     "logo",
+    "hud",
+    "ui",
     "censored",
+    "blurry",
     "watermark",
     "watermarked",
+    "copyright",
     "extra digit",
     "fewer digits",
     "bad fingers",
@@ -39,11 +47,11 @@ export function getNegativePrompt(prompt: string) {
     "low quality",
     "low resolution",
     "glitch", // <-- keep or not? could be a desired style?
-    "deformed",
-    "mutated",
-    "ugly",
-    "disfigured",
-    "3D render", // <-- keep or not? could be a desired style?
+    // "deformed",
+    // "mutated",
+    // "ugly",
+    // "disfigured",
+    // "3D render", // <-- keep or not? could be a desired style?
     "signature"
   ])
 }

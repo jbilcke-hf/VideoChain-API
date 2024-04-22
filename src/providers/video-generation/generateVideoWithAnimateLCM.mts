@@ -16,14 +16,14 @@ export const generateVideoWithAnimateLCM = async ({
   width,
   height,
   style = "",
+  nbSteps = 4,
+  nbFrames = 20,
   seed,
   debug,
 }: VideoGenerationParams): Promise<string> => {
   
 
   const actualFunction = async () => {
-    const negPrompt = ""
-    prompt = prompt || ""
     
     // seed = seed || generateSeed()
     seed = generateSeed()
@@ -42,14 +42,12 @@ export const generateVideoWithAnimateLCM = async ({
     const lcmLoraAlpha = 0.8 // spatial_lora_slider,
 
     // label="Width", value=512, minimum=256, maximum=1024, step=64)
-    const width = 512
 
     // label="Animation length", value=16,  minimum=12,   maximum=20,   step=1)
     const nbFrames = 16
 
     // label="Height", value=512, minimum=256, maximum=1024, step=64)
-    const height = 256 
-
+   
     //  label="CFG Scale", value=1.5, minimum=1,   maximum=2)
     const cfgScale = 1.5
 

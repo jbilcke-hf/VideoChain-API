@@ -7,7 +7,11 @@ export function parseRenderRequest(request: RenderRequest) {
 
   // console.log("parseRenderRequest: "+JSON.stringify(request, null, 2))
   try {
-    request.nbFrames = getValidNumber(request.nbFrames, 1, 24, 16)
+    // we are large on the values here, since each model will have their own limits
+    // we just want pseudo-valid numbers
+
+    request.nbFrames = getValidNumber(request.nbFrames, 1, 2147483647, 1)
+    request.nbFPS = getValidNumber(request.nbFPS, 1, 2147483647, 1)
 
     request.negativePrompt = request.negativePrompt || ""
 
