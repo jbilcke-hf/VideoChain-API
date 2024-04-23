@@ -11,7 +11,7 @@ export async function renderVideo(
   response: RenderedScene
 ): Promise<RenderedScene> {
 
-  response.assetUrl = await generateVideoWithAnimateDiffLightning(request, response)
+  await generateVideoWithAnimateDiffLightning(request, response)
 
   return response
 }

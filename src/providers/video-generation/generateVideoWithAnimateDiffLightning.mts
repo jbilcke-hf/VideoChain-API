@@ -14,7 +14,7 @@ export const generateVideoWithAnimateDiffLightning = async (
   
   const debug = false
 
-  const actualFunction = async () => {
+  const actualFunction = async (): Promise<RenderedScene> => {
 
     const prompt = request.prompt || ""
     if (!prompt) {
@@ -37,7 +37,7 @@ export const generateVideoWithAnimateDiffLightning = async (
     const width = getValidNumber(request.width, 256, 1024, 512)
     const height = getValidNumber(request.height, 256, 1024, 256)
 
-    const nbFrames = getValidNumber(request.nbFrames, 10, 60, 20)
+    const nbFrames = getValidNumber(request.nbFrames, 10, 60, 10)
     const nbFPS = getValidNumber(request.nbFPS, 10, 60, 10)
 
     // by default AnimateDiff generates about 2 seconds of video at 10 fps
@@ -104,8 +104,10 @@ export const generateVideoWithAnimateDiffLightning = async (
         throw new Error(`invalid response (no content)`)
       }
 
+      response.assetUrl = base64Content
+
       // this API already emits a data-uri with a content type
-      return base64Content // addBase64HeaderToMp4(base64Content)
+      return response // addBase64HeaderToMp4(base64Content)
     } catch (err) {
       if (debug) {
         console.error(`failed to call the AnimateDiff Lightning API:`)
