@@ -9,7 +9,7 @@ export async function makeSureSpaceIsRunning({
   // userName,
   // spaceName,
 }: {
-  space: string // a joined "user_name/space_name"
+  space?: string // a joined "user_name/space_name"
 
   maxWaitTimeInSec?: number
 

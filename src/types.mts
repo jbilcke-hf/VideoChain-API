@@ -279,6 +279,9 @@ export type RenderRequest = {
   // unused for now
   negativePrompt: string
 
+  // image used for the consistent identity of the main entity (optional)
+  identityImage: string
+
   // whether to use video segmentation
   // disabled (default)
   // firstframe: we only analyze the first frame

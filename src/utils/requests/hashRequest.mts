@@ -8,6 +8,7 @@ export function hashRequest(request: RenderRequest) {
     version: 1,
     prompt: request.prompt,
     negativePrompt: request.negativePrompt,
+    identityImage: request.identityImage,
     segmentation: request.segmentation,
     actionnables: request.actionnables,
     nbFrames: request.nbFrames,

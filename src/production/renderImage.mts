@@ -1,8 +1,7 @@
-import { generateImageLCMAsBase64 } from "../providers/image-generation/generateImageLCMGradio.mts"
-import { generateImageSDXLTurboAsBase64 } from "../providers/image-generation/generateImageSDXLTurbo.mts"
 import { generateImageSDXLAsBase64 } from "../providers/image-generation/generateImageSDXLGradio.mts"
 import { generateImageSDXL360AsBase64 } from "../providers/image-generation/generateImageSDXL360.mts"
 import { RenderedScene, RenderRequest } from "../types.mts"
+import { generateImagePulibAsBase64 } from "../providers/image-generation/generateImagePulib.mts"
 
 export async function renderImage(
   request: RenderRequest,
@@ -22,7 +21,7 @@ export async function renderImage(
     // but much, much faster to run
     // for the moment we use SDXL + LCM, as it offers better scene coherence,
     // but we might switch to SDXL Turbo in the future if its quality improves
-    ? generateImageLCMAsBase64 // generateImageSDXLTurboAsBase64 
+    ? generateImagePulibAsBase64 // generateImageSDXLTurboAsBase64 
 
     : generateImageSDXLAsBase64
 
@@ -31,6 +30,7 @@ export async function renderImage(
   const params = {
     positivePrompt: request.prompt,
     negativePrompt: request.negativePrompt,
+    identityImage: request.identityImage,
     seed: request.seed,
     nbSteps: request.nbSteps,
     width: request.width,

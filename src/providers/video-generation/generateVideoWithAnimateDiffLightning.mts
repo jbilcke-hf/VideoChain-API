@@ -3,8 +3,11 @@ import { generateSeed } from "../../utils/misc/generateSeed.mts"
 import { tryApiCalls } from "../../utils/misc/tryApiCall.mts"
 import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
 
-// const gradioApi = `${process.env.AI_TUBE_MODEL_ANIMATELCM_GRADIO_URL || ""}`
-const gradioApi = "https://jbilcke-hf-ai-tube-model-animatediff-lightning.hf.space"
+const replicas = [
+  "https://jbilcke-hf-ai-tube-model-adl-1.hf.space",
+  "https://jbilcke-hf-ai-tube-model-adl-2.hf.space",
+]
+
 const accessToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
 
 export const generateVideoWithAnimateDiffLightning = async (
@@ -13,6 +16,8 @@ export const generateVideoWithAnimateDiffLightning = async (
 ): Promise<RenderedScene> => {
   
   const debug = false
+
+  let replica = replicas[0] || ""
 
   const actualFunction = async (): Promise<RenderedScene> => {
 
@@ -61,7 +66,9 @@ export const generateVideoWithAnimateDiffLightning = async (
         })
       }
 
-      const res = await fetch(gradioApi + (gradioApi.endsWith("/") ? "" : "/") + "api/predict", {
+      replicas.push(replica = replicas.shift())
+
+      const res = await fetch(replica + (replica.endsWith("/") ? "" : "/") + "api/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
