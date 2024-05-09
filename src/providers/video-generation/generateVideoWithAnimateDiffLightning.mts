@@ -5,12 +5,14 @@ import { getValidNumber } from "../../utils/validators/getValidNumber.mts"
 
 const accessToken = `${process.env.VC_MICROSERVICE_SECRET_TOKEN || ""}`
 
+// @deprecated This endpoint has been decommissioned. Please use the AiTube API instead (check aitube.at/api/v1/render)
 export const generateVideoWithAnimateDiffLightning = async (
   request: RenderRequest,
   response: RenderedScene,
 ): Promise<RenderedScene> => {
   
-  const debug = false
+  throw new Error(`This endpoint has been decommissioned. Please use the AiTube API instead (check aitube.at/api/v1/render)`)
+  const debug = true
 
 
   const actualFunction = async (): Promise<RenderedScene> => {
@@ -32,17 +34,19 @@ export const generateVideoWithAnimateDiffLightning = async (
 
     // can be 1, 2, 4 or 8
     // but values below 4 look bad
-    const nbSteps = getValidNumber(request.nbSteps, 1, 8, 4)
-    const width = getValidNumber(request.width, 256, 1024, 512)
-    const height = getValidNumber(request.height, 256, 1024, 256)
+    const nbSteps = 4// getValidNumber(request.nbSteps, 1, 8, 4)
+    const width = 512 // getValidNumber(request.width, 256, 1024, 512)
+    const height = 288 // getValidNumber(request.height, 256, 1024, 256)
 
-    const nbFrames = getValidNumber(request.nbFrames, 10, 60, 10)
-    const nbFPS = getValidNumber(request.nbFPS, 10, 60, 10)
+    const nbFrames = 16 // getValidNumber(request.nbFrames, 10, 60, 10)
+    const nbFPS = 10 //  getValidNumber(request.nbFPS, 10, 60, 10)
 
     // by default AnimateDiff generates about 2 seconds of video at 10 fps
     // the Gradio API now has some code to optional fix that using FFmpeg,
     // but this will add some delay overhead, so use with care!
-    const durationInSec = Math.round(nbFrames / nbFPS)
+    const durationInSec = nbFrames / nbFPS
+    // no, we need decimals
+    // const durationInSec = Math.round(nbFrames / nbFPS)
     const framesPerSec = nbFPS
 
     try {
