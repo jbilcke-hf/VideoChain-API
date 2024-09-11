@@ -18,8 +18,8 @@
   "dependencies": {
     "@gorgonjs/file-provider": "^1.4.1",
     "@gorgonjs/gorgon": "^1.4.1",
-    "@gradio/client": "^0.1.4",
-    "@huggingface/inference": "^2.6.1",
+    "@gradio/client": "1.5.2",
+    "@huggingface/inference": "2.8.0",
     "@types/express": "^4.17.17",
     "@types/node": "^20.12.7",
     "@types/uuid": "^9.0.2",
